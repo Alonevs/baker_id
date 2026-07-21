@@ -1,0 +1,21 @@
+[package]
+name = "forge-editor"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+eframe.workspace = true
+egui.workspace = true
+egui_dock.workspace = true
+forge-types = { path = "../forge-types" }
+forge-panel-messaging = { path = "../forge-panel-messaging" }
+forge-undo-redo = { path = "../forge-undo-redo" }
+forge-map-cart = { path = "../forge-map-cart" }
+forge-runtime = { path = "../forge-runtime" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+toml = "0.8"
+notify = "6.1"

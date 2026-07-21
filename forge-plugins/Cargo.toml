@@ -1,0 +1,17 @@
+[package]
+name = "forge-plugins"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Plugins - Sistema de plugins"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+thiserror = "1.0"
+
+[lib]
+name = "forge_plugins"
+path = "src/lib.rs"

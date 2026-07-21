@@ -1,0 +1,29 @@
+{
+  "scene_name": "Scene_755d9c3b-35c5-4b36-ab46-d74835a261a8",
+  "nodes": {
+    "node_8cd2afec-04d8-49ae-9b11-31e8e4a75ba3": {
+      "id": "node_8cd2afec-04d8-49ae-9b11-31e8e4a75ba3",
+      "name": "Scene_755d9c3b-35c5-4b36-ab46-d74835a261a8",
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "visible": true,
+      "enabled": true,
+      "parent_id": null,
+      "children": [],
+      "properties": {},
+      "components": []
+    }
+  },
+  "assets": []
+}

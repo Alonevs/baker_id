@@ -1,0 +1,25 @@
+[package]
+name = "forge-runtime"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+# Renderizado 2D ligero (compatible con eframe 0.33)
+winit = { version = "0.27" }
+wgpu = "0.19"
+glow = "0.14"
+
+# Comunicación con editor
+forge-panel-messaging = { path = "../forge-panel-messaging" }
+forge-types = { path = "../forge-types" }
+forge-map-cart = { path = "../forge-map-cart" }
+
+# Serialización
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Utilidades
+thiserror = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

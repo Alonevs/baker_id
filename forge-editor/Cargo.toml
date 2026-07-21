@@ -1,0 +1,47 @@
+[package]
+name = "forge-editor"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Game Engine Editor"
+license = "MIT"
+
+[dependencies]
+eframe = { version = "0.33.3", default-features = false, features = ["wgpu"] }
+pollster = "0.4"
+quick-xml = "0.38"
+egui = "0.33.3"
+egui_extras = "0.33.0"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp"] }
+egui_dock = "0.18"
+rfd = "0.15"
+wgpu = { version = "27.0.1", features = ["dx12"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "2.0"
+notify = "6.1"
+toml = "0.8"
+parking_lot = "0.12"
+crossbeam-channel = "0.5"
+regex = "1.10"
+rand = "0.8"
+forge-scene = { path = "../forge-scene" }
+forge-resource = { path = "../forge-resource" }
+forge-physics = { path = "../forge-physics" }
+forge-animation = { path = "../forge-animation" }
+forge-export = { path = "../forge-export" }
+forge-project = { path = "../forge-project" }
+forge-event = { path = "../forge-event" }
+# forge-excel = { path = "../forge-excel" }
+forge-dialog = { path = "../forge-dialog" }
+forge-linter = { path = "../forge-linter" }
+dirs = "6.0.0"
+
+[[bin]]
+name = "forge-editor"
+path = "src/main.rs"
+
+[[example]]
+name = "export_import"
+path = "examples/export_import.rs"

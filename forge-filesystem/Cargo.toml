@@ -1,0 +1,16 @@
+[package]
+name = "forge-filesystem"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Filesystem - Sistema de archivos"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+
+[lib]
+name = "forge_filesystem"
+path = "src/lib.rs"

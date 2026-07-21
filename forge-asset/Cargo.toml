@@ -1,0 +1,17 @@
+[package]
+name = "forge-asset"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Asset - Sistema de assets"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+thiserror = "1.0"
+
+[lib]
+name = "forge_asset"
+path = "src/lib.rs"

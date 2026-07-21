@@ -1,0 +1,57 @@
+[package]
+name = "forge"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Game Engine"
+license = "MIT"
+
+[workspace]
+members = [
+    "forge-editor",
+    "forge-scene",
+    "forge-scene_stub",
+    "forge-physics",
+    "forge-animation",
+    "forge-export",
+    "forge-resource",
+    "forge-project",
+    "forge-linter",
+]
+
+[workspace.lints.rust]
+deprecated = "allow"
+future_incompatible = "allow"
+rust_2018_idioms = "allow"
+
+[workspace.metadata.cargo-udeps.ignore]
+normal = ["quick-xml"]
+
+[workspace.metadata.cargo-features]
+default = ["quick-xml"]
+
+[build-dependencies]
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+eframe = { version = "0.33.3", default-features = false, features = ["wgpu"] }
+egui = "0.33.3"
+wgpu = { version = "27.0.1", features = ["dx12"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "2.0"
+notify = "6.1"
+toml = "0.8"
+parking_lot = "0.12"
+crossbeam-channel = "0.5"
+chrono = "0.4"
+forge-scene = { path = "forge-scene" }
+forge-physics = { path = "forge-physics" }
+forge-animation = { path = "forge-animation" }
+forge-export = { path = "forge-export" }
+forge-resource = { path = "forge-resource" }
+forge-project = { path = "forge-project" }
+forge-linter = { path = "forge-linter" }

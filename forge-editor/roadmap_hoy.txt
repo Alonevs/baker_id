@@ -1,0 +1,78 @@
+# Roadmap - Explorador de Archivos Real (Fase 4)
+**Fecha:** Mon Jul 20 2026
+**Estado:** En progreso
+**Objetivo:** Implementar explorador de archivos que lea carpetas reales del disco
+
+## ✅ Completado
+- Eliminados warnings en `dialog_manager.rs` (prefixados `options`, `options_list`, `language` con `_`)
+- Corregida comparación en `import_manager.rs`: `self.project.entities.len() < 0` → `== 0`
+- Eliminados warnings en `physics_2d.rs` (prefixados `_check_collision`, `_resolve_collision`)
+- Eliminados imports no usados: `eframe::egui` en `property_panel.rs`, `crate::animation_track::InterpolationType` en `keyframe.rs`
+- Estadísticas del Viewport conectadas con datos reales (`app.physics.blocks`, `app.particles`, `app.animation`)
+- Botón 'Save' del menú File habilitado con serialización del mapa
+
+## ✅ Completado (Fase 4)
+### Tarea 1: Implementar `load_from_directory()` en `src/ui/asset_browser.rs`
+- ✅ Leer carpetas reales del disco usando `std::fs` y `std::path`
+- ✅ Filtrar archivos por extensiones: `.png`, `.jpg`, `.csv`, `.wav`, `.rs`, `.lua`
+- ✅ Estructurar assets en árbol de carpetas (recursivo)
+- ✅ Integrar `pollster::FutureExt` para `rfd::AsyncFileDialog`
+- ✅ Corregir tipos de `FileHandle` a `Path`
+- ✅ Agregar botón "Load Default Assets..." para directorio por defecto
+- ✅ Mejorar visualización del árbol de carpetas con UI grupal
+- ✅ Preview de imágenes pendiente (API egui_extras requiere ajuste)
+
+### Tarea 2: Integrar `AssetBrowser` en UI
+- ✅ Añadir `Tab::AssetBrowser` a `ForgeEditorTabViewer::tabs()` en `src/ui/tab_viewer.rs`
+- ✅ Implementar `Display` para `Tab::AssetBrowser`
+- ✅ Mostrar explorador de archivos en dock como pestaña nueva
+- ✅ Renderizar UI con búsqueda, categorías y lista de assets
+- ✅ Botón "Change Directory..." para seleccionar carpeta personalizada
+- ✅ Botón "📥 Import Selected" para importar assets seleccionados
+- ✅ Botón "🔄 Refresh" para recargar assets
+
+### Tarea 3: Integrar con ForgeEditorApp
+- ✅ `asset_browser: AssetBrowser` ya existe en `ForgeEditorApp`
+- ✅ `import_manager: ImportManager` agregado a ForgeEditorApp
+- ✅ Corregir errores de préstamos mutuos en renderizado
+- ✅ Corregir errores de tipos de `console::LogLevel`
+- ✅ Agregar `pending_import` para manejar importación asíncrona
+- ✅ Agregar `Clone` a `ProjectData` y structs relacionados
+- ✅ Importación automática en update loop de eframe::App
+
+## ✅ Completado (Fase 4 - Mejoras)
+### Tarea 4: Implementar árbol jerárquico de carpetas
+- ✅ Agregar estructura `FolderTree` para representación jerárquica
+- ✅ Método `build_hierarchical_tree()` para construir árbol recursivo
+- ✅ Método `render_folder_tree()` para renderizar UI del árbol
+- ✅ UI mejorada con indentación visual (└──)
+- ✅ Contador de archivos por carpeta
+- ✅ Soporte para subcarpetas anidadas
+
+### Tarea 5: Mejorar filtro por extensiones
+- ✅ Método `is_extension_supported()` para verificar extensiones válidas
+- ✅ Método `get_supported_extensions()` para mapeo de categorías
+- ✅ Filtrado automático en `load_flat_assets()` y `load_flat_assets_from_slice()`
+- ✅ Solo mostrar archivos soportados por categoría seleccionada
+
+### Tarea 6: Carga recursiva de subcarpetas
+- ✅ Método `collect_files_recursive()` para leer carpetas anidadas
+- ✅ Integración en `load_from_directory()`
+- ✅ Soporte para estructura de carpetas profunda
+
+## 🚀 Tareas Pendientes
+1. Agregar drag & drop de assets (drag & drop de imágenes del Asset Browser a entidades)
+2. Mejorar búsqueda con resaltado de texto
+3. Agregar filtros por tipo de asset (sprites, animaciones, audio)
+4. Integrar con export_manager para guardar sprite_path en entidades
+5. Agregar preview de sprite asignado en Inspector de Entidades
+
+## 📁 Archivos Clave
+- `src/ui/asset_browser.rs` - Implementar lectura de disco
+- `src/ui/tab_viewer.rs` - Añadir pestaña AssetBrowser
+- `src/lib.rs` - Añadir assets_directory a ForgeEditorApp
+- `src/import_manager.rs` - Importación de assets
+- `src/export_manager.rs` - Exportación de proyecto
+
+## 🎯 Meta
+**Fase 4 completada** - Explorador de archivos funcional con árbol jerárquico, filtros por categoría e importación

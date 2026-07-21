@@ -1,0 +1,14 @@
+https://docs.unity.com
+https://docs.unrealengine.com
+https://docs.godotengine.org
+https://manual.gamemaker.io
+https://defold.com/manuals
+https://www.construct.net/en/make-games/manual
+https://docs.cocos.com
+https://kinoar.github.io/rmmv-doc-web
+https://github.com/defold/doc
+https://github.com/YoYoGames/GameMaker-Manual
+https://docs.o3de.org
+https://bevyengine.org/learn/book/introduction/
+http://doc.stride3d.net
+https://github.com/ProwlEngine/Prowl

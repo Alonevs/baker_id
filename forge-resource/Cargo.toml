@@ -1,0 +1,17 @@
+[package]
+name = "forge-resource"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Resource - Recursos serializables"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "1.0"
+
+[lib]
+name = "forge_resource"
+path = "src/lib.rs"

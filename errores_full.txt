@@ -1,0 +1,732 @@
+﻿cargo : warning: struct `AnimationState` is never constructed
+En línea: 1 Carácter: 33
++ cd C:\Users\xico0\Desktop\Xico; cargo build --workspace 2>&1 | Out-Fi ...
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: struct...ver constructed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  --> forge-animation\src\animation.rs:23:12
+   |
+23 | pub struct AnimationState {
+   |            ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `BlendTree` is never constructed
+ --> forge-animation\src\blend_tree.rs:5:12
+  |
+5 | pub struct BlendTree {
+  |            ^^^^^^^^^
+
+warning: enum `BlendTreeType` is never used
+  --> forge-animation\src\blend_tree.rs:13:10
+   |
+13 | pub enum BlendTreeType {
+   |          ^^^^^^^^^^^^^
+
+warning: struct `Transition` is never constructed
+  --> forge-animation\src\blend_tree.rs:20:12
+   |
+20 | pub struct Transition {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `add_transition`, `get_transition`, and `interpolate` are never used
+  --> forge-animation\src\blend_tree.rs:27:12
+   |
+26 | impl BlendTree {
+   | -------------- associated items in this implementation
+27 |     pub fn new(name: String, type_: BlendTreeType, root: Uuid) -> Self {
+   |            ^^^
+...
+36 |     pub fn add_transition(&mut self, transition: Transition) {
+   |            ^^^^^^^^^^^^^^
+...
+40 |     pub fn get_transition(&self, from: &Uuid) -> Option<&Transition> {
+   |            ^^^^^^^^^^^^^^
+...
+44 |     pub fn interpolate(&self, time: f32) -> BlendWeight {
+   |            ^^^^^^^^^^^
+
+warning: struct `Constraint` is never constructed
+ --> forge-physics\src\constraints.rs:4:12
+  |
+4 | pub struct Constraint {
+  |            ^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: enum `ConstraintType` is never used
+  --> forge-physics\src\constraints.rs:15:10
+   |
+15 | pub enum ConstraintType {
+   |          ^^^^^^^^^^^^^^
+
+warning: associated items `new` and `update` are never used
+  --> forge-physics\src\constraints.rs:23:12
+   |
+22 | impl Constraint {
+   | --------------- associated items in this implementation
+23 |     pub fn new(
+   |            ^^^
+...
+43 |     pub fn update(&self, _body1: &[f32; 2], _body2: &[f32; 2], _dt: f32) {
+   |            ^^^^^^
+
+   Compiling forge-scene v1.0.0 (C:\Users\xico0\Desktop\Xico\forge-scene)
+warning: unused import: `uuid::Uuid`
+ --> forge-project\src\asset_library.rs:3:5
+  |
+3 | use uuid::Uuid;
+  |     ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: ambiguous glob re-exports
+  --> forge-project\src\lib.rs:25:9
+   |
+24 | pub use project::*;
+   |         ---------- but the name `ProjectSettings` in the type namespace is also re-exported here
+25 | pub use project_settings::*;
+   |         ^^^^^^^^^^^^^^^^^^^ the name `ProjectSettings` in the type namespace is first re-exported here
+   |
+   = note: `#[warn(ambiguous_glob_reexports)]` on by default
+
+warning: unused variable: `path`
+  --> forge-project\src\asset_importer.rs:14:30
+   |
+14 |     pub fn import(&mut self, path: &str, data: Value) -> Result<(), String> {
+   |                              ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `data`
+  --> forge-project\src\asset_importer.rs:14:42
+   |
+14 |     pub fn import(&mut self, path: &str, data: Value) -> Result<(), String> {
+   |                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_data`
+
+warning: unused variable: `path`
+  --> forge-project\src\asset_exporter.rs:14:30
+   |
+14 |     pub fn export(&mut self, path: &str, data: &Value) -> Result<(), String> {
+   |                              ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `data`
+  --> forge-project\src\asset_exporter.rs:14:42
+   |
+14 |     pub fn export(&mut self, path: &str, data: &Value) -> Result<(), String> {
+   |                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_data`
+
+warning: struct `ImportQueue` is never constructed
+ --> forge-project\src\import_queue.rs:2:12
+  |
+2 | pub struct ImportQueue {
+  |            ^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `new`, `push`, and `pop` are never used
+  --> forge-project\src\import_queue.rs:7:12
+   |
+ 6 | impl ImportQueue {
+   | ---------------- associated items in this implementation
+ 7 |     pub fn new() -> Self {
+   |            ^^^
+...
+11 |     pub fn push(&mut self, path: String) {
+   |            ^^^^
+...
+15 |     pub fn pop(&mut self) -> Option<String> {
+   |            ^^^
+
+warning: struct `ImportProcessor` is never constructed
+ --> forge-project\src\import_processor.rs:4:12
+  |
+4 | pub struct ImportProcessor {
+  |            ^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `process`, and `is_processed` are never used
+  --> forge-project\src\import_processor.rs:9:12
+   |
+ 8 | impl ImportProcessor {
+   | -------------------- associated items in this implementation
+ 9 |     pub fn new() -> Self {
+   |            ^^^
+...
+13 |     pub fn process(&mut self, path: &str) -> Result<(), String> {
+   |            ^^^^^^^
+...
+18 |     pub fn is_processed(&self, path: &str) -> bool {
+   |            ^^^^^^^^^^^^
+
+warning: struct `ImportPreset` is never constructed
+ --> forge-project\src\import_preset.rs:4:12
+  |
+4 | pub struct ImportPreset {
+  |            ^^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> forge-project\src\import_preset.rs:11:12
+   |
+10 | impl ImportPreset {
+   | ----------------- associated function in this implementation
+11 |     pub fn new(name: String, extensions: Vec<String>, default_settings: Value) -> Self {
+   |            ^^^
+
+warning: struct `FormatConverter` is never constructed
+ --> forge-project\src\format_converter.rs:4:12
+  |
+4 | pub struct FormatConverter {
+  |            ^^^^^^^^^^^^^^^
+
+warning: associated items `new` and `convert` are never used
+  --> forge-project\src\format_converter.rs:9:12
+   |
+ 8 | impl FormatConverter {
+   | -------------------- associated items in this implementation
+ 9 |     pub fn new() -> Self {
+   |            ^^^
+...
+13 |     pub fn convert(&self, from: &str, to: &str) -> bool {
+   |            ^^^^^^^
+
+warning: unused import: `std::sync::Arc`
+ --> forge-resource\src\resource.rs:2:5
+  |
+2 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::resource_manager::ResourceManager`
+  --> forge-resource\src\resource.rs:76:5
+   |
+76 | use crate::resource_manager::ResourceManager;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::resource_load::ResourceLoader`
+  --> forge-resource\src\resource.rs:77:5
+   |
+77 | use crate::resource_load::ResourceLoader;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::resource_save::ResourceSaver`
+  --> forge-resource\src\resource.rs:78:5
+   |
+78 | use crate::resource_save::ResourceSaver;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::sync::Arc`
+ --> forge-resource\src\resource_save.rs:2:5
+  |
+2 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: `forge-animation` (lib) generated 5 warnings
+warning: `forge-physics` (lib) generated 3 warnings
+warning: `forge-project` (lib) generated 14 warnings (run `cargo fix --lib -p forge-project` to apply 5 suggestions)
+warning: `forge-resource` (lib) generated 5 warnings (run `cargo fix --lib -p forge-resource` to apply 5 suggestions)
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene.rs:336:17
+    |
+336 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+336 - #[derive(Debug, Error)]
+336 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:338:7
+    |
+338 |     #[error("Failed to create scene: {0}")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+337 + #[derive(Error)]
+338 | pub enum SceneError {
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:340:7
+    |
+340 |     #[error("Failed to save scene: {0}")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+337 + #[derive(Error)]
+338 | pub enum SceneError {
+    |
+
+error: cannot find attribute `from` in this scope
+   --> forge-scene\src\scene.rs:341:17
+    |
+341 |     SaveError(#[from] crate::scene_node::SaveError),
+    |                 ^^^^
+    |
+help: `from` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+337 + #[derive(Error)]
+338 | pub enum SceneError {
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:342:7
+    |
+342 |     #[error("Failed to load scene: {0}")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+337 + #[derive(Error)]
+338 | pub enum SceneError {
+    |
+
+error: cannot find attribute `from` in this scope
+   --> forge-scene\src\scene.rs:343:17
+    |
+343 |     LoadError(#[from] crate::scene_node::LoadError),
+    |                 ^^^^
+    |
+help: `from` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+337 + #[derive(Error)]
+338 | pub enum SceneError {
+    |
+
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene.rs:346:17
+    |
+346 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+346 - #[derive(Debug, Error)]
+346 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:348:7
+    |
+348 |     #[error("Node not found")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+347 + #[derive(Error)]
+348 | pub enum MoveError {
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:350:7
+    |
+350 |     #[error("Invalid parent")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+347 + #[derive(Error)]
+348 | pub enum MoveError {
+    |
+
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene.rs:354:17
+    |
+354 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+354 - #[derive(Debug, Error)]
+354 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:356:7
+    |
+356 |     #[error("Failed to export scene: {0}")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+355 + #[derive(Error)]
+356 | pub enum ExportError {
+    |
+
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene.rs:360:17
+    |
+360 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+360 - #[derive(Debug, Error)]
+360 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:362:7
+    |
+362 |     #[error("Failed to import scene: {0}")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+361 + #[derive(Error)]
+362 | pub enum ImportError {
+    |
+
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene.rs:366:17
+    |
+366 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+366 - #[derive(Debug, Error)]
+366 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:368:7
+    |
+368 |     #[error("No undo available")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+367 + #[derive(Error)]
+368 | pub enum UndoError {
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene.rs:370:7
+    |
+370 |     #[error("No redo available")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+367 + #[derive(Error)]
+368 | pub enum UndoError {
+    |
+
+error: cannot find derive macro `Error` in this scope
+   --> forge-scene\src\scene_tree.rs:164:17
+    |
+164 | #[derive(Debug, Error)]
+    |                 ^^^^^
+    |
+help: the derive macro `Error` accepts the similarly named `error` attribute
+    |
+164 - #[derive(Debug, Error)]
+164 + #[derive(Debug, error)]
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene_tree.rs:166:7
+    |
+166 |     #[error("Node not found")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+165 + #[derive(Error)]
+166 | pub enum MoveError {
+    |
+
+error: cannot find attribute `error` in this scope
+   --> forge-scene\src\scene_tree.rs:168:7
+    |
+168 |     #[error("Invalid parent")]
+    |       ^^^^^
+    |
+help: `error` is an attribute that can be used by the derive macro `Error`, you might be missing a `derive` attribute
+    |
+165 + #[derive(Error)]
+166 | pub enum MoveError {
+    |
+
+warning: unused imports: `Keyframe` and `LoadError`
+ --> forge-scene\src\scene.rs:5:42
+  |
+5 | use crate::scene_node::{NodeData, Scene, Keyframe, LoadError};
+  |                                          ^^^^^^^^  ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `DragOperation` and `SceneTree`
+ --> forge-scene\src\scene.rs:6:25
+  |
+6 | use crate::scene_tree::{SceneTree, SceneTreeEditor, DragOperation};
+  |                         ^^^^^^^^^                   ^^^^^^^^^^^^^
+
+warning: unused import: `Keyframe`
+ --> forge-scene\src\scene_tree.rs:5:42
+  |
+5 | use crate::scene_node::{NodeData, Scene, Keyframe, LoadError};
+  |                                          ^^^^^^^^
+
+warning: unused import: `Entity`
+ --> forge-scene\src\scene_tree.rs:6:18
+  |
+6 | use crate::ecs::{Entity, Signal};
+  |                  ^^^^^^
+
+warning: unused import: `std::sync::Arc`
+ --> forge-scene\src\scene_node.rs:2:5
+  |
+2 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused import: `thiserror::Error`
+ --> forge-scene\src\scene_preview.rs:4:5
+  |
+4 | use thiserror::Error;
+  |     ^^^^^^^^^^^^^^^^
+
+warning: unused imports: `LoadError`, `NodeData`, and `Scene`
+ --> forge-scene\src\scene_preview.rs:6:25
+  |
+6 | use crate::scene_node::{NodeData, Scene, LoadError};
+  |                         ^^^^^^^^  ^^^^^  ^^^^^^^^^
+
+warning: unused import: `Signal`
+ --> forge-scene\src\scene_preview.rs:7:26
+  |
+7 | use crate::ecs::{Entity, Signal};
+  |                          ^^^^^^
+
+warning: unused import: `uuid::Uuid`
+ --> forge-scene\src\resource.rs:3:5
+  |
+3 | use uuid::Uuid;
+  |     ^^^^^^^^^^
+
+warning: unused import: `thiserror::Error`
+ --> forge-scene\src\ecs.rs:1:5
+  |
+1 | use thiserror::Error;
+  |     ^^^^^^^^^^^^^^^^
+
+warning: ambiguous glob re-exports
+  --> forge-scene\src\lib.rs:21:9
+   |
+21 | pub use scene::*;
+   |         ^^^^^^^^ the name `MoveError` in the type namespace is first re-exported here
+22 | pub use scene_tree::*;
+   |         ------------- but the name `MoveError` in the type namespace is also re-exported here
+   |
+   = note: `#[warn(ambiguous_glob_reexports)]` on by default
+
+warning: ambiguous glob re-exports
+  --> forge-scene\src\lib.rs:23:9
+   |
+23 | pub use scene_node::*;
+   |         ^^^^^^^^^^^^^ the name `Signal` in the type namespace is first re-exported here
+...
+28 | pub use ecs::*;
+   |         ------ but the name `Signal` in the type namespace is also re-exported here
+
+warning: ambiguous glob re-exports
+  --> forge-scene\src\lib.rs:23:9
+   |
+23 | pub use scene_node::*;
+   |         ^^^^^^^^^^^^^ the name `LoadError` in the type namespace is first re-exported here
+...
+28 | pub use ecs::*;
+   |         ------ but the name `LoadError` in the type namespace is also re-exported here
+
+warning: unused import: `resource::*`
+  --> forge-scene\src\lib.rs:25:9
+   |
+25 | pub use resource::*;
+   |         ^^^^^^^^^^^
+
+warning: ambiguous glob re-exports
+  --> forge-scene\src\lib.rs:30:9
+   |
+25 | pub use resource::*;
+   |         ----------- but the name `ResourceManager` in the type namespace is also re-exported here
+...
+30 | pub use resource_manager::*;
+   |         ^^^^^^^^^^^^^^^^^^^ the name `ResourceManager` in the type namespace is first re-exported here
+
+error[E0277]: `?` couldn't convert the error to `SceneError`
+   --> forge-scene\src\scene.rs:79:29
+    |
+ 79 |             scene.save(path)?;
+    |                   ----------^ the trait `From<SaveError>` is not implemented for `SceneError`
+    |                   |
+    |                   this can't be annotated with `?` because it has type `Result<_, SaveError>`
+    |
+note: `SceneError` needs to implement `From<SaveError>`
+   --> forge-scene\src\scene.rs:337:1
+    |
+337 | pub enum SceneError {
+    | ^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` 
+trait
+
+error[E0308]: mismatched types
+   --> forge-scene\src\scene.rs:108:9
+    |
+107 |     pub fn move_node(&mut self, source_id: Uuid, target_id: Uuid) -> Result<(), MoveError> {
+    |                                                                      --------------------- expected `Result<(), 
+scene::MoveError>` because of return type
+108 |         self.tree.move_node(source_id, target_id)
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `scene::MoveError`, found `scene_tree::MoveError`
+    |
+    = note: `scene_tree::MoveError` and `scene::MoveError` have similar names, but are actually distinct types
+note: `scene_tree::MoveError` is defined in module `crate::scene_tree` of the current crate
+   --> forge-scene\src\scene_tree.rs:165:1
+    |
+165 | pub enum MoveError {
+    | ^^^^^^^^^^^^^^^^^^
+note: `scene::MoveError` is defined in module `crate::scene` of the current crate
+   --> forge-scene\src\scene.rs:347:1
+    |
+347 | pub enum MoveError {
+    | ^^^^^^^^^^^^^^^^^^
+
+error[E0277]: `?` couldn't convert the error to `ExportError`
+   --> forge-scene\src\scene.rs:117:29
+    |
+117 |             scene.save(path)?;
+    |                   ----------^ the trait `From<SaveError>` is not implemented for `ExportError`
+    |                   |
+    |                   this can't be annotated with `?` because it has type `Result<_, SaveError>`
+    |
+note: `ExportError` needs to implement `From<SaveError>`
+   --> forge-scene\src\scene.rs:355:1
+    |
+355 | pub enum ExportError {
+    | ^^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` 
+trait
+
+error[E0277]: `?` couldn't convert the error to `ImportError`
+   --> forge-scene\src\scene.rs:123:38
+    |
+123 |         let scene = Scene::load(path)?;
+    |                     -----------------^ the trait `From<scene_node::LoadError>` is not implemented for 
+`ImportError`
+    |                     |
+    |                     this can't be annotated with `?` because it has type `Result<_, scene_node::LoadError>`
+    |
+note: `ImportError` needs to implement `From<scene_node::LoadError>`
+   --> forge-scene\src\scene.rs:361:1
+    |
+361 | pub enum ImportError {
+    | ^^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` 
+trait
+
+error[E0308]: mismatched types
+   --> forge-scene\src\scene_tree.rs:131:59
+    |
+131 |                 if let Some(parent) = self.tree.nodes.get(&node.parent_id) {
+    |                                                       --- ^^^^^^^^^^^^^^^ expected `&Uuid`, found `&Option<Uuid>`
+    |                                                       |
+    |                                                       arguments to this method are incorrect
+    |
+    = note: expected reference `&Uuid`
+               found reference `&std::option::Option<Uuid>`
+note: method defined here
+   --> /rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library\std\src\collections\hash\map.rs:1035:11
+
+error[E0308]: mismatched types
+   --> forge-scene\src\scene_tree.rs:132:41
+    |
+132 |                       parent.signals.push(Signal {
+    |  ____________________________________----_^
+    | |                                    |
+    | |                                    arguments to this method are incorrect
+133 | |                         name: "node_deleted".to_string(),
+134 | |                         arguments: vec![id.to_string()],
+135 | |                     });
+    | |_____________________^ expected `scene_node::Signal`, found `ecs::Signal`
+    |
+    = note: `ecs::Signal` and `scene_node::Signal` have similar names, but are actually distinct types
+note: `ecs::Signal` is defined in module `crate::ecs` of the current crate
+   --> forge-scene\src\ecs.rs:15:1
+    |
+ 15 | pub struct Signal {
+    | ^^^^^^^^^^^^^^^^^
+note: `scene_node::Signal` is defined in module `crate::scene_node` of the current crate
+   --> forge-scene\src\scene_node.rs:148:1
+    |
+148 | pub struct Signal {
+    | ^^^^^^^^^^^^^^^^^
+note: method defined here
+   --> /rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library\alloc\src\vec\mod.rs:1003:11
+
+warning: unused variable: `name`
+  --> forge-scene\src\scene.rs:63:40
+   |
+63 |     pub fn create_new_scene(&mut self, name: &str) -> Result<(), SceneError> {
+   |                                        ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `path`
+  --> forge-scene\src\scene.rs:73:34
+   |
+73 |     pub fn open_scene(&mut self, path: &str) -> Result<(), SceneError> {
+   |                                  ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `scene`
+  --> forge-scene\src\scene_tree.rs:34:21
+   |
+34 |         if let Some(scene) = self.scenes.get(scene_id) {
+   |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_scene`
+
+error[E0596]: cannot borrow data in an `Arc` as mutable
+  --> forge-scene\src\scene_tree.rs:79:13
+   |
+79 |             node_clone.update(delta);
+   |             ^^^^^^^^^^ cannot borrow as mutable
+   |
+   = help: trait `DerefMut` is required to modify through a dereference, but it is not implemented for `Arc<NodeData>`
+
+warning: unused variable: `old_node`
+   --> forge-scene\src\scene_tree.rs:154:25
+    |
+154 |             if let Some(old_node) = self.tree.nodes.remove(&source_id) {
+    |                         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_old_node`
+
+warning: unused variable: `path`
+   --> forge-scene\src\scene_node.rs:196:24
+    |
+196 |     pub fn save(&self, path: &str) -> Result<(), SaveError> {
+    |                        ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `path`
+   --> forge-scene\src\scene_node.rs:201:17
+    |
+201 |     pub fn load(path: &str) -> Result<Self, LoadError> {
+    |                 ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `delta`
+  --> forge-scene\src\scene_preview.rs:41:30
+   |
+41 |     pub fn update(&mut self, delta: f64) {
+   |                              ^^^^^ help: if this is intentional, prefix it with an underscore: `_delta`
+
+warning: unused variable: `scene_id`
+  --> forge-scene\src\scene_preview.rs:91:24
+   |
+91 |         while let Some(scene_id) = self.preview_queue.pop() {
+   |                        ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_scene_id`
+
+Some errors have detailed explanations: E0277, E0308, E0596.
+For more information about an error, try `rustc --explain E0277`.
+warning: `forge-scene` (lib) generated 23 warnings
+error: could not compile `forge-scene` (lib) due to 26 previous errors; 23 warnings emitted
