@@ -548,11 +548,11 @@ impl ProjectManager {
     pub fn save_project(&mut self) -> Result<(), String> {
         if let Some(ref mut project) = self.current_project {
             // Escanear assets del proyecto
-            project.assets = self.scan_project_assets()
+            project.assets = project.scan_project_assets()
                 .iter()
                 .map(|name| AssetInfo {
                     name: name.clone(),
-                    category: self.get_category_for_extension(name.split('.').last().unwrap_or("").to_lowercase().as_str()),
+                    category: Self::get_category_for_extension(name.split('.').last().unwrap_or("").to_lowercase().as_str()).to_string(),
                     path: format!("assets/{}", name),
                 })
                 .collect();
@@ -565,7 +565,7 @@ impl ProjectManager {
     }
 
     /// Obtiene categoría para una extensión
-    fn get_category_for_extension(&self, extension: &str) -> &'static str {
+    fn get_category_for_extension(extension: &str) -> &'static str {
         match extension {
             "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" => "Sprites",
             "mp3" | "wav" | "ogg" | "flac" | "aiff" => "Audio",

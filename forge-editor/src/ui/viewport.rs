@@ -204,7 +204,7 @@ impl Viewport {
     }
     
     /// Renderiza el viewport con soporte de drop
-    pub fn ui(&self, ui: &mut egui::Ui, app: &mut crate::ForgeEditorApp) {
+    pub fn ui_render(ui: &mut egui::Ui, app: &mut crate::ForgeEditorApp) {
         ui.heading("Viewport");
         ui.add_space(10.0);
         ui.separator();
@@ -213,7 +213,7 @@ impl Viewport {
         ui.group(|ui| {
             ui.label("Viewport");
             ui.add_space(5.0);
-            ui.label(format!("Zoom: x{}", self.camera_zoom));
+            ui.label(format!("Zoom: x{}", app.viewport.camera_zoom));
             ui.label("Grid: enabled");
             
             // Zona de drop

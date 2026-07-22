@@ -1,8 +1,8 @@
-# Directorios de compilación y temporales
+# Directorios de compilacin y temporales
 /target/
 crates/*/target/
 
-# Librerías externas
+# Libreras externas
 Libreria_Global/
 old/
 temp_*
@@ -24,7 +24,7 @@ export_error.txt
 *.docx
 *.md
 
-# Archivos específicos
+# Archivos especficos
 forge-scene/src/lib.rs.corrupt
 forge-scene/forge-scene_check.txt
 
@@ -35,11 +35,11 @@ forge-editor/FASE_4_RESUMEN.md
 forge-editor/docs/
 forge-editor/examples/
 
-# Librerías de proyectos
+# Libreras de proyectos
 forge-scene/
 forge-sprite-baker/
 
-# Docs raíz
+# Docs raz
 docs/*.docx
 docs/*.txt
-docs/*.md
+docs/*.md

@@ -76,14 +76,13 @@ impl AssetBrowser {
     }
 
     /// Agregar un asset seleccionado a la escena actual
-    pub fn add_asset_to_scene(&mut self, app: &mut crate::ForgeEditorApp, asset_name: &str) -> bool {
-        // Buscar el path del asset
+    /// Buscar el path de un asset en el árbol
+    pub fn find_asset_path(&self, asset_name: &str) -> Option<std::path::PathBuf> {
         let extension = asset_name.split('.').last().unwrap_or("").to_lowercase();
         
         // Verificar si es un sprite (imagen)
         if ["png", "jpg", "jpeg", "gif", "bmp", "webp"].contains(&extension.as_str()) {
             // Buscar el path en el árbol de assets
-            let mut found_path: Option<std::path::PathBuf> = None;
             for (folder_name, files) in &self.asset_tree {
                 if files.iter().any(|f| f.contains(asset_name)) {
                     let mut path = self.assets_directory.clone();
@@ -92,24 +91,13 @@ impl AssetBrowser {
                     }
                     path.push(asset_name);
                     if path.exists() {
-                        found_path = Some(path);
-                        break;
+                        return Some(path);
                     }
                 }
             }
-            
-            if let Some(path) = found_path {
-                // Crear asset con forge-scene::Asset real
-                let asset = app.create_asset(&path.to_string_lossy());
-                app.current_asset = Some(asset);
-                
-                // Agregar a la escena actual
-                app.scene_tree.selected_entity_sprite_path = Some(path.to_string_lossy().to_string());
-                return true;
-            }
         }
         
-        false
+        None
     }
 
     /// Cargar assets desde un directorio
@@ -685,11 +673,8 @@ impl AssetBrowser {
                         let preview_type = AssetPreviewType::from_extension(&asset_ext);
                         
                         if ui.selectable_label(is_selected, asset).clicked() {
-                            app.dragged_asset = Some(crate::forge_scene_stub::Asset {
-                                id: uuid::Uuid::new_v4(),
-                                path: asset.to_string(),
-                                data: Vec::new(),
-                            });
+                            let asset_real = app.create_asset(asset);
+                            app.dragged_asset = Some(asset_real);
                             app.drag_operation = Some(DragOperation::Asset {
                                 asset_name: asset.to_string(),
                                 asset_type: asset_type.clone(),

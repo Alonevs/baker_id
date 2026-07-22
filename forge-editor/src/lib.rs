@@ -210,7 +210,7 @@ pub struct ForgeEditorApp {
     pub drag_operation: Option<DragOperation>,
     
     /// Asset arrastrado (usando forge-scene::Asset real)
-    pub dragged_asset: Option<crate::forge_scene::Asset>,
+    pub dragged_asset: Option<::forge_scene::Asset>,
     
     /// Timeline playing
     pub timeline_playing: bool,
@@ -222,7 +222,7 @@ pub struct ForgeEditorApp {
     pub audio_playing: bool,
     
     /// Asset cargado actualmente (usando forge-scene::Asset real)
-    pub current_asset: Option<crate::forge_scene::Asset>,
+    pub current_asset: Option<::forge_scene::Asset>,
     
     /// Physics manager
     pub physics: Physics2D,
@@ -1675,19 +1675,26 @@ crate::export_manager::ProjectData {
 
     /// Agregar un asset a la escena actual
     pub fn add_asset_to_scene(&mut self, asset_name: &str) -> bool {
-        self.asset_browser.add_asset_to_scene(self, asset_name)
+        if let Some(path) = self.asset_browser.find_asset_path(asset_name) {
+            let asset = self.create_asset(&path.to_string_lossy());
+            self.current_asset = Some(asset);
+            self.selected_entity_sprite_path = Some(path.to_string_lossy().to_string());
+            true
+        } else {
+            false
+        }
     }
 
     /// Obtener asset por path (usando forge-scene::Asset real)
-    pub fn get_asset(&self, path: &str) -> Option<crate::forge_scene::Asset> {
+    pub fn get_asset(&self, path: &str) -> Option<::forge_scene::Asset> {
         // Buscar en los assets cargados
         for asset in self.asset_browser.assets.iter() {
             if asset.ends_with(path) {
-                return Some(crate::forge_scene::Asset {
+                return Some(::forge_scene::Asset {
                     id: uuid::Uuid::new_v4().to_string(),
                     name: asset.to_string(),
                     path: path.to_string(),
-                    asset_type: crate::forge_scene_stub::AssetType::Sprite,
+                    asset_type: ::forge_scene::AssetType::Sprite,
                     size: 0,
                     is_loaded: false,
                 });
@@ -1697,11 +1704,11 @@ crate::export_manager::ProjectData {
     }
 
     /// Crear asset desde path (usando forge-scene::Asset real)
-    pub fn create_asset(&mut self, path: &str) -> crate::forge_scene::Asset {
+    pub fn create_asset(&mut self, path: &str) -> ::forge_scene::Asset {
         let asset_name = path.split('/').last().unwrap_or(path);
         let asset_type = self.get_asset_type_from_path(path);
         
-        crate::forge_scene::Asset {
+        ::forge_scene::Asset {
             id: uuid::Uuid::new_v4().to_string(),
             name: asset_name.to_string(),
             path: path.to_string(),
@@ -1712,23 +1719,23 @@ crate::export_manager::ProjectData {
     }
 
     /// Obtener tipo de asset desde path
-    fn get_asset_type_from_path(&self, path: &str) -> crate::forge_scene_stub::AssetType {
+    fn get_asset_type_from_path(&self, path: &str) -> ::forge_scene::AssetType {
         let extension = path.split('.').last().unwrap_or("").to_lowercase();
         match extension.as_str() {
             "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "tga" => {
-                crate::forge_scene_stub::AssetType::Sprite
+                ::forge_scene::AssetType::Sprite
             }
             "mp3" | "wav" | "ogg" | "flac" | "aiff" => {
-                crate::forge_scene_stub::AssetType::Audio
+                ::forge_scene::AssetType::Audio
             }
             "rs" | "lua" | "gdscript" | "js" | "ts" | "json" => {
-                crate::forge_scene_stub::AssetType::Script
+                ::forge_scene::AssetType::Script
             }
             "csv" => {
-                crate::forge_scene_stub::AssetType::Dialogue
+                ::forge_scene::AssetType::Dialogue
             }
             _ => {
-                crate::forge_scene_stub::AssetType::Other
+                ::forge_scene::AssetType::Other
             }
         }
     }
@@ -1784,7 +1791,7 @@ impl eframe::App for ForgeEditorApp {
 
         // Panel central — Viewport
         egui::CentralPanel::default().show(ctx, |ui| {
-            self.viewport.ui(ui, self);
+            ui::Viewport::ui_render(ui, self);
         });
 
         ctx.request_repaint();

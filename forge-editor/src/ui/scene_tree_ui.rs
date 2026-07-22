@@ -30,6 +30,7 @@ impl SceneTreeUI {
             let root_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
                 .filter(|n| n.parent_id.is_none())
                 .cloned()
+                .map(Arc::new)
                 .collect();
                 
             self.render_tree_nodes(
@@ -70,7 +71,7 @@ impl SceneTreeUI {
                 // Botón para crear grupo
                 if ui.button("📁").clicked() {
                     let group_name = format!("{}Group", node.name);
-                    let group_node = Arc::new(NodeData {
+                    let group_node = NodeData {
                         id: Uuid::new_v4(),
                         name: group_name.clone(),
                         entity_type: EntityType::Group,
@@ -78,7 +79,7 @@ impl SceneTreeUI {
                         transform: Transform::default(),
                         properties: std::collections::HashMap::new(),
                         components: vec![],
-                    });
+                    };
                     
                     app.scene_tree.add_node_to_scene(group_node);
                     app.console.add_message(
@@ -105,6 +106,7 @@ impl SceneTreeUI {
                     let other_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
                         .filter(|n| n.id != node.id)
                         .cloned()
+                        .map(Arc::new)
                         .collect();
                     
                     for parent_node in other_nodes {
@@ -125,6 +127,7 @@ impl SceneTreeUI {
             let child_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
                 .filter(|n| n.parent_id == Some(node.id))
                 .cloned()
+                .map(Arc::new)
                 .collect();
             
             if !child_nodes.is_empty() {
