@@ -10,7 +10,6 @@ license = "MIT"
 members = [
     "forge-editor",
     "forge-scene",
-    "forge-scene_stub",
     "forge-physics",
     "forge-animation",
     "forge-export",

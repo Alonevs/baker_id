@@ -1,0 +1,13 @@
+[package]
+name = "forge-tools"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+forge-scene.workspace = true
+forge-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+parking_lot.workspace = true
