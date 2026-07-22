@@ -19,9 +19,8 @@ if %ERRORLEVEL% NEQ 0 (
 echo Starting Forge Editor 2D...
 echo.
 
-REM Ejecutar el editor desde el binario compilado
-start "Forge Editor 2D" target\release\forge.exe
-timeout /t 2 >nul
+REM Ejecutar el editor
+cargo run -p forge-editor --release
 echo.
-echo Editor lanzado. Presiona una tecla para cerrar esta ventana.
+echo Editor cerrado. Presion una tecla para salir.
 pause

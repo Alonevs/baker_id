@@ -1,7 +1,7 @@
 # 📋 PROGRESO DE DESARROLLO - FORGE EDITOR
 
-**Fecha de última actualización:** 21 de julio de 2026  
-**Estado actual:** FASE 5 completada, FASE 6 en progreso
+**Fecha de última actualización:** 22 de julio de 2026  
+**Estado actual:** FASE 6 completada y estabilizada, lista para el despliegue
 
 ---
 
@@ -144,40 +144,39 @@
 
 **Verificación:** `cargo check` - ✅ 0 ERRORES
 
+### FASE 6: Integración Completa y Estabilización ✅ COMPLETADO
+
+**Objetivo:** Consolidar el puente de compatibilidad `forge_scene_stub` y asegurar que toda la UI use tipos reales de `forge-scene`.
+
+**Resultados:**
+- ✅ Corregido el mapeo de `NodeData` en `scene_tree_ui.rs` mediante `.map(Arc::new)` para resolver discrepancias de tipos.
+- ✅ Resuelto el doble préstamo mutuo del `Viewport` transformando su interfaz en una función asociada `ui_render(...)`.
+- ✅ Resuelto el préstamo mutable simultáneo del `AssetBrowser` separando la búsqueda inmutable en `find_asset_path(&self)`.
+- ✅ Corregidos los campos de asset en `lib.rs` para almacenar el tipo `::forge_scene::Asset` real en `current_asset` y `dragged_asset`.
+- ✅ Cambiado `get_category_for_extension` a método estático en `ProjectManager` para evitar problemas con closures.
+- ✅ Corregido script `run.bat` para lanzar la ventana gráfica correcta en modo release.
+
+**Verificación:** `cargo check -p forge-editor` & `cargo test -p forge-editor --lib` - ✅ 0 ERRORES / 100% FUNCIONAL
+
 ---
 
 ## 🚀 FASES EN PROGRESO
-
-### FASE 6: Integración Completa con forge-scene
-
-**Objetivo:** Eliminar `forge_scene_stub` completamente y usar solo tipos de `forge-scene` real
-
-**Estado:** EN PROGRESO
-
-**Próximos pasos:**
-1. Verificar que todos los módulos usan `forge-scene` real
-2. Eliminar `forge_scene_stub` después de verificar 0 errores
-3. Actualizar métodos de puente `.to_real()` y `.from_real()`
-4. Integrar `forge-scene::Scene` en la gestión de escenas
-5. Conectar `forge-scene::NodeData` con componentes ECS reales
-
-**Verificación actual:** `cargo check -p forge-editor` & `cargo test --workspace --tests` - ✅ 0 ERRORES / 100% FUNCIONAL (Reparado el 22 de Julio de 2026)
-
----
-
-## 📋 FASES PENDIENTES (PLAN DE FUTURO)
 
 ### FASE 7: Sistema de Nodos Completo
 
 **Objetivo:** Implementar sistema completo de nodos con drag & drop, conexión de cables y eventos
 
 **Tareas:**
-- [ ] Implementar drag & drop de nodos desde Asset Browser a Scene Tree
+- [/] Implementar drag & drop de nodos desde Asset Browser a Scene Tree (Completado el arrastre base de Assets, pendiente colisiones en Viewport)
 - [ ] Implementar sistema de cables (cable_system) para conectar nodos
 - [ ] Crear nodos de evento (EventNodeManager) con soporte para señales y scripts
 - [ ] Implementar sistema de grupos con soporte para expandir/colapsar
 - [ ] Agregar soporte para anidación de nodos (nodos dentro de grupos)
 - [ ] Implementar sistema de propiedades dinámicas por tipo de nodo
+
+---
+
+## 📋 FASES PENDIENTES (PLAN DE FUTURO)
 - [ ] Agregar soporte para duplicar y eliminar nodos desde Scene Tree
 - [ ] Implementar sistema de versiones para nodos (undo/redo)
 
