@@ -127,6 +127,34 @@ impl SceneTree {
         self.active_nodes.clone()
     }
 
+    pub fn remove_node(&mut self, node_id: Uuid) {
+        // Si el nodo tiene padre, lo eliminamos de la lista de hijos del padre
+        if let Some(parent_id) = self.nodes.get(&node_id).and_then(|n| n.parent_id) {
+            if let Some(parent_node) = self.nodes.get(&parent_id) {
+                let parent_clone = parent_node.as_ref().clone();
+                let new_children = parent_clone.children.iter().filter(|child| *child != &node_id).cloned().collect();
+                let updated_parent = NodeData {
+                    children: new_children,
+                    ..parent_clone
+                };
+                self.nodes.insert(parent_id, Arc::new(updated_parent));
+            }
+        }
+        
+        // Si es el nodo raíz, limpiar root
+        if let Some(ref root_node) = self.root {
+            if root_node.id == node_id {
+                self.root = None;
+            }
+        }
+        
+        // Eliminar de nodes
+        self.nodes.remove(&node_id);
+        
+        // Eliminar de active_nodes
+        self.active_nodes.retain(|n| n.id != node_id);
+    }
+
     pub fn update(&mut self, delta: f64) {
         // Actualizar todos los nodos activos
         for node in &self.active_nodes {

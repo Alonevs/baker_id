@@ -1,11 +1,11 @@
 //! Test panel UI
 
 use crate::testing::{
-    test_framework::{TestResult, TestStatus, TestLocation},
+    test_framework::{TestResult, TestStatus},
     test_runner::TestReporter,
     coverage::CoverageReport,
 };
-use egui::{Context, RichText, Sense, Ui, Vec2};
+use egui::{Context, RichText, Ui, Vec2};
 
 /// Test panel
 #[derive(Default)]
@@ -194,7 +194,7 @@ impl TestPanel {
 
         egui::ScrollArea::vertical().show(ui, |ui| {
             for test in &self.tests {
-                ui.selectable_label(
+                let _ = ui.selectable_label(
                     test.name.contains(&self.filter_text),
                     &test.name,
                 );

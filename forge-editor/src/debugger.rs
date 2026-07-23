@@ -10,8 +10,7 @@
 //! - Debug output/logs
 
 use std::collections::HashMap;
-use std::sync::Arc;
-use crate::compile_system::{CompileError, SourceLocation, ValueType};
+use crate::compile_system::{CompileError, ValueType};
 
 /// Punto de interrupción
 #[derive(Debug, Clone)]
@@ -112,7 +111,8 @@ impl Debugger {
     }
 
     /// Evalúa una condición de breakpoint
-    fn evaluate_condition(&self, condition: &str, line: usize) -> bool {
+    #[allow(dead_code)]
+    fn evaluate_condition(&self, _condition: &str, _line: usize) -> bool {
         true
     }
 
@@ -380,6 +380,7 @@ impl Debugger {
     }
 
     /// Obtiene timestamp actual para logs
+    #[allow(dead_code)]
     fn get_timestamp(&self) -> String {
         let now = std::time::SystemTime::now();
         let duration = now.duration_since(std::time::UNIX_EPOCH).unwrap();

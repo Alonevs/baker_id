@@ -47,12 +47,22 @@ pub mod component_editor;
 pub mod timeline;
 pub mod keyframe;
 pub mod animation_track;
-pub mod forge_scene_stub;
 
-pub use forge_scene_stub::{
-    Scene, Asset, SceneTree, TransformProps, NodeType, Transform,
+/// Integration validation tests for PROGRESO.md
+#[cfg(test)]
+mod integration_validation_tests;
+
+pub use ::forge_scene::{
+    Scene, Asset, SceneTree, Transform, EntityType
 };
 pub use ::forge_scene::{ComponentData, ComponentType, TransformData};
+
+#[derive(Debug, Clone, Copy, PartialEq, Default, serde::Serialize, serde::Deserialize)]
+pub struct TransformProps {
+    pub position: [f32; 3],
+    pub rotation: f32,
+    pub scale: [f32; 3],
+}
 pub mod export_manager;
 pub mod import_manager;
 pub mod dialogue_editor;
@@ -99,15 +109,13 @@ pub use export_manager::ExportManager;
 pub use import_manager::ImportManager;
 pub use map_export::ExportManager as MapExport;
 pub use dialogue_editor::DialogueManager;
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use uuid::Uuid;
 use crate::debugger::LogLevel;
 
 pub use ui::*;
-use ui::AssetType;
 
 pub use script_serialization::{
     SerializedScript, SerializedVariable, SerializedScriptError,
@@ -172,12 +180,22 @@ pub use project_manager::{
     Project, GameType, PhysicsConfig, ProjectWizard, ProjectManager,
 };
 
-use egui_dock::{DockState, DockArea, Style};
-use pollster::FutureExt;
-use crate::forge_scene_stub as forge_scene;
+use egui_dock::DockState;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum CentralTab {
+    Viewport,
+    EventForge,
+}
 
 /// Aplicación principal del Forge Editor
 pub struct ForgeEditorApp {
+    /// Tab activo en el panel central
+    pub central_tab: CentralTab,
+
+    /// Editor de nodos de evento
+    pub event_node_editor: crate::event_node_editor::EventNodeEditor,
+
     /// Escena actual
     pub scene: Scene,
     
@@ -223,6 +241,15 @@ pub struct ForgeEditorApp {
     
     /// Asset cargado actualmente (usando forge-scene::Asset real)
     pub current_asset: Option<::forge_scene::Asset>,
+    
+    /// Capa de escena activa (1: Fondo, 2: Suelo/Sólido, 3: Entidades, 4: Frente)
+    pub active_layer: u32,
+    
+    /// Si el modo de simulación Play está activo
+    pub play_mode: bool,
+    
+    /// Instantánea de las posiciones de los nodos antes del inicio de Play Mode
+    pub scene_snapshot: Option<std::collections::HashMap<uuid::Uuid, [f32; 3]>>,
     
     /// Physics manager
     pub physics: Physics2D,
@@ -281,20 +308,8 @@ pub struct ForgeEditorApp {
     /// Selected entity sprite path
     pub selected_entity_sprite_path: Option<String>,
     
-    /// Entity type
-    pub entity_type: NodeType,
-    
-    /// Entity name
-    pub entity_name: String,
-    
-    /// Entity ID
-    pub entity_id: Uuid,
-    
-    /// Entity parent ID
-    pub entity_parent_id: Option<Uuid>,
-    
-    /// Entity transform
-    pub entity_transform: Transform,
+    /// Active/selected node ID
+    pub active_node_id: Option<Uuid>,
     
     /// Event node manager
     pub event_node_manager: crate::event_node_manager::EventNodeManager,
@@ -386,7 +401,9 @@ impl Default for ForgeEditorApp {
         // Default construye usando los mismos defaults que new() pero sin CreationContext
         // Solo usado internamente donde no hay contexto eframe disponible
         Self {
-            scene: Scene::default(),
+            central_tab: CentralTab::Viewport,
+            event_node_editor: crate::event_node_editor::EventNodeEditor::new(),
+            scene: Scene::new(),
             assets: HashMap::new(),
             asset_preview: AssetPreview::default(),
             window_pos: egui::Pos2::ZERO,
@@ -400,32 +417,31 @@ impl Default for ForgeEditorApp {
             timeline_playing: false,
             timeline_time: 0.0,
             audio_playing: false,
+            current_asset: None,
+            active_layer: 2,
+            play_mode: false,
+            scene_snapshot: None,
+            dragged_asset: None,
             physics: Physics2D::default(),
             particles: particle_system::ParticleSystem::default(),
             animation: animation_2d::Animation2DManager::default(),
-            export_mgr: ExportManager::default(),
-            import_mgr: ImportManager::default(),
+            export_mgr: ExportManager::new(),
+            import_mgr: ImportManager::new(),
             timeline: crate::ui::timeline::TimelineEditor::new(),
             animation_tracks: vec![],
             dialogue_manager: crate::dialogue_editor::DialogueManager::new(),
-            scene_tree: SceneTree::default(),
+            scene_tree: SceneTree::new(),
             console: ConsoleLog::new(),
             asset_browser: ui::AssetBrowser::default(),
             pending_import: None,
-            dragged_asset: None,
             drop_target: None,
-            current_asset: None,
             viewport_rect: egui::Rect::NOTHING,
             scene_tree_selected: vec![],
             transform_props: TransformProps::default(),
             component_props: crate::ui::component_properties::ComponentProperties::new(),
             script_props: crate::ui::script_properties::ScriptProperties::new(),
             selected_entity_sprite_path: None,
-            entity_type: NodeType::default(),
-            entity_name: String::new(),
-            entity_id: Uuid::new_v4(),
-            entity_parent_id: None,
-            entity_transform: Transform::default(),
+            active_node_id: None,
             event_node_manager: crate::event_node_manager::EventNodeManager::new(),
             script_viewer: crate::ui::script_viewer::ScriptViewer::new(),
             serialization_panel: crate::ui::serialization_panel::SerializationPanel::new(),
@@ -543,13 +559,135 @@ impl ForgeEditorApp {
     }
     
     /// Actualiza el sistema de física
-    pub fn update_physics(&mut self, dt: f32) {
-        self.physics.apply_gravity();
-        self.physics.update();
+    pub fn update_physics(&mut self, _dt: f32) {
+        if self.play_mode {
+            self.physics.apply_gravity();
+            self.physics.update();
+            
+            // Sincronizar de física a nodos del SceneTree
+            let blocks_read = self.physics.blocks.read().unwrap();
+            for (id_str, block) in blocks_read.iter() {
+                if let Ok(node_uuid) = uuid::Uuid::parse_str(id_str) {
+                    if let Some(node) = self.scene_tree.nodes.get(&node_uuid) {
+                        let mut updated_node = node.as_ref().clone();
+                        // El centro del bloque físico coincide con la posición del transform
+                        updated_node.transform.transform.position = [block.position.x, block.position.y, 0.0];
+                        
+                        let arc_node = std::sync::Arc::new(updated_node);
+                        self.scene_tree.nodes.insert(node_uuid, arc_node.clone());
+                        
+                        if self.scene_tree.root.as_ref().map(|n| n.id) == Some(node_uuid) {
+                            self.scene_tree.root = Some(arc_node.clone());
+                        }
+                        if let Some(pos) = self.scene_tree.active_nodes.iter().position(|n| n.id == node_uuid) {
+                            self.scene_tree.active_nodes[pos] = arc_node;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Inicia el modo de simulación Play, creando un snapshot y poblando el motor físico
+    pub fn start_play_mode(&mut self) {
+        if self.play_mode {
+            return;
+        }
+        
+        self.play_mode = true;
+        
+        // 1. Crear instantánea de posiciones
+        let mut snapshot = std::collections::HashMap::new();
+        for (id, node) in &self.scene_tree.nodes {
+            snapshot.insert(*id, node.transform.transform.position);
+        }
+        self.scene_snapshot = Some(snapshot);
+        
+        // 2. Poblar Physics2D con bloques físicos correspondientes a cada colisionador
+        let mut physics_blocks = self.physics.blocks.write().unwrap();
+        physics_blocks.clear();
+        
+        for (id, node) in &self.scene_tree.nodes {
+            let has_collider = node.components.iter().any(|c| matches!(c.component_type, ::forge_scene::ComponentType::Collider));
+            let layer = node.properties.get("layer").and_then(|v| v.as_u64()).unwrap_or(2) as u32;
+            
+            if has_collider || layer == 2 {
+                let pos = node.transform.transform.position;
+                let scale = node.transform.transform.scale;
+                
+                let width = 64.0 * scale[0];
+                let height = 64.0 * scale[1];
+                
+                let is_static = layer == 2 || node.components.iter().any(|c| {
+                    if matches!(c.component_type, ::forge_scene::ComponentType::Collider) {
+                        c.data.get("is_static").and_then(|v| v.as_bool()).unwrap_or(false)
+                    } else {
+                        false
+                    }
+                });
+                
+                let block = crate::physics_2d::PhysicsBlock {
+                    id: id.to_string(),
+                    position: crate::physics_2d::Vector2::new(pos[0], pos[1]),
+                    size: crate::physics_2d::Vector2::new(width, height),
+                    // Si es estático usamos masa infinita para que no caiga
+                    mass: if is_static { f32::MAX } else { 1.0 },
+                    velocity: crate::physics_2d::Vector2::zero(),
+                    friction: 0.5,
+                    restitution: 0.5,
+                    is_static,
+                    collider_type: crate::physics_2d::ColliderType::Rectangle,
+                };
+                
+                physics_blocks.insert(id.to_string(), block);
+            }
+        }
+        
+        self.console.add_message(
+            crate::debugger::LogLevel::Info,
+            "Play Mode iniciado: Gravedad y colisiones físicas activas."
+        );
+    }
+    
+    /// Detiene la simulación y restaura las posiciones de la instantánea original
+    pub fn stop_play_mode(&mut self) {
+        if !self.play_mode {
+            return;
+        }
+        
+        self.play_mode = false;
+        
+        // Restaurar posiciones desde snapshot
+        if let Some(snapshot) = self.scene_snapshot.take() {
+            for (id, original_pos) in snapshot {
+                if let Some(node) = self.scene_tree.nodes.get(&id) {
+                    let mut updated_node = node.as_ref().clone();
+                    updated_node.transform.transform.position = original_pos;
+                    
+                    let arc_node = std::sync::Arc::new(updated_node);
+                    self.scene_tree.nodes.insert(id, arc_node.clone());
+                    
+                    if self.scene_tree.root.as_ref().map(|n| n.id) == Some(id) {
+                        self.scene_tree.root = Some(arc_node.clone());
+                    }
+                    if let Some(pos) = self.scene_tree.active_nodes.iter().position(|n| n.id == id) {
+                        self.scene_tree.active_nodes[pos] = arc_node;
+                    }
+                }
+            }
+        }
+        
+        // Limpiar bloques físicos
+        self.physics.blocks.write().unwrap().clear();
+        
+        self.console.add_message(
+            crate::debugger::LogLevel::Info,
+            "Play Mode detenido: Posiciones del editor restauradas."
+        );
     }
     
     /// Actualiza el sistema de partículas
-    pub fn update_particles(&mut self, dt: f32) {
+    pub fn update_particles(&mut self, _dt: f32) {
         self.particles.update();
     }
     
@@ -567,7 +705,8 @@ impl ForgeEditorApp {
 
     /// Exporta el proyecto actual a un archivo .map
     pub fn export_project(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        self.export_mgr.set_name(&self.scene.name);
+        let name = self.scene_tree.root.as_ref().map(|r| r.name.as_str()).unwrap_or("default_scene");
+        self.export_mgr.set_name(name);
         self.export_mgr.export(path)?;
         Ok(())
     }
@@ -1647,7 +1786,8 @@ impl ForgeEditorApp {
 
 /// Convierte scene a project data para export manager
 impl ForgeEditorApp {
-    fn scene_to_project_data(&self, scene: &Scene) -> 
+    #[allow(dead_code)]
+    fn scene_to_project_data(&self, _scene: &Scene) -> 
 crate::export_manager::ProjectData {
         crate::export_manager::ProjectData {
             name: "Forge Project".to_string(),
@@ -1756,32 +1896,36 @@ impl eframe::App for ForgeEditorApp {
         }
 
         // Panel superior
-        egui::TopBottomPanel::top("menu_bar").show(ctx, |_ui| {
-            // Menu renderizado desde tab_viewer cuando se usa como app independiente
+        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.heading("🛠️ Forge Engine");
+                ui.add_space(20.0);
+                
+                if !self.play_mode {
+                    let play_btn = ui.add(egui::Button::new("▶ PLAY").fill(egui::Color32::from_rgb(46, 117, 89)));
+                    if play_btn.clicked() {
+                        self.start_play_mode();
+                    }
+                } else {
+                    let stop_btn = ui.add(egui::Button::new("⏹ STOP").fill(egui::Color32::from_rgb(180, 50, 50)));
+                    if stop_btn.clicked() {
+                        self.stop_play_mode();
+                    }
+                    
+                    ui.add_space(10.0);
+                    ui.colored_label(egui::Color32::from_rgb(255, 215, 0), "🎮 MODO JUEGO ACTIVO (Gravedad y WASD)");
+                }
+            });
         });
 
         // Panel izquierdo — Scene Tree
         egui::SidePanel::left("scene_tree_panel").resizable(true).show(ctx, |ui| {
-            ui.heading("Scene Tree");
-            ui.separator();
-            for (i, entity) in self.scene.entities.iter().enumerate() {
-                let selected = self.scene_tree_selected.contains(&i);
-                if ui.selectable_label(selected, &entity.name).clicked() {
-                    self.scene_tree_selected = vec![i];
-                }
-            }
+            ui::SceneTreeUI::new(self.scene_tree.clone()).ui(ui, self);
         });
 
         // Panel derecho — Inspector
         egui::SidePanel::right("inspector_panel").resizable(true).show(ctx, |ui| {
-            ui.heading("Inspector");
-            ui.separator();
-            if let Some(&idx) = self.scene_tree_selected.first() {
-                if let Some(entity) = self.scene.entities.get(idx) {
-                    ui.label(format!("Nombre: {}", entity.name));
-                    ui.label(format!("Tipo: {:?}", entity.entity_type));
-                }
-            }
+            crate::ui::component_properties::ComponentProperties::render(ui, self);
         });
 
         // Panel inferior — Asset Browser
@@ -1789,9 +1933,27 @@ impl eframe::App for ForgeEditorApp {
             ui::AssetBrowser::render(ui, self);
         });
 
-        // Panel central — Viewport
+        // Panel central — Viewport / Event Forge
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui::Viewport::ui_render(ui, self);
+            ui.horizontal(|ui| {
+                if ui.selectable_label(self.central_tab == CentralTab::Viewport, "👁️ Viewport").clicked() {
+                    self.central_tab = CentralTab::Viewport;
+                }
+                ui.add_space(10.0);
+                if ui.selectable_label(self.central_tab == CentralTab::EventForge, "⚡ Event Forge").clicked() {
+                    self.central_tab = CentralTab::EventForge;
+                }
+            });
+            ui.separator();
+
+            match self.central_tab {
+                CentralTab::Viewport => {
+                    ui::Viewport::ui_render(ui, self);
+                }
+                CentralTab::EventForge => {
+                    self.event_node_editor.render(ui);
+                }
+            }
         });
 
         ctx.request_repaint();

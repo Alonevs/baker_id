@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use uuid::Uuid;
-use serde::{Serialize, Deserialize};
 use crate::scene_node::NodeData;
 
 #[derive(Debug, Clone)]

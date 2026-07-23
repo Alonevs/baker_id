@@ -3,9 +3,8 @@
 //! Panel del Scene Tree con soporte para nodos, grupos y jerarquía.
 
 use eframe::egui;
-use crate::forge_scene_stub::{NodeData, EntityType, Transform, SceneTree};
+use ::forge_scene::{NodeData, SceneTree};
 use crate::{ForgeEditorApp, debugger::LogLevel};
-use uuid::Uuid;
 use std::sync::Arc;
 
 /// Panel del Scene Tree
@@ -27,10 +26,9 @@ impl SceneTreeUI {
             ui.add_space(5.0);
             
             // Renderizar nodos raíz (los que no tienen parent_id)
-            let root_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
+            let root_nodes: Vec<Arc<NodeData>> = app.scene_tree.nodes.values()
                 .filter(|n| n.parent_id.is_none())
                 .cloned()
-                .map(Arc::new)
                 .collect();
                 
             self.render_tree_nodes(
@@ -57,13 +55,13 @@ impl SceneTreeUI {
             let label = format!("{}📄 {}", indent_str, node.name);
             
             // Determinar si está activo
-            let is_active = app.scene_tree.active_node_id == Some(node.id);
+            let is_active = app.active_node_id == Some(node.id);
             
             // Crear botón seleccionable para el nodo
             let response = ui.selectable_label(is_active, label);
             
             if response.clicked() {
-                app.scene_tree.active_node_id = Some(node.id);
+                app.active_node_id = Some(node.id);
             }
             
             // Botones de acción
@@ -71,17 +69,12 @@ impl SceneTreeUI {
                 // Botón para crear grupo
                 if ui.button("📁").clicked() {
                     let group_name = format!("{}Group", node.name);
-                    let group_node = NodeData {
-                        id: Uuid::new_v4(),
-                        name: group_name.clone(),
-                        entity_type: EntityType::Group,
-                        parent_id: Some(node.id),
-                        transform: Transform::default(),
-                        properties: std::collections::HashMap::new(),
-                        components: vec![],
-                    };
+                    let mut group_node = NodeData::as_group(&group_name);
+                    group_node.parent_id = Some(node.id);
                     
-                    app.scene_tree.add_node_to_scene(group_node);
+                    let id = app.scene_tree.add_node(Arc::new(group_node));
+                    let _ = app.scene_tree.set_parent(&id, Some(node.id));
+                    
                     app.console.add_message(
                         LogLevel::Info,
                         &format!("Created group: {}", group_name)
@@ -91,29 +84,27 @@ impl SceneTreeUI {
                 // Botón para eliminar
                 if ui.button("×").clicked() {
                     app.scene_tree.remove_node(node.id);
+                    if app.active_node_id == Some(node.id) {
+                        app.active_node_id = None;
+                    }
                     app.console.add_message(
                         LogLevel::Info,
                         &format!("Removed node: {}", node.name)
                     );
                 }
 
-                // Botón para mover
-                
                 ui.add_space(10.0);
                 
-                // Botón para mover
+                // Botón para mover (re-parenting)
                 if ui.button("🔄").clicked() {
-                    let other_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
+                    let other_nodes: Vec<Arc<NodeData>> = app.scene_tree.nodes.values()
                         .filter(|n| n.id != node.id)
                         .cloned()
-                        .map(Arc::new)
                         .collect();
                     
                     for parent_node in other_nodes {
                         if ui.selectable_label(false, &parent_node.name).clicked() {
-                            if let Some(pos) = app.scene_tree.tree.iter().position(|n| n.id == node.id) {
-                                app.scene_tree.tree[pos].parent_id = Some(parent_node.id);
-                            }
+                            let _ = app.scene_tree.set_parent(&node.id, Some(parent_node.id));
                             app.console.add_message(
                                 LogLevel::Info,
                                 &format!("Moved node to: {}", parent_node.name)
@@ -124,10 +115,9 @@ impl SceneTreeUI {
             });
             
             // Renderizar hijos recursivamente
-            let child_nodes: Vec<Arc<NodeData>> = app.scene_tree.tree.iter()
+            let child_nodes: Vec<Arc<NodeData>> = app.scene_tree.nodes.values()
                 .filter(|n| n.parent_id == Some(node.id))
                 .cloned()
-                .map(Arc::new)
                 .collect();
             
             if !child_nodes.is_empty() {
@@ -141,4 +131,3 @@ impl SceneTreeUI {
         }
     }
 }
-

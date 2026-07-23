@@ -2,14 +2,13 @@
 //! 
 //! Panel para exportar e importar proyectos en formato .map y JSON
 
-use crate::export_manager::ExportManager;
-use crate::import_manager::ImportManager;
 use crate::ForgeEditorApp;
 
 /// Panel de exportación/importación
 pub struct ExportImportPanel {
     export_path: String,
     import_path: String,
+    #[allow(dead_code)]
     file_format: String,
 }
 

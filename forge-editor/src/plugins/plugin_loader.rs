@@ -359,7 +359,7 @@ impl PluginHotReload {
     }
 
     /// Check if plugin needs reload
-    pub fn needs_reload(&self, current_hash: &str) -> bool {
+    pub fn needs_reload(&self, _current_hash: &str) -> bool {
         // Placeholder for hash comparison
         false
     }
@@ -476,7 +476,7 @@ impl PluginSandboxExecutor {
     }
 
     /// Check if code is allowed to execute
-    pub fn is_code_allowed(&self, code: &str) -> bool {
+    pub fn is_code_allowed(&self, _code: &str) -> bool {
         // Placeholder for code analysis
         true
     }

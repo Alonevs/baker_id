@@ -3,8 +3,7 @@
 //! Módulo para el viewport 2D y renderizado.
 
 use eframe::egui;
-use crate::{DragOperation, DropTarget};
-use crate::forge_scene_stub;
+use serde_json;
 
 /// Viewport 2D para renderizado
 #[derive(Debug, Clone)]
@@ -19,12 +18,6 @@ pub struct Viewport {
     pub grid_size: f32,
     /// Entidades seleccionadas
     pub selected_entities: Vec<usize>,
-    /// Zoom in flag
-    pub zoom_in: bool,
-    /// Zoom out flag
-    pub zoom_out: bool,
-    /// Reset zoom flag
-    pub zoom_reset: bool,
     /// Pan left flag
     pub pan_left: bool,
     /// Pan right flag
@@ -33,6 +26,10 @@ pub struct Viewport {
     pub pan_up: bool,
     /// Pan down flag
     pub pan_down: bool,
+    /// ID del nodo que se está arrastrando en la escena
+    pub drag_node_id: Option<uuid::Uuid>,
+    /// Posición inicial al comenzar el arrastre
+    pub drag_start_pos: Option<[f32; 3]>,
 }
 
 impl Default for Viewport {
@@ -50,14 +47,26 @@ impl Viewport {
             show_grid: true,
             grid_size: 50.0,
             selected_entities: Vec::new(),
-            zoom_in: false,
-            zoom_out: false,
-            zoom_reset: false,
             pan_left: false,
             pan_right: false,
             pan_up: false,
             pan_down: false,
+            drag_node_id: None,
+            drag_start_pos: None,
         }
+    }
+
+    pub fn zoom_in(&mut self) {
+        self.camera_zoom = (self.camera_zoom * 1.1).clamp(0.1, 10.0);
+    }
+    
+    pub fn zoom_out(&mut self) {
+        self.camera_zoom = (self.camera_zoom / 1.1).clamp(0.1, 10.0);
+    }
+    
+    pub fn reset_zoom(&mut self) {
+        self.camera_zoom = 1.0;
+        self.camera_offset = (0.0, 0.0);
     }
     
     /// Renderiza el viewport en la UI
@@ -203,133 +212,372 @@ impl Viewport {
         });
     }
     
-    /// Renderiza el viewport con soporte de drop
+    /// Renderiza el viewport con soporte de drop, rejilla, capas inteligentes y sprites interactivos
     pub fn ui_render(ui: &mut egui::Ui, app: &mut crate::ForgeEditorApp) {
         ui.heading("Viewport");
-        ui.add_space(10.0);
+        ui.add_space(5.0);
         ui.separator();
         ui.add_space(5.0);
         
-        ui.group(|ui| {
-            ui.label("Viewport");
-            ui.add_space(5.0);
-            ui.label(format!("Zoom: x{}", app.viewport.camera_zoom));
-            ui.label("Grid: enabled");
-            
-            // Zona de drop
-            if matches!(app.drag_operation, Some(DragOperation::Asset { .. })) {
-                let asset_name = app.dragged_asset.as_ref().map(|a| a.path.clone()).unwrap_or_else(|| "unknown".to_string());
-                ui.label(format!("Drop {} here", asset_name));
-                ui.add_space(5.0);
-            }
+        ui.horizontal(|ui| {
+            ui.label(format!("Zoom: x{:.2}", app.viewport.camera_zoom));
+            ui.add_space(10.0);
+            ui.checkbox(&mut app.viewport.show_grid, "Mostrar Rejilla");
+            ui.add_space(10.0);
+            ui.label("Grid Size:");
+            ui.add(egui::DragValue::new(&mut app.viewport.grid_size).range(10.0..=200.0));
         });
-        
-        // Actualizar viewport_rect antes de renderizar
+        ui.add_space(5.0);
+
+        // Selector visual de Capa Activa
+        ui.horizontal(|ui| {
+            ui.label("Capa Activa:");
+            egui::ComboBox::from_id_salt("active_layer_select")
+                .selected_text(match app.active_layer {
+                    1 => "1: Fondo (Background)",
+                    2 => "2: Suelo/Sólidos (Ground - Auto Collider)",
+                    3 => "3: Entidades (Entities - Auto Collider+Behavior)",
+                    4 => "4: Decoración (Foreground)",
+                    _ => "Desconocida",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut app.active_layer, 1, "1: Fondo (Background)");
+                    ui.selectable_value(&mut app.active_layer, 2, "2: Suelo/Sólidos (Ground - Auto Collider)");
+                    ui.selectable_value(&mut app.active_layer, 3, "3: Entidades (Entities - Auto Collider+Behavior)");
+                    ui.selectable_value(&mut app.active_layer, 4, "4: Decoración (Foreground)");
+                });
+        });
+        ui.add_space(5.0);
+
         let rect = ui.available_rect_before_wrap();
         app.viewport_rect = rect;
         
-        // Renderizar área de viewport
-        let _response = ui.allocate_exact_size(egui::vec2(rect.width(), rect.height()), egui::Sense::click_and_drag());
+        let (response, painter) = ui.allocate_painter(
+            egui::vec2(rect.width(), rect.height()),
+            egui::Sense::click_and_drag(),
+        );
         
-        // Manejar drop en el viewport
-        if app.drop_target == Some("Viewport".to_string()) {
-            // Calcular posición del mouse relativa al viewport
-            let viewport_rect = app.viewport_rect;
-            if viewport_rect != egui::Rect::NOTHING {
-                let mouse_pos = ui.input(|i| i.pointer.hover_pos());
-                if let Some(pos) = mouse_pos {
-                    // Calcular posición en coordenadas de la escena
-                    let scene_x = (pos.x - viewport_rect.min.x - app.viewport.camera_offset.0) / app.viewport.camera_zoom;
-                    let scene_y = (pos.y - viewport_rect.min.y - app.viewport.camera_offset.1) / app.viewport.camera_zoom;
+        // 1. Panning & Zooming con el ratón
+        if response.dragged_by(egui::PointerButton::Middle) || response.dragged_by(egui::PointerButton::Secondary) {
+            let delta = response.drag_delta();
+            app.viewport.camera_offset.0 += delta.x;
+            app.viewport.camera_offset.1 += delta.y;
+        }
+        
+        if response.hovered() {
+            let scroll = ui.input(|i| i.raw_scroll_delta.y);
+            if scroll != 0.0 {
+                let zoom_factor = if scroll > 0.0 { 1.1 } else { 1.0 / 1.1 };
+                app.viewport.camera_zoom = (app.viewport.camera_zoom * zoom_factor).clamp(0.1, 10.0);
+            }
+        }
+        
+        // 2. Definir límites de la pantalla virtual retro (960x540)
+        let zoom = app.viewport.camera_zoom;
+        let offset = app.viewport.camera_offset;
+        let virtual_center = rect.center() + egui::vec2(offset.0, offset.1);
+        let screen_size = egui::vec2(960.0 * zoom, 540.0 * zoom);
+        let screen_rect = egui::Rect::from_center_size(virtual_center, screen_size);
+        
+        // Dibujar el fondo negro de la pantalla virtual
+        painter.rect_filled(screen_rect, 0.0, egui::Color32::from_rgb(15, 15, 15));
+        
+        // Dibujar líneas de rejilla
+        if app.viewport.show_grid {
+            let grid_size = app.viewport.grid_size * zoom;
+            let stroke = egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_unmultiplied(45, 45, 45, 140));
+            
+            // Líneas verticales
+            let mut x = virtual_center.x;
+            while x < screen_rect.max.x {
+                painter.line_segment([egui::pos2(x, screen_rect.min.y), egui::pos2(x, screen_rect.max.y)], stroke);
+                x += grid_size;
+            }
+            let mut x = virtual_center.x - grid_size;
+            while x > screen_rect.min.x {
+                painter.line_segment([egui::pos2(x, screen_rect.min.y), egui::pos2(x, screen_rect.max.y)], stroke);
+                x -= grid_size;
+            }
+            
+            // Líneas horizontales
+            let mut y = virtual_center.y;
+            while y < screen_rect.max.y {
+                painter.line_segment([egui::pos2(screen_rect.min.x, y), egui::pos2(screen_rect.max.x, y)], stroke);
+                y += grid_size;
+            }
+            let mut y = virtual_center.y - grid_size;
+            while y > screen_rect.min.y {
+                painter.line_segment([egui::pos2(screen_rect.min.x, y), egui::pos2(screen_rect.max.x, y)], stroke);
+                y -= grid_size;
+            }
+        }
+        
+        // Dibujar ejes cartesianos centrales
+        let axis_stroke_x = egui::Stroke::new(1.5_f32, egui::Color32::from_rgba_unmultiplied(220, 60, 60, 160)); // Rojo para X
+        let axis_stroke_y = egui::Stroke::new(1.5_f32, egui::Color32::from_rgba_unmultiplied(60, 220, 60, 160)); // Verde para Y
+        if screen_rect.min.y <= virtual_center.y && virtual_center.y <= screen_rect.max.y {
+            painter.line_segment([egui::pos2(screen_rect.min.x, virtual_center.y), egui::pos2(screen_rect.max.x, virtual_center.y)], axis_stroke_x);
+        }
+        if screen_rect.min.x <= virtual_center.x && virtual_center.x <= screen_rect.max.x {
+            painter.line_segment([egui::pos2(virtual_center.x, screen_rect.min.y), egui::pos2(virtual_center.x, screen_rect.max.y)], axis_stroke_y);
+        }
+        
+        // Dibujar borde de delimitación (rojo retro)
+        painter.rect_stroke(screen_rect, 0.0, egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(220, 50, 50)), egui::StrokeKind::Inside);
+        
+        // 3. Obtener y ordenar Sprites por Capa (Z-sorting)
+        let mut sprites_to_draw = Vec::new();
+        let nodes: Vec<_> = app.scene_tree.nodes.values().cloned().collect();
+        for node in &nodes {
+            if node.entity_type == ::forge_scene::EntityType::Sprite || node.properties.contains_key("sprite_path") {
+                let sprite_path = node.properties.get("sprite_path")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+                if let Some(path) = sprite_path {
+                    let pos = node.transform.transform.position;
+                    let scale = node.transform.transform.scale;
                     
-                    // Usar current_asset o dragged_asset
-                    let asset = app.current_asset.clone().or_else(|| app.dragged_asset.clone());
-                    if let Some(asset) = asset {
-                        let sprite_name = asset.path.split('.').next().unwrap_or("Sprite").to_string();
-                        
-                        // Crear nodo Sprite en la posición especificada
-                        let mut sprite_node = forge_scene_stub::NodeData {
-                            id: uuid::Uuid::new_v4(),
-                            name: sprite_name.clone(),
-                            entity_type: forge_scene_stub::EntityType::Sprite,
-                            parent_id: None,
-                            transform: forge_scene_stub::Transform {
-                                position: [scene_x, scene_y, 0.0],
-                                rotation: 0.0,
-                                scale: [1.0, 1.0, 0.0],
-                            },
-                            properties: std::collections::HashMap::new(),
-                            components: vec![forge_scene_stub::ComponentData {
-                                component_type: forge_scene_stub::ComponentType::Sprite,
-                                data: serde_json::Value::Null,
-                            }],
-                        };
-                        sprite_node.properties.insert("sprite_path".to_string(), asset.path.clone());
-                        
-                        app.scene_tree.tree.push(sprite_node.clone());
-                        app.scene_tree.nodes.push(sprite_node);
-                        
-                        app.console.add_message(
-                            crate::debugger::LogLevel::Info, 
-                            &format!("Created Sprite node '{}' at ({}, {}) with texture '{}'", sprite_name, scene_x, scene_y, asset.path)
-                        );
+                    let sprite_center = virtual_center + egui::vec2(pos[0] * zoom, pos[1] * zoom);
+                    let base_size = 64.0;
+                    let size = egui::vec2(base_size * scale[0] * zoom, base_size * scale[1] * zoom);
+                    let sprite_rect = egui::Rect::from_center_size(sprite_center, size);
+                    
+                    let layer = node.properties.get("layer")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(2) as u32;
+                    
+                    sprites_to_draw.push((layer, node.id, node.name.clone(), path, sprite_rect));
+                }
+            }
+        }
+        
+        // Ordenar de forma que los de capas menores (ej. 1: Fondo) se pinten primero
+        sprites_to_draw.sort_by_key(|(layer, _, _, _, _)| *layer);
+        
+        let mouse_clicked = response.clicked_by(egui::PointerButton::Primary);
+        let pointer_pos = ui.input(|i| i.pointer.interact_pos());
+        let mut clicked_node = None;
+        
+        for (_layer, id, name, path, sprite_rect) in &sprites_to_draw {
+            let uri = get_file_uri(path);
+            ui.put(*sprite_rect, egui::Image::new(&uri));
+            
+            // Capturar click para selección
+            if mouse_clicked {
+                if let Some(mpos) = pointer_pos {
+                    if sprite_rect.contains(mpos) {
+                        clicked_node = Some(*id);
                     }
                 }
             }
             
-            app.drag_operation = None;
-            app.dragged_asset = None;
-            app.drop_target = None;
+            // Dibujar contorno de selección activo (amarillo)
+            if app.active_node_id == Some(*id) {
+                painter.rect_stroke(*sprite_rect, 0.0, egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(255, 215, 0)), egui::StrokeKind::Inside);
+                
+                // Mostrar nombre del sprite
+                let label_pos = sprite_rect.left_top() - egui::vec2(0.0, 14.0);
+                painter.text(
+                    label_pos,
+                    egui::Align2::LEFT_TOP,
+                    name,
+                    egui::FontId::proportional(12.0),
+                    egui::Color32::from_rgb(255, 215, 0)
+                );
+            }
         }
-    }
-
-    /// Restablece el zoom a 1.0 y offset a (0, 0)
-    pub fn reset_zoom(&mut self) {
-        self.camera_zoom = 1.0;
-        self.camera_offset = (0.0, 0.0);
-    }
-    
-    /// Crear nodo Sprite en el viewport
-    pub fn create_sprite_node(&mut self, app: &mut crate::ForgeEditorApp, x: f32, y: f32) {
-        let asset = app.current_asset.clone().or_else(|| app.dragged_asset.clone());
-        if let Some(asset) = asset {
-            // Crear nodo Sprite en la escena
-            self.create_sprite_at_position(x, y, asset.path.as_str(), app);
-            
-            // Limpiar drag operation
-            app.drag_operation = None;
-            app.dragged_asset = None;
-            app.current_asset = None;
-            app.drop_target = None;
-        }
-    }
-    
-    /// Crear nodo Sprite en la posición especificada
-    fn create_sprite_at_position(&mut self, x: f32, y: f32, asset_name: &str, app: &mut crate::ForgeEditorApp) {
-        // Crear nodo Sprite
-        let sprite_name = asset_name.split('.').next().unwrap_or("Sprite").to_string();
         
-        // Agregar nodo a la escena (esto requiere acceso a scene_tree)
-        // Por ahora, solo registramos la acción
-        app.console.add_message(crate::debugger::LogLevel::Info, &format!("Creating Sprite: {} at ({}, {})", sprite_name, x, y));
-    }
-    
-    /// Manejar drop en el viewport
-    pub fn handle_drop_in_viewport(&mut self, app: &mut crate::ForgeEditorApp) {
+        // 3.8. Dibujar contornos de colisiones (Gizmos de Físicas)
+        for node in &nodes {
+            let has_collider = node.components.iter().any(|c| matches!(c.component_type, ::forge_scene::ComponentType::Collider));
+            let layer = node.properties.get("layer").and_then(|v| v.as_u64()).unwrap_or(2) as u32;
+            
+            if has_collider || layer == 2 {
+                let pos = node.transform.transform.position;
+                let scale = node.transform.transform.scale;
+                
+                let col_center = virtual_center + egui::vec2(pos[0] * zoom, pos[1] * zoom);
+                let col_size = egui::vec2(64.0 * scale[0] * zoom, 64.0 * scale[1] * zoom);
+                let col_rect = egui::Rect::from_center_size(col_center, col_size);
+                
+                let color = if app.active_node_id == Some(node.id) {
+                    egui::Color32::from_rgba_unmultiplied(255, 215, 0, 200) // Amarillo (Seleccionado)
+                } else if layer == 2 {
+                    egui::Color32::from_rgba_unmultiplied(220, 50, 50, 160) // Rojo translúcido (Suelo Estático)
+                } else {
+                    egui::Color32::from_rgba_unmultiplied(50, 220, 50, 160) // Verde translúcido (Dinámico/Actor)
+                };
+                
+                painter.rect_stroke(col_rect, 0.0, egui::Stroke::new(1.5_f32, color), egui::StrokeKind::Outside);
+            }
+        }
+        
+        // Manejar lógica de selección y arrastre
+        if let Some(id) = clicked_node {
+            app.active_node_id = Some(id);
+            if let Some(node) = app.scene_tree.nodes.get(&id) {
+                app.viewport.drag_node_id = Some(id);
+                app.viewport.drag_start_pos = Some(node.transform.transform.position);
+            }
+        } else if mouse_clicked {
+            if let Some(mpos) = pointer_pos {
+                if screen_rect.contains(mpos) {
+                    let mut hit = false;
+                    for (_, _, _, _, sprite_rect) in &sprites_to_draw {
+                        if sprite_rect.contains(mpos) {
+                            hit = true;
+                            break;
+                        }
+                    }
+                    if !hit {
+                        app.active_node_id = None;
+                        app.viewport.drag_node_id = None;
+                        app.viewport.drag_start_pos = None;
+                    }
+                }
+            }
+        }
+        
+        // Realizar traslación durante el arrastre
+        if let Some(dragged_id) = app.viewport.drag_node_id {
+            if response.dragged_by(egui::PointerButton::Primary) {
+                if let Some(mpos) = pointer_pos {
+                    let new_scene_x = (mpos.x - virtual_center.x) / zoom;
+                    let new_scene_y = (mpos.y - virtual_center.y) / zoom;
+                    
+                    if let Some(node) = app.scene_tree.nodes.get(&dragged_id) {
+                        let mut updated_node = node.as_ref().clone();
+                        updated_node.transform.transform.position = [new_scene_x, new_scene_y, 0.0];
+                        let arc_node = std::sync::Arc::new(updated_node);
+                        app.scene_tree.nodes.insert(dragged_id, arc_node.clone());
+                        if app.scene_tree.root.as_ref().map(|n| n.id) == Some(dragged_id) {
+                            app.scene_tree.root = Some(arc_node.clone());
+                        }
+                        if let Some(pos) = app.scene_tree.active_nodes.iter().position(|n| n.id == dragged_id) {
+                            app.scene_tree.active_nodes[pos] = arc_node;
+                        }
+                    }
+                }
+            } else if response.drag_stopped() {
+                app.viewport.drag_node_id = None;
+                app.viewport.drag_start_pos = None;
+            }
+        }
+        
+        // 3.9. Controles de Teclado WASD / Impulsos Físicos en Play Mode
+        if app.play_mode {
+            if let Some(active_id) = app.active_node_id {
+                let mut blocks = app.physics.blocks.write().unwrap();
+                if let Some(block) = blocks.get_mut(&active_id.to_string()) {
+                    let speed = 200.0;
+                    
+                    // Controles horizontales (A/D o Flechas Izquierda/Derecha)
+                    if ui.input(|i| i.key_down(egui::Key::A) || i.key_down(egui::Key::ArrowLeft)) {
+                        block.velocity.x = -speed;
+                    } else if ui.input(|i| i.key_down(egui::Key::D) || i.key_down(egui::Key::ArrowRight)) {
+                        block.velocity.x = speed;
+                    } else {
+                        block.velocity.x *= 0.8; // Fricción
+                    }
+                    
+                    // Controles de Salto (W o Espacio o Flecha Arriba)
+                    if ui.input(|i| i.key_pressed(egui::Key::W) || i.key_pressed(egui::Key::Space) || i.key_pressed(egui::Key::ArrowUp)) {
+                        block.velocity.y = -300.0;
+                    }
+                }
+            }
+        }
+        
+        // 4. Recepción de drop (con soporte de Prefabs y Auto-Físicas)
         if app.drop_target == Some("Viewport".to_string()) {
-            self.create_sprite_node(app, self.camera_offset.0, self.camera_offset.1);
+            if let Some(mpos) = pointer_pos {
+                let scene_x = (mpos.x - virtual_center.x) / zoom;
+                let scene_y = (mpos.y - virtual_center.y) / zoom;
+                
+                let asset = app.current_asset.clone().or_else(|| app.dragged_asset.clone());
+                if let Some(asset) = asset {
+                    if asset.path.ends_with(".prefab") {
+                        // Instanciación de Prefab
+                        if let Ok(content) = std::fs::read_to_string(&asset.path) {
+                            if let Ok(mut prefab_node) = serde_json::from_str::<::forge_scene::NodeData>(&content) {
+                                prefab_node.id = uuid::Uuid::new_v4();
+                                prefab_node.transform.transform.position = [scene_x, scene_y, 0.0];
+                                
+                                let new_id = app.scene_tree.add_node(std::sync::Arc::new(prefab_node));
+                                app.active_node_id = Some(new_id);
+                                
+                                app.console.add_message(
+                                    crate::debugger::LogLevel::Info,
+                                    &format!("Instantiated Prefab from '{}' at ({:.1}, {:.1})", asset.path, scene_x, scene_y)
+                                );
+                            } else {
+                                app.console.add_message(
+                                    crate::debugger::LogLevel::Error,
+                                    &format!("Failed to parse Prefab JSON from '{}'", asset.path)
+                                );
+                            }
+                        } else {
+                            app.console.add_message(
+                                crate::debugger::LogLevel::Error,
+                                &format!("Failed to read Prefab file at '{}'", asset.path)
+                            );
+                        }
+                    } else {
+                        // Creación normal de Sprite con físicas por Capa inteligente
+                        let sprite_name = asset.path.split('.').next().unwrap_or("Sprite").to_string();
+                        let mut sprite_node = ::forge_scene::NodeData::new(&sprite_name, ::forge_scene::EntityType::Sprite);
+                        sprite_node.transform.transform.position = [scene_x, scene_y, 0.0];
+                        sprite_node.properties.insert("sprite_path".to_string(), serde_json::Value::String(asset.path.clone()));
+                        sprite_node.properties.insert("layer".to_string(), serde_json::Value::Number(serde_json::Number::from(app.active_layer)));
+                        sprite_node.components.push(::forge_scene::ComponentData::new_sprite(asset.path.clone()));
+                        
+                        // Asignación de colisiones automáticas de acuerdo a la capa inteligente
+                        if app.active_layer == 2 {
+                            sprite_node.components.push(::forge_scene::ComponentData::new_collider());
+                        } else if app.active_layer == 3 {
+                            sprite_node.components.push(::forge_scene::ComponentData::new_collider());
+                            sprite_node.components.push(::forge_scene::ComponentData::new_behavior());
+                        }
+                        
+                        let new_id = app.scene_tree.add_node(std::sync::Arc::new(sprite_node));
+                        app.active_node_id = Some(new_id);
+                        
+                        app.console.add_message(
+                            crate::debugger::LogLevel::Info,
+                            &format!("Created Sprite '{}' on Layer {} at ({:.1}, {:.1})", sprite_name, app.active_layer, scene_x, scene_y)
+                        );
+                    }
+                }
+            }
+            app.drag_operation = None;
+            app.dragged_asset = None;
             app.drop_target = None;
         }
     }
-    
-    /// Aumenta el zoom
-    pub fn zoom_in(&mut self) {
-        self.camera_zoom *= 1.1;
-    }
+}
 
-    /// Disminuye el zoom
-    pub fn zoom_out(&mut self) {
-        self.camera_zoom /= 1.1;
+/// Helper para convertir ruta relativa en URI absoluta compatible con cargadores egui
+fn get_file_uri(path_str: &str) -> String {
+    let path = std::path::Path::new(path_str);
+    if let Ok(abs_path) = std::fs::canonicalize(path) {
+        let abs_str = abs_path.to_string_lossy().replace('\\', "/");
+        let clean_abs = if abs_str.starts_with("//?/") {
+            abs_str[4..].to_string()
+        } else if abs_str.starts_with("\\\\?\\") {
+            abs_str[4..].to_string()
+        } else if abs_str.starts_with("?") {
+            abs_str.trim_start_matches('?').to_string()
+        } else {
+            abs_str
+        };
+        
+        if clean_abs.starts_with('/') {
+            format!("file://{}", clean_abs)
+        } else {
+            format!("file:///{}", clean_abs)
+        }
+    } else {
+        format!("file:///{}", path_str.replace('\\', "/"))
     }
 }
 

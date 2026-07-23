@@ -11,7 +11,6 @@
 //! - Parallel execution
 //! - Test filters
 
-use std::collections::HashMap;
 use std::time::SystemTime;
 use crate::testing::coverage::CoverageReport;
 

@@ -2,7 +2,6 @@
 //! 
 //! Módulo para panel de colaboración.
 
-use eframe::egui;
 use crate::collaboration::{UserInfo, ChatMessage};
 
 /// Collaboration Panel - panel para colaboración

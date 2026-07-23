@@ -4,7 +4,7 @@
 
 use uuid::Uuid;
 use eframe::egui;
-use crate::animation_2d::{Animation2D, Animation2DManager, InterpolationType, Keyframe as AnimKeyframe};
+use crate::animation_2d::{Animation2D, Animation2DManager};
 
 /// Timeline Editor UI para gestión de keyframes y animación
 /// 

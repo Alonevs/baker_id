@@ -171,17 +171,17 @@ impl TabViewer {
 impl eframe::App for TabViewer {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
+            egui::MenuBar::new().ui(ui, |ui| {
+                ui.menu_button("File", |_ui| {
                     // File menu
                 });
-                ui.menu_button("Edit", |ui| {
+                ui.menu_button("Edit", |_ui| {
                     // Edit menu
                 });
-                ui.menu_button("View", |ui| {
+                ui.menu_button("View", |_ui| {
                     // View menu
                 });
-                ui.menu_button("Help", |ui| {
+                ui.menu_button("Help", |_ui| {
                     // Help menu
                 });
             });

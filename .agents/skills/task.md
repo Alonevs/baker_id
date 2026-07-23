@@ -1,0 +1,22 @@
+- `[x]` FASE 7: Inspector Dinámico, Comportamientos No-Code y Prefabs
+  - `[x]` Modificar `component_properties.rs` para renderizar el Inspector interactivo
+    - `[x]` Implementar cambio de nombre bidireccional (renombrar entidad)
+    - `[x]` Implementar edición visual de transformaciones (Position/Scale/Rotation)
+    - `[x]` Implementar renderizado de componentes y sus propiedades JSON internas
+    - `[x]` Implementar componente No-Code `Behavior` (presets Patrol, Chase, Flee, Attack y parámetros)
+    - `[x]` Implementar botón "Guardar como Plantilla (Prefab)" en `assets/prefabs/`
+    - `[x]` Implementar "+ Añadir Componente" y botón "❌" para eliminar componentes
+  - `[x]` Modificar `lib.rs` para invocar el Inspector modular
+  - `[x]` Habilitar el arrastre de texturas desde el Asset Browser para asignarlas directamente a los componentes
+- `[x]` FASE 8.5: Capas Inteligentes, Rejillas de Colisión (B) y Prefabs Loader (C)
+  - `[x]` Implementar selector de Capa Activa en el Viewport
+  - `[x]` Implementar Z-sorting dinámico en Viewport por capa (Z-index lógicos)
+  - `[x]` Auto-físicas al hacer drop (Collider en Capa 2, Collider+Behavior en Capa 3)
+  - `[x]` Implementar Editor Visual de Colisiones en Rejilla (B) en el Inspector para TileMaps
+  - `[x]` Implementar cargador y clonador de Prefabs (.prefab) por drag-and-drop
+- `[x]` Verificación y Pruebas
+  - `[x]` Ejecutar `cargo check --workspace`
+  - `[x]` Ejecutar `cargo test --lib --workspace`
+- `[x]` Documentar Cambios
+  - `[x]` Registrar en `VISION.md` y `PROGRESO.md`
+  - `[x]` Actualizar `walkthrough.md`

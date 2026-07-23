@@ -2,7 +2,7 @@
 //! 
 //! Sistema de ejecución de scripts que interpreta el AST generado por el compilador.
 
-use crate::compile_system::{ASTNode, CompileError, CompileWarning, DataType, SourceLocation, ValueType, ErrorKind};
+use crate::compile_system::{ASTNode, CompileError, CompileWarning, DataType, SourceLocation, ValueType};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -213,7 +213,7 @@ impl ScriptExecutor {
                 }
             }
 
-            ASTNode::MethodCall { receiver, method, arguments } => {
+            ASTNode::MethodCall { receiver, method, arguments: _ } => {
                 // Implementación básica de llamada a método
                 let receiver_value = self.execute_node(receiver)?;
                 println!("Method call: {} on {:?}", method, receiver_value);
@@ -306,7 +306,7 @@ impl ScriptExecutor {
             }
 
             ASTNode::Return { value } => {
-                let return_value = if let Some(v) = value {
+                let _return_value = if let Some(v) = value {
                     self.execute_node(v)?
                 } else {
                     ValueType::Null
@@ -330,7 +330,7 @@ impl ScriptExecutor {
 
             ASTNode::FunctionDefinition { name, parameters, body, .. } => {
                 // Crear función closure
-                let params = parameters.clone();
+                let _params = parameters.clone();
                 let body_clone = body.clone();
                 let executor_clone = self.clone();
                 let name_clone = name.clone();
@@ -652,7 +652,7 @@ impl ScriptExecutor {
     }
 
     /// Ejecuta un script desde código fuente
-    pub fn execute_from_source(&mut self, source: &str) -> Result<ValueType, CompileError> {
+    pub fn execute_from_source(&mut self, _source: &str) -> Result<ValueType, CompileError> {
         // Aquí se integraría con el compilador para obtener el AST
         // Por ahora, ejecutamos un ejemplo básico
         let start_time = std::time::Instant::now();

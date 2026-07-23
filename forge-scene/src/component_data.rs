@@ -11,6 +11,7 @@ pub enum ComponentType {
     Audio,
     Script,
     Dialogue,
+    Behavior,
 }
 
 impl std::fmt::Display for ComponentType {
@@ -23,6 +24,7 @@ impl std::fmt::Display for ComponentType {
             ComponentType::Audio => write!(f, "audio"),
             ComponentType::Script => write!(f, "script"),
             ComponentType::Dialogue => write!(f, "dialogue"),
+            ComponentType::Behavior => write!(f, "behavior"),
         }
     }
 }
@@ -110,6 +112,18 @@ impl ComponentData {
             data: serde_json::json!({
                 "dialogue_path": dialogue_path,
                 "is_active": false
+            }),
+        }
+    }
+
+    pub fn new_behavior() -> Self {
+        ComponentData {
+            component_type: ComponentType::Behavior,
+            data: serde_json::json!({
+                "behavior_type": "patrol",
+                "speed": 100.0,
+                "range": 200.0,
+                "is_active": true
             }),
         }
     }

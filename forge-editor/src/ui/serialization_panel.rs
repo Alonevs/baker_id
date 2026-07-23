@@ -3,7 +3,6 @@
 //! Módulo para panel de serialización.
 
 use eframe::egui;
-use serde::{Deserialize, Serialize};
 
 /// Serialization Panel - panel para serialización de datos
 #[derive(Default)]

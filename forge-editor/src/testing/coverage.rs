@@ -33,7 +33,7 @@ impl CoverageFunction {
         self.covered = true;
     }
 
-    pub fn add_line(&mut self, line: usize) {
+    pub fn add_line(&mut self, _line: usize) {
         if !self.covered {
             self.covered = true;
         }

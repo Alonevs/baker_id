@@ -2,7 +2,6 @@
 //! 
 //! Módulo para panel de serialización.
 
-use eframe::egui;
 
 /// Serialization Panel - panel para serialización
 #[derive(Default)]

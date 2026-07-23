@@ -254,7 +254,7 @@ impl CompileSystem {
         Self::default()
     }
     
-    pub fn compile(&mut self, source: &str) -> CompileResult {
+    pub fn compile(&mut self, _source: &str) -> CompileResult {
         let result = CompileResult {
             success: true,
             errors: Vec::new(),

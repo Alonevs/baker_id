@@ -396,7 +396,7 @@ pub(crate) fn render_settings_tab(
 /// Render logs tab
 pub(crate) fn render_logs_tab(
     ui: &mut egui::Ui,
-    plugin_manager: &mut crate::plugins::PluginManager,
+    _plugin_manager: &mut crate::plugins::PluginManager,
     _panel: &mut PluginPanel,
 ) {
     ui.vertical(|ui| {
@@ -436,7 +436,7 @@ pub(crate) fn render_extensions_tab(
 /// Render marketplace tab
 pub(crate) fn render_marketplace_tab(
     ui: &mut egui::Ui,
-    plugin_manager: &mut crate::plugins::PluginManager,
+    _plugin_manager: &mut crate::plugins::PluginManager,
     _panel: &mut PluginPanel,
 ) {
     ui.vertical(|ui| {

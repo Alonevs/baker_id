@@ -3,9 +3,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
-use pollster::FutureExt;
 use crate::debugger::LogLevel;
-use crate::{DragOperation, DropTarget};
+use crate::DragOperation;
 use crate::ui::asset_preview::AssetPreviewType;
 
 /// Tipos de asset por extensión

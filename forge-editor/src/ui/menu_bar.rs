@@ -5,10 +5,8 @@
 use eframe::egui;
 use rfd::AsyncFileDialog;
 use std::fs;
-use std::path::Path;
-use crate::forge_scene_stub::{Scene};
 use serde::{Deserialize, Serialize};
-use crate::project_manager::{ProjectManager, ProjectWizard, GameType};
+use crate::project_manager::{ProjectWizard, GameType};
 
 /// Nodos de escena para exportación
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,7 +75,12 @@ impl MenuBar {
                     GameType::Isometric,
                     std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("assets"))
                 );
-                new_project.execute();
+                if let Err(e) = new_project.execute() {
+                    app.console.add_message(
+                        crate::debugger::LogLevel::Error,
+                        &format!("Error creating project: {}", e)
+                    );
+                }
             }
 
             // Open Project
@@ -102,21 +105,27 @@ impl MenuBar {
 
             // New Project (also loads default assets)
             if ui.button("New Project").clicked() {
-                let mut new_project = ProjectWizard::new(
+                let new_project = ProjectWizard::new(
                     "Nuevo Proyecto".to_string(),
                     GameType::Isometric,
                     std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("assets"))
                 );
-                new_project.execute();
+                if let Err(e) = new_project.execute() {
+                    app.console.add_message(
+                        crate::debugger::LogLevel::Error,
+                        &format!("Error creating project: {}", e)
+                    );
+                }
                 // Cargar assets del nuevo proyecto
                 app.load_project_assets();
             }
 
             // New Scene
             if ui.button("New Scene").clicked() {
-                app.scene_tree.tree.clear();
                 app.scene_tree.nodes.clear();
                 app.scene_tree.active_nodes.clear();
+                app.scene_tree.root = None;
+                app.active_node_id = None;
                 app.console.add_message(
                     crate::debugger::LogLevel::Info,
                     "Created new empty scene"
@@ -197,13 +206,17 @@ fn save_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
     // Convertir nodos de la escena a formato JSON
     let nodes: Vec<SceneNode> = app
         .scene_tree
-        .get_tree()
-        .iter()
+        .nodes
+        .values()
         .map(|node| {
-            let entity_type = format!("{:?}", node.entity_type);
+            let entity_type = if node.is_group {
+                "Group".to_string()
+            } else {
+                format!("{:?}", node.entity_type)
+            };
             let mut properties = std::collections::HashMap::new();
             for (k, v) in &node.properties {
-                properties.insert(k.clone(), serde_json::Value::String(v.clone()));
+                properties.insert(k.clone(), v.clone());
             }
 
             SceneNode {
@@ -212,9 +225,9 @@ fn save_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
                 entity_type,
                 parent_id: node.parent_id.map(|id| id.to_string()),
                 transform: Transform {
-                    position: [node.transform.position[0], node.transform.position[1], 0.0],
-                    rotation: node.transform.rotation,
-                    scale: [node.transform.scale[0], node.transform.scale[1], 1.0],
+                    position: [node.transform.transform.position[0], node.transform.transform.position[1], 0.0],
+                    rotation: node.transform.transform.rotation,
+                    scale: [node.transform.transform.scale[0], node.transform.transform.scale[1], 1.0],
                 },
                 properties,
                 components: node
@@ -222,7 +235,7 @@ fn save_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
                     .iter()
                     .map(|comp| Component {
                         name: comp.component_type.to_string(),
-                        data: serde_json::Value::Null,
+                        data: comp.data.clone(),
                     })
                     .collect(),
             }
@@ -250,13 +263,17 @@ fn save_scene_as(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> 
     // Convertir nodos de la escena a formato JSON
     let nodes: Vec<SceneNode> = app
         .scene_tree
-        .get_tree()
-        .iter()
+        .nodes
+        .values()
         .map(|node| {
-            let entity_type = format!("{:?}", node.entity_type);
+            let entity_type = if node.is_group {
+                "Group".to_string()
+            } else {
+                format!("{:?}", node.entity_type)
+            };
             let mut properties = std::collections::HashMap::new();
             for (k, v) in &node.properties {
-                properties.insert(k.clone(), serde_json::Value::String(v.clone()));
+                properties.insert(k.clone(), v.clone());
             }
 
             SceneNode {
@@ -265,9 +282,9 @@ fn save_scene_as(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> 
                 entity_type,
                 parent_id: node.parent_id.map(|id| id.to_string()),
                 transform: Transform {
-                    position: [node.transform.position[0], node.transform.position[1], 0.0],
-                    rotation: node.transform.rotation,
-                    scale: [node.transform.scale[0], node.transform.scale[1], 1.0],
+                    position: [node.transform.transform.position[0], node.transform.transform.position[1], 0.0],
+                    rotation: node.transform.transform.rotation,
+                    scale: [node.transform.transform.scale[0], node.transform.transform.scale[1], 1.0],
                 },
                 properties,
                 components: node
@@ -275,7 +292,7 @@ fn save_scene_as(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> 
                     .iter()
                     .map(|comp| Component {
                         name: comp.component_type.to_string(),
-                        data: serde_json::Value::Null,
+                        data: comp.data.clone(),
                     })
                     .collect(),
             }
@@ -300,51 +317,80 @@ fn open_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
     let file = pollster::block_on(rfd::AsyncFileDialog::new().pick_file());
     let path = file.map(|f| f.path().to_path_buf())?;
 
-    // Limpiar escena actual
-    app.scene_tree.tree.clear();
-    app.scene_tree.nodes.clear();
-    app.scene_tree.active_nodes.clear();
-
     // Cargar escena desde archivo
     let content = fs::read_to_string(&path).unwrap();
     let scene_data: SceneFile = serde_json::from_str(&content).unwrap();
 
+    let mut temp_nodes = std::collections::HashMap::new();
+
     // Recargar nodos
     for node in scene_data.nodes {
-        let entity_type = match node.entity_type.as_str() {
-            "GameObject" => crate::forge_scene_stub::EntityType::GameObject,
-            "Sprite" => crate::forge_scene_stub::EntityType::Sprite,
-            "Group" => crate::forge_scene_stub::EntityType::Group,
-            _ => crate::forge_scene_stub::EntityType::Empty,
-        };
-
         let node_id = uuid::Uuid::parse_str(&node.id).unwrap_or_default();
         let parent_id = node.parent_id.and_then(|id_str| uuid::Uuid::parse_str(&id_str).ok());
 
-        let mut properties = std::collections::HashMap::new();
-        for (k, v) in node.properties {
-            properties.insert(k, v.as_str().unwrap_or("").to_string());
-        }
-
-        let loaded_node = crate::forge_scene_stub::NodeData {
+        let loaded_node = ::forge_scene::NodeData {
             id: node_id,
             name: node.name.clone(),
-            entity_type,
-            parent_id,
-            transform: crate::forge_scene_stub::Transform {
-                position: [node.transform.position[0], node.transform.position[1], 0.0],
-                rotation: node.transform.rotation,
-                scale: [node.transform.scale[0], node.transform.scale[1], 1.0],
+            entity_type: match node.entity_type.as_str() {
+                "GameObject" => ::forge_scene::EntityType::GameObject,
+                "Sprite" => ::forge_scene::EntityType::Sprite,
+                _ => ::forge_scene::EntityType::Node,
             },
-            properties,
-            components: node.components.iter().map(|c| crate::forge_scene_stub::ComponentData {
-                component_type: crate::forge_scene_stub::ComponentType::Transform,
-                data: serde_json::Value::Null,
+            parent_id,
+            transform: ::forge_scene::Transform {
+                transform: ::forge_scene::TransformData {
+                    position: [node.transform.position[0], node.transform.position[1], 0.0],
+                    rotation: node.transform.rotation,
+                    scale: [node.transform.scale[0], node.transform.scale[1], 1.0],
+                }
+            },
+            properties: node.properties.clone(),
+            signals: vec![],
+            scripts: vec![],
+            children: vec![],
+            physics_body: None,
+            animation: None,
+            components: node.components.iter().map(|c| ::forge_scene::ComponentData {
+                component_type: match c.name.to_lowercase().as_str() {
+                    "transform" => ::forge_scene::ComponentType::Transform,
+                    "collider" => ::forge_scene::ComponentType::Collider,
+                    "renderer" => ::forge_scene::ComponentType::Renderer,
+                    "sprite" => ::forge_scene::ComponentType::Sprite,
+                    "audio" => ::forge_scene::ComponentType::Audio,
+                    "script" => ::forge_scene::ComponentType::Script,
+                    "dialogue" => ::forge_scene::ComponentType::Dialogue,
+                    _ => ::forge_scene::ComponentType::Transform,
+                },
+                data: c.data.clone(),
             }).collect(),
+            is_group: node.entity_type == "Group" || node.entity_type == "Node",
         };
 
-        app.scene_tree.tree.push(loaded_node.clone());
-        app.scene_tree.nodes.push(loaded_node);
+        temp_nodes.insert(node_id, loaded_node);
+    }
+
+    // Construir jerarquía
+    let ids: Vec<uuid::Uuid> = temp_nodes.keys().cloned().collect();
+    for id in ids {
+        if let Some(parent_id) = temp_nodes.get(&id).and_then(|n| n.parent_id) {
+            if let Some(parent_node) = temp_nodes.get_mut(&parent_id) {
+                parent_node.children.push(id);
+            }
+        }
+    }
+
+    // Rellenar app.scene_tree
+    app.scene_tree.nodes.clear();
+    app.scene_tree.active_nodes.clear();
+    app.scene_tree.root = None;
+
+    for (id, node) in temp_nodes {
+        let arc_node = std::sync::Arc::new(node);
+        app.scene_tree.nodes.insert(id, arc_node.clone());
+        app.scene_tree.active_nodes.push(arc_node.clone());
+        if arc_node.parent_id.is_none() {
+            app.scene_tree.root = Some(arc_node);
+        }
     }
 
     Some(path)

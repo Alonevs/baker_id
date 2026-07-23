@@ -153,7 +153,7 @@ impl TimelineEditor {
     }
 
     /// Actualiza el editor
-    pub fn update(&mut self, ctx: &egui::Context, _ui: &egui::Ui) {
+    pub fn update(&mut self, _ctx: &egui::Context, _ui: &egui::Ui) {
         self.widgets = Vec::new();
         self.create_widgets();
     }

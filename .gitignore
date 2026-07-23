@@ -23,6 +23,10 @@ export_error.txt
 # Documentos y markdown
 *.docx
 *.md
+!doc/
+!doc/**
+!.agents/
+!.agents/**
 
 # Archivos especficos
 forge-scene/src/lib.rs.corrupt
@@ -42,4 +46,7 @@ forge-sprite-baker/
 # Docs raz
 docs/*.docx
 docs/*.txt
-docs/*.md
+docs/*.md
+
+# Gemini IDE settings
+.gemini/

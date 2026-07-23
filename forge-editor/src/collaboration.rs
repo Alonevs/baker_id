@@ -344,7 +344,7 @@ impl CollaborationManager {
     }
 
     /// Agrega cursor remoto
-    pub fn add_remote_cursor(&mut self, user_id: String, cursor: UserCursor) {
+    pub fn add_remote_cursor(&mut self, _user_id: String, cursor: UserCursor) {
         if let Some(ref mut session) = self.session {
             session.add_cursor(cursor);
         }

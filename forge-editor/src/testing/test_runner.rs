@@ -1,12 +1,8 @@
 //! Test runner and execution engine
 
-use crate::testing::{
-    test_framework::{
+use crate::testing::test_framework::{
         TestResult, TestStatus, TestLocation, TestFixture, TestFilter, TestSuite, TestReport,
-    },
-    coverage::CoverageReport,
-    assertions::macro_rules_private_eq,
-};
+    };
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 use rand::prelude::SliceRandom;
@@ -178,7 +174,7 @@ impl ExecutionContext {
     }
 
     pub fn exit_scope(&mut self) {
-        if let Some(scope) = self.current_scope.take() {
+        if let Some(_scope) = self.current_scope.take() {
             self.scope_stack.pop();
         }
     }

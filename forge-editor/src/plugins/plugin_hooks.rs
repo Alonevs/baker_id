@@ -124,7 +124,7 @@ impl HookManager {
                 let p2 = callback.as_ref() as *const (dyn Fn(&PluginEvent) + Send + Sync) as *const ();
                 p1 == p2
             }) {
-                callbacks.remove(pos);
+                let _ = callbacks.remove(pos);
                 self.callbacks_count -= 1;
                 if callbacks.is_empty() {
                     self.hooks.remove(hook_name);

@@ -10,8 +10,7 @@
 //! - Performance analysis
 //! - Optimization levels (O0, O1, O2, O3)
 
-use std::collections::HashMap;
-use crate::compile_system::{CompileResult, CompileError, SourceLocation, ValueType, ASTNode, Expression, Statement};
+use crate::compile_system::{SourceLocation, ASTNode, Expression};
 
 /// Nivel de optimización
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
