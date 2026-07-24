@@ -1171,6 +1171,7 @@ dependencies = [
  "eframe",
  "egui",
  "forge-animation",
+ "forge-audio",
  "forge-export",
  "forge-linter",
  "forge-physics",
@@ -1195,6 +1196,15 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
+name = "forge-audio"
+version = "1.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
  "uuid",
 ]
 

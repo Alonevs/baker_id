@@ -118,11 +118,11 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 | Métrica | Valor |
 |---------|-------|
-| **Herramientas documentadas** | 36/36 (100%) |
+| **Herramientas documentadas** | 37/37 (100%) |
 | **UIs completadas** | 36/36 (100%) |
-| **Tests passing** | 94/94 (100%) |
-| **Líneas de código** | ~16,996 |
-| **FASES completadas** | 8 de 30 (26.7%) |
+| **Tests passing** | 112/112 (100%) |
+| **Líneas de código** | ~18,500 |
+| **FASES completadas** | 9 de 30 (30%) |
 | **Agent Rails implementados** | ✅ 3 directivas activas |
 
 ---
@@ -192,12 +192,11 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 | 07 | Timeline Editor UI | ✅ | `doc/tools/07_TIMELINE_EDITOR_UI.md` | 
 | 08 | Animation Track UI | ✅ | `doc/tools/08_ANIMATION_TRACK_UI.md` | 
 
-### Pendientes (6)
+### Pendientes (5)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
 | 31 | Sprite & Sheet Slicer | ⏳ | `doc/tools/31_SPRITE_SLICER.md` |
 | 32 | TileMap Painter | ⏳ | `doc/tools/32_TILEMAP_PAINTER.md` |
-| 35 | Sound Sockets & Positional Audio | ⏳ | `doc/tools/35_SOUND_SOCKETS.md` |
 | 36 | Play Mode & Live Reload | ⏳ | `doc/tools/36_PLAY_MODE.md` |
 | 37 | Configuración de Assets | ⏳ | `doc/tools/37_ASSET_CONFIG.md` |
 | 38 | Presets & Prefabs | ⏳ | `doc/tools/38_PREFABS.md` |
@@ -213,8 +212,8 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 | Animación | 4 | 4 | 0 | 0 |
 | Scripts | 8 | 8 | 0 | 0 |
 | Física | 2 | 2 | 0 | 0 |
-| Utilidades | 11 | 11 | 0 | 0 |
-| **TOTAL** | **36** | **36** | **0** | **6** |
+| Utilidades | 12 | 12 | 0 | 5 |
+| **TOTAL** | **37** | **37** | **0** | **5** |
 
 ---
 

@@ -1,0 +1,16 @@
+[package]
+name = "forge-audio"
+version = "1.0.0"
+edition = "2021"
+description = "Sistema de audio completo para Forge SDK 2D"
+authors = ["Forge Team"]
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+
+[lib]
+name = "forge_audio"
+path = "src/lib.rs"

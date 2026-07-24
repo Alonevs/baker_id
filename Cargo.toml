@@ -17,6 +17,7 @@ members = [
       "forge-project",
       "forge-linter",
       "forge-runtime",
+      "forge-audio",
 ]
 
 [workspace.dependencies]
@@ -54,3 +55,4 @@ forge-resource = { path = "forge-resource" }
 forge-project = { path = "forge-project" }
 forge-linter = { path = "forge-linter" }
 forge-runtime = { path = "forge-runtime" }
+forge-audio = { path = "forge-audio" }
