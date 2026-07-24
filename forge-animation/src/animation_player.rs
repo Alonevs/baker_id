@@ -1,14 +1,21 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::animation_clip::AnimationClip;
+use crate::animation::{LoopMode};
+use crate::animation_clip::{AnimationClip, AnimationEvent};
+use crate::keyframe::{Keyframe, Transform};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+
+/// AnimationPlayer - Sistema de reproducción de animaciones en tiempo real
+/// Permite reproducir, pausar, detener y gestionar múltiples clips de animación
 pub struct AnimationPlayer {
     pub clips: Vec<AnimationClip>,
     pub current_clip: Option<Uuid>,
     pub state: AnimationState,
     pub active: bool,
     pub auto_play: bool,
+    pub loop_mode: LoopMode,
+    pub event_callbacks: Vec<(Uuid, Box<dyn Fn(&AnimationEvent) + Send + Sync>)>,
+    pub last_event_time: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,6 +24,7 @@ pub struct AnimationState {
     pub current_blend: BlendWeight,
     pub playing: bool,
     pub speed: f32,
+    pub loop_mode: LoopMode,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -41,9 +49,13 @@ impl AnimationPlayer {
                 current_blend: BlendWeight { weight: 0.0, target: Uuid::nil() },
                 playing: false,
                 speed: 1.0,
+                loop_mode: LoopMode::Loop,
             },
             active: false,
             auto_play: false,
+            loop_mode: LoopMode::Loop,
+            event_callbacks: Vec::new(),
+            last_event_time: 0.0,
         }
     }
 
@@ -85,22 +97,110 @@ impl AnimationPlayer {
         }
 
         let dt = delta as f32 * self.state.speed;
+        let current_time = self.state.current_time;
         self.state.current_time += dt;
 
-        if let Some(clip) = self.clips.iter().find(|c| c.id == self.current_clip.unwrap()) {
-            // Update blend weight
-            if let Some(anim) = clip.blend_tree.as_ref() {
-                self.state.current_blend = anim.interpolate(self.state.current_time);
+        // Handle loop (after mutable borrows)
+        self.handle_loop();
+
+        // Update blend weight and check events
+        if let Some(current_clip_id) = self.current_clip {
+            let clip = self.clips.iter().find(|c| c.id == current_clip_id);
+            if let Some(clip) = clip {
+                if let Some(anim) = clip.blend_tree.as_ref() {
+                    self.state.current_blend = anim.interpolate(current_time);
+                }
+
+                // Check for events
+                if self.state.current_time > self.last_event_time {
+                    let events = clip.get_events_at_time(self.state.current_time);
+                    for event in &events {
+                        for callback in &self.event_callbacks {
+                            if callback.0 == event.event_id {
+                                callback.1(event);
+                            }
+                        }
+                    }
+                    self.last_event_time = self.state.current_time;
+                }
             }
         }
     }
 
-    pub fn is_playing(&self) -> bool {
-        self.state.playing
+    pub fn handle_loop(&mut self) {
+        if !self.state.playing {
+            return;
+        }
+
+        if let Some(current_clip_id) = self.current_clip {
+            if let Some(clip) = self.clips.iter_mut().find(|c| c.id == current_clip_id) {
+                if let Some(duration) = clip.get_duration() {
+                    let loop_duration = match self.loop_mode {
+                        LoopMode::Loop => duration,
+                        LoopMode::None => return, // Stop at end
+                        LoopMode::PingPong => duration * 2.0,
+                    };
+
+                    if self.state.current_time >= loop_duration {
+                        self.state.current_time = 0.0;
+                        self.state.playing = false;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    pub fn add_event_callback(&mut self, event_id: Uuid, callback: Box<dyn Fn(&AnimationEvent) + Send + Sync>) {
+        self.event_callbacks.push((event_id, callback));
+    }
+
+    pub fn remove_event_callback(&mut self, event_id: Uuid) {
+        self.event_callbacks.retain(|(id, _)| *id != event_id);
     }
 
     pub fn get_current_time(&self) -> f32 {
         self.state.current_time
+    }
+
+    pub fn get_clip_duration(&self) -> Option<f32> {
+        self.current_clip.and_then(|id| {
+            self.clips.iter().find(|c| c.id == id).and_then(|c| c.get_duration())
+        })
+    }
+
+    pub fn get_total_duration(&self) -> f32 {
+        self.clips.iter()
+            .map(|c| c.get_duration().unwrap_or(1.0))
+            .sum()
+    }
+
+    pub fn scrub_to_time(&mut self, time: f32) {
+        self.state.current_time = time;
+        self.state.playing = false;
+    }
+
+    pub fn get_keyframe_at_time(&self, time: f32) -> Option<&Keyframe> {
+        if let Some(clip) = self.clips.iter().find(|c| c.id == self.current_clip.unwrap()) {
+            if let Some(anim) = clip.blend_tree.as_ref() {
+                return anim.get_keyframe_at_time(time);
+            }
+        }
+        None
+    }
+
+    pub fn get_transform_at_time(&self, time: f32, target: Uuid) -> Option<crate::keyframe::Transform> {
+        if let Some(clip) = self.clips.iter().find(|c| c.id == self.current_clip.unwrap()) {
+            if let Some(anim) = clip.blend_tree.as_ref() {
+                return Some(anim.interpolate_transform(time, target));
+            }
+        }
+        None
+    }
+
+    pub fn get_current_blend(&self) -> &BlendWeight {
+        &self.state.current_blend
     }
 }
 

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::{PlayerState, BlendWeight, AnimationPlayer, Transition, BlendTree, AnimationEvent, AnimationLayer, AnimationClip, Transform, Keyframe, BlendTreeType};
+use crate::{PlayerState, BlendWeight, AnimationPlayer, Transition, BlendTree, AnimationEvent, AnimationLayer, AnimationClip, Transform, Keyframe, BlendTreeType, LoopMode};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimationSaveData {
@@ -182,6 +182,9 @@ impl AnimationPlayerSaveData {
             state: self.state.to_state(),
             active: self.active,
             auto_play: self.auto_play,
+            loop_mode: LoopMode::Loop,
+            event_callbacks: Vec::new(),
+            last_event_time: 0.0,
         }
     }
 }
@@ -193,6 +196,7 @@ impl PlayerStateSaveData {
             current_blend: self.current_blend.to_blend(),
             playing: self.playing,
             speed: self.speed,
+            loop_mode: LoopMode::Loop,
         }
     }
 }

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::{LoopMode, Transform, Keyframe};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimationClip {
@@ -77,13 +78,38 @@ impl AnimationClip {
     pub fn get_events_at_time(&self, time: f32) -> Vec<&AnimationEvent> {
         self.events.iter().filter(|e| e.time <= time).collect()
     }
+
+    pub fn get_duration(&self) -> Option<f32> {
+        if self.layers.is_empty() {
+            return None;
+        }
+        Some(self.layers.iter().map(|l| l.animation).count() as f32)
+    }
 }
 
 use crate::animation_player::BlendWeight;
 
 impl BlendTree {
-    pub fn interpolate(&self, _time: f32) -> BlendWeight {
-        BlendWeight::new(0.0, Uuid::nil())
+    pub fn interpolate(&self, time: f32) -> BlendWeight {
+        let duration = self.get_duration();
+        let progress = time % duration / duration;
+
+        BlendWeight {
+            weight: progress,
+            target: self.root,
+        }
+    }
+
+    pub fn get_keyframe_at_time(&self, _time: f32) -> Option<&Keyframe> {
+        None
+    }
+
+    pub fn interpolate_transform(&self, _time: f32, _target: Uuid) -> Transform {
+        Transform::default()
+    }
+
+    pub fn get_duration(&self) -> f32 {
+        self.transitions.len() as f32
     }
 }
 
