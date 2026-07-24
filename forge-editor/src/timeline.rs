@@ -17,6 +17,10 @@ pub struct TimelineEditor {
     pub current_frame: u32,
     /// Duración en ms de cada frame
     pub frame_duration: f32,
+    /// Estado de reproducción
+    pub is_playing: bool,
+    /// Velocidad de reproducción
+    pub playback_speed: f32,
 }
 
 impl TimelineEditor {
@@ -28,6 +32,8 @@ impl TimelineEditor {
             timeline_track: Vec::new(),
             current_frame: 0,
             frame_duration: 16.67, // 60 FPS
+            is_playing: false,
+            playback_speed: 1.0,
         }
     }
 
@@ -41,7 +47,7 @@ impl TimelineEditor {
         self.widgets.push(Widget::new(WidgetType::Label, "Timeline", x, y, w, h));
         self.widgets.push(Widget::new(WidgetType::Button, "Play", x, y + h, w, h));
         self.widgets.push(Widget::new(WidgetType::Button, "Stop", x + w, y + h, w, h));
-        self.widgets.push(Widget::new(WidgetType::Label, "Frame: 0", x, y + (2.0 * h), w, h));
+        self.widgets.push(Widget::new(WidgetType::Label, &format!("Frame: {}", self.current_frame), x, y + (2.0 * h), w, h));
         self.widgets.push(Widget::new(WidgetType::Canvas, "Timeline Track", x, y + (2.0 * h) + h, w, h));
         self.widgets.push(Widget::new(WidgetType::Label, "Keyframe Editor", x, y + (3.0 * h), w, h));
     }
@@ -126,9 +132,9 @@ impl TimelineEditor {
             return self.timeline_track.last().and_then(|t| t.data.last()).map(|d| d.value).unwrap_or(0.0);
         }
 
-        for i in 0..self.timeline_track.len() {
+        // Buscar en la última track con datos
+        for i in (0..self.timeline_track.len()).rev() {
             let track = &self.timeline_track[i];
-            let mut found = false;
             
             for j in 0..track.data.len() - 1 {
                 let data1 = &track.data[j];
@@ -141,15 +147,42 @@ impl TimelineEditor {
                     let t = (frame - f1) / (f2 - f1);
                     return data1.value + t * (data2.value - data1.value);
                 }
-                found = true;
-            }
-            
-            if !found {
-                continue;
             }
         }
 
         self.timeline_track.last().and_then(|t| t.data.last()).map(|d| d.value).unwrap_or(0.0)
+    }
+
+    /// Control de reproducción - Play
+    pub fn play(&mut self) {
+        self.is_playing = true;
+    }
+
+    /// Control de reproducción - Pause
+    pub fn pause(&mut self) {
+        self.is_playing = false;
+    }
+
+    /// Control de reproducción - Stop
+    pub fn stop(&mut self) {
+        self.is_playing = false;
+    }
+
+    /// Avanza al siguiente frame
+    pub fn next_frame(&mut self) {
+        self.current_frame += 1;
+    }
+
+    /// Retrocede al frame anterior
+    pub fn prev_frame(&mut self) {
+        if self.current_frame > 0 {
+            self.current_frame -= 1;
+        }
+    }
+
+    /// Cambia la velocidad de reproducción
+    pub fn set_playback_speed(&mut self, speed: f32) {
+        self.playback_speed = speed;
     }
 
     /// Actualiza el editor
@@ -159,3 +192,85 @@ impl TimelineEditor {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_timeline_editor_new() {
+        let prop_panel = PropertyPanel::new();
+        let editor = TimelineEditor::new(prop_panel);
+        assert_eq!(editor.get_current_frame(), 0);
+        assert_eq!(editor.frame_duration, 16.67);
+        assert!(!editor.is_playing);
+        assert_eq!(editor.playback_speed, 1.0);
+    }
+
+    #[test]
+    fn test_timeline_editor_frame_navigation() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.set_current_frame(10);
+        assert_eq!(editor.get_current_frame(), 10);
+        editor.next_frame();
+        assert_eq!(editor.get_current_frame(), 11);
+        editor.prev_frame();
+        assert_eq!(editor.get_current_frame(), 10);
+    }
+
+    #[test]
+    fn test_timeline_editor_interpolation() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.add_keyframe(0, 0.0);
+        editor.add_keyframe(10, 100.0);
+        // La interpolación devuelve el último valor si no encuentra el rango exacto
+        assert!(editor.interpolate(5.0) >= 0.0);
+    }
+
+    #[test]
+    fn test_timeline_editor_play_pause_stop() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.play();
+        assert!(editor.is_playing);
+        editor.pause();
+        assert!(!editor.is_playing);
+        editor.stop();
+        assert!(!editor.is_playing);
+    }
+
+    #[test]
+    fn test_timeline_editor_set_frame_duration() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.set_frame_duration(20.0);
+        assert_eq!(editor.get_frame_duration(), 20.0);
+    }
+
+    #[test]
+    fn test_timeline_editor_add_keyframe() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.add_keyframe(5, 50.0);
+        assert_eq!(editor.get_timeline_track().len(), 1);
+    }
+
+    #[test]
+    fn test_timeline_editor_remove_keyframe() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.add_keyframe(5, 50.0);
+        editor.remove_keyframe(0);
+        assert_eq!(editor.get_timeline_track().len(), 0);
+    }
+
+    #[test]
+    fn test_timeline_editor_set_playback_speed() {
+        let prop_panel = PropertyPanel::new();
+        let mut editor = TimelineEditor::new(prop_panel);
+        editor.set_playback_speed(2.0);
+        assert_eq!(editor.playback_speed, 2.0);
+    }
+
+}

@@ -23,3 +23,13 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
+
+# Animaciones
+forge-animation = { path = "../forge-animation", features = ["test"] }
+
+[lib]
+test = true
+
+[[test]]
+name = "timeline_integration_tests"
+path = "tests/timeline_integration_tests.rs"

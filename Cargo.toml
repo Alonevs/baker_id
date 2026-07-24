@@ -6,6 +6,11 @@ authors = ["Forge Team"]
 description = "Forge Game Engine"
 license = "MIT"
 
+[workspace.package]
+edition = "2021"
+version = "1.0.0"
+authors = ["Forge Team"]
+
 [workspace]
 members = [
       "forge-editor",

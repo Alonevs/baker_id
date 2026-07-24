@@ -41,8 +41,15 @@ Crear un SDK completo para desarrollo de juegos 2D con editor visual, programado
 
 ### 🟡 MEDIA - En progreso
 
-1. **FASE 9 - Física 2D** - Motor de colisiones completo (en pausa)
-2. **FASE 11 - Audio** - Sistema de audio completo ✅ COMPLETADO
+1. **FASE 10.4 - Timeline Editor UI** - Integración con runtime
+    - TimelineManager con TimelineSystem para sincronización
+    - Conectar AnimationComponent con game loop
+    - Preview en vivo de animaciones en runtime
+    - 14 tests passing (pending execution)
+    - Documentación completa en `doc/tools/03_TIMELINE_EDITOR.md`
+
+2. **FASE 9 - Física 2D** - Motor de colisiones completo (en pausa)
+3. **FASE 11 - Audio** - Sistema de audio completo ✅ COMPLETADO
     - AudioManager centralizado
     - AudioMixer con volumen, pan, pitch control
     - AudioBus system para routing

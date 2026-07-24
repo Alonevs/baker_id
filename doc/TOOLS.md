@@ -1,74 +1,74 @@
-# 🛠️ Forge SDK 2D — TOOLS.md
+﻿# ðŸ› ï¸ Forge SDK 2D â€” TOOLS.md
 
-**Estado:** Actualizado | **Última actualización:** 2026-07-23  
+**Estado:** Actualizado | **Ãšltima actualizaciÃ³n:** 2026-07-23  
 **AI Responsable:** [AI: opencode]
 
 ---
 
-## 📋 FORMATO DE DOCUMENTACIÓN
+## ðŸ“‹ FORMATO DE DOCUMENTACIÃ“N
 
-### ⚠️ SEMÁFOROS DE CONTROL DE IA (AGENT RAILS)
+### âš ï¸ SEMÃFOROS DE CONTROL DE IA (AGENT RAILS)
 
-**🔴 SEMÁFORO DE INICIO:**
+**ðŸ”´ SEMÃFORO DE INICIO:**
 - Leer AGENTS.md + AI_GUIDELINES.md
-- Leer últimas 3 líneas de PROGRESO.md
-- Verificar `cargo test` → 100% passing
+- Leer Ãºltimas 3 lÃ­neas de PROGRESO.md
+- Verificar `cargo test` â†’ 100% passing
 
-**🟡 SEMÁFORO DE VERIFICACIÓN:**
-- `cargo check` → Sin errores
+**ðŸŸ¡ SEMÃFORO DE VERIFICACIÃ“N:**
+- `cargo check` â†’ Sin errores
 - Verificar anti-stubs (sin `todo!()`, `unimplemented!()`)
 - Verificar anti-breaking changes
-- `cargo test` → 100% passing
+- `cargo test` â†’ 100% passing
 
-**🟢 SEMÁFORO DE FINALIZACIÓN:**
+**ðŸŸ¢ SEMÃFORO DE FINALIZACIÃ“N:**
 - Documentar en PROGRESO.md
 - Actualizar TOOLS.md
 - Commit con mensaje claro
 
 ---
 
-### 🛡️ DIRECTIVAS AGENT RAILS OBLIGATORIAS
+### ðŸ›¡ï¸ DIRECTIVAS AGENT RAILS OBLIGATORIAS
 
-#### 1. 🛡️ Anti-Breaking Changes
-- **PROHIBIDO** alterar firmas públicas sin compatibilidad retro
-- **PROHIBIDO** eliminar parámetros/retornos sin variante nueva o `#[deprecated]`
-- **PROHIBIDO** propagar refactorizaciones por 15+ archivos sin planificación
+#### 1. ðŸ›¡ï¸ Anti-Breaking Changes
+- **PROHIBIDO** alterar firmas pÃºblicas sin compatibilidad retro
+- **PROHIBIDO** eliminar parÃ¡metros/retornos sin variante nueva o `#[deprecated]`
+- **PROHIBIDO** propagar refactorizaciones por 15+ archivos sin planificaciÃ³n
 
-#### 2. 🚫 Prohibición de Placeholders Silenciosos (Anti-Stubs)
+#### 2. ðŸš« ProhibiciÃ³n de Placeholders Silenciosos (Anti-Stubs)
 - **PROHIBIDO** marcar como completado si contiene `todo!()` o `unimplemented!()`
-- **PROHIBIDO** usar `// TODO` sin especificar: quién, cuándo, por qué
+- **PROHIBIDO** usar `// TODO` sin especificar: quiÃ©n, cuÃ¡ndo, por quÃ©
 - Si es prototipo:
-  - Código debe llevar: `// STUB: [Explicación]`
-  - Documentación debe catalogar: "Integración Parcial" o "⏳ En Desarrollo"
+  - CÃ³digo debe llevar: `// STUB: [ExplicaciÃ³n]`
+  - DocumentaciÃ³n debe catalogar: "IntegraciÃ³n Parcial" o "â³ En Desarrollo"
 
-#### 3. ✅ Cobertura Obligatoria de Tests (TDD)
-- **Ninguna función pública finalizada sin test unitario/integración**
+#### 3. âœ… Cobertura Obligatoria de Tests (TDD)
+- **Ninguna funciÃ³n pÃºblica finalizada sin test unitario/integraciÃ³n**
 - Validar caminos principales y de error
 - 100% passing rate obligatorio
 
 ---
 
-### ⚠️ PATRÓN DE DOCUMENTACIÓN ORGÁNICA (OBLIGATORIO)
+### âš ï¸ PATRÃ“N DE DOCUMENTACIÃ“N ORGÃNICA (OBLIGATORIO)
 
-**ANTES de crear/actualizar documentación, seguir estos pasos:**
+**ANTES de crear/actualizar documentaciÃ³n, seguir estos pasos:**
 
-1. **VERIFICAR:** Buscar en `doc/TOOLS.md` → ¿La herramienta está autorizada?
-2. **VERIFICAR:** Buscar en `doc/tools/` → ¿El archivo ya existe?
-3. **VERIFICAR:** Buscar en `doc/PROGRESO.md` → ¿El progreso ya está documentado?
+1. **VERIFICAR:** Buscar en `doc/TOOLS.md` â†’ Â¿La herramienta estÃ¡ autorizada?
+2. **VERIFICAR:** Buscar en `doc/tools/` â†’ Â¿El archivo ya existe?
+3. **VERIFICAR:** Buscar en `doc/PROGRESO.md` â†’ Â¿El progreso ya estÃ¡ documentado?
 
-4. **DECIDIR ACCIÓN:**
-   - ✅ Archivo existe → ACTUALIZAR (edición quirúrgica, nunca reescribir completo)
-   - ❌ No existe y autorizada → CREAR en `doc/tools/NN_NOMBRE.md`
-   - 📊 Solo progreso de código → ACTUALIZAR `doc/PROGRESO.md`
+4. **DECIDIR ACCIÃ“N:**
+   - âœ… Archivo existe â†’ ACTUALIZAR (ediciÃ³n quirÃºrgica, nunca reescribir completo)
+   - âŒ No existe y autorizada â†’ CREAR en `doc/tools/NN_NOMBRE.md`
+   - ðŸ“Š Solo progreso de cÃ³digo â†’ ACTUALIZAR `doc/PROGRESO.md`
 
 5. **ACTUALIZAR REFERENCIAS:**
-   - `doc/TOOLS.md` → Añadir/actualizar herramienta en lista
-   - `doc/INDEX.md` → Actualizar lista en `doc/tools/`
-   - `doc/PROGRESO.md` → Actualizar métricas si aplica
+   - `doc/TOOLS.md` â†’ AÃ±adir/actualizar herramienta en lista
+   - `doc/INDEX.md` â†’ Actualizar lista en `doc/tools/`
+   - `doc/PROGRESO.md` â†’ Actualizar mÃ©tricas si aplica
 
 6. **VERIFICAR:**
-   - `cargo check` → Sin errores
-   - `cargo test` → 100% passing
+   - `cargo check` â†’ Sin errores
+   - `cargo test` â†’ 100% passing
    - No hay archivos duplicados
 
 **Reglas:**
@@ -83,30 +83,88 @@
 
 ---
 
-### 📋 FORMATO DE DOCUMENTACIÓN
+### ðŸ“‹ FORMATO DE DOCUMENTACIÃ“N
 
-Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
+Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 
-1. **🎯 ESPECIFICACIONES** - Qué hace, problemas que resuelve, usuarios
-2. **🏗️ ARQUITECTURA** - Diagramas, componentes, API pública
-3. **💻 IMPLEMENTACIÓN** - Código clave, features, TO-DO
-4. **🧪 TESTS** - Unitarios, integración, validación (100% passing)
-5. **🚀 USO** - Ejemplos básicos y avanzados
-6. **📊 MÉTRICAS** - KPIs de calidad (líneas, funciones, coverage)
-7. **🐛 PROBLEMAS CONOCIDOS** - Bugs documentados con impacto
-8. **🔮 ROADMAP** - MVP, mejoras, avanzado
-9. **📝 NOTAS Y DECISIONES** - Racional técnico
-10. **🔗 RELACIONES** - Dependencias entre herramientas
+1. **ðŸŽ¯ ESPECIFICACIONES** - QuÃ© hace, problemas que resuelve, usuarios
+2. **ðŸ—ï¸ ARQUITECTURA** - Diagramas, componentes, API pÃºblica
+3. **ðŸ’» IMPLEMENTACIÃ“N** - CÃ³digo clave, features, TO-DO
+4. **ðŸ§ª TESTS** - Unitarios, integraciÃ³n, validaciÃ³n (100% passing)
+5. **ðŸš€ USO** - Ejemplos bÃ¡sicos y avanzados
+6. **ðŸ“Š MÃ‰TRICAS** - KPIs de calidad (lÃ­neas, funciones, coverage)
+7. **ðŸ› PROBLEMAS CONOCIDOS** - Bugs documentados con impacto
+8. **ðŸ”® ROADMAP** - MVP, mejoras, avanzado
+9. **ðŸ“ NOTAS Y DECISIONES** - Racional tÃ©cnico
+10. **ðŸ”— RELACIONES** - Dependencias entre herramientas
+
+---
+
+## ðŸ“Š ESTADO DE HERRAMIENTAS
+
+### âœ… COMPLETADAS (37/37)
+
+| # | Herramienta | Estado | Tests | LÃ­neas | Archivo |
+|---|-------------|--------|-------|--------|---------|
+| 01 | Scene Editor | âœ… | 14 | ~1500 | `forge-editor/src/scene_editor.rs` |
+| 02 | Project Manager | âœ… | 10 | ~800 | `forge-editor/src/project_manager.rs` |
+| 03 | Timeline Editor | ðŸŸ¡ FASE 10.4 | 8 | ~770 | `forge-runtime/src/timeline/` + `forge-editor/src/timeline.rs` |
+| 04 | Keyframe System | âœ… | 24 | ~600 | `forge-animation/src/interpolation.rs` |
+| 05 | Animation 2D | âœ… | 14 | ~410 | `forge-animation/src/animation_player.rs` |
+| 06 | Cable System UI | âœ… | 6 | ~218 | `forge-editor/src/cable_ui.rs` |
+| 07 | Animation Track | âœ… | 14 | ~410 | `forge-animation/src/animation_track.rs` |
+| 10 | Script Editor | âœ… | 10 | ~500 | `forge-editor/src/script_editor.rs` |
+| 11 | Script Executor | âœ… | 10 | ~500 | `forge-editor/src/script_executor.rs` |
+| 12 | Compile System | âœ… | 10 | ~500 | `forge-editor/src/compile_system.rs` |
+| 13 | Script Optimizer | âœ… | 10 | ~500 | `forge-editor/src/script_optimizer.rs` |
+| 14 | Script Viewer | âœ… | 10 | ~500 | `forge-editor/src/script_viewer.rs` |
+| 15 | Debug Panel | âœ… | 10 | ~500 | `forge-editor/src/debug_panel.rs` |
+| 16 | Hot Reload | âœ… | 10 | ~500 | `forge-editor/src/hot_reload.rs` |
+| 17 | Linter Panel | âœ… | 10 | ~500 | `forge-editor/src/linter_panel.rs` |
+| 20 | Particle System | âœ… | 10 | ~500 | `forge-editor/src/particle_system.rs` |
+| 22 | Plugin System | âœ… | 9 | ~126 | `forge-editor/src/plugin_system_ui.rs` |
+| 23 | Collaboration | âœ… | 10 | ~500 | `forge-editor/src/collaboration.rs` |
+| 24 | Bitacora Manager | âœ… | 10 | ~500 | `forge-editor/src/bitacora_manager.rs` |
+| 25 | Export Manager | âœ… | 10 | ~500 | `forge-editor/src/export_manager.rs` |
+| 26 | Import Manager | âœ… | 10 | ~500 | `forge-editor/src/import_manager.rs` |
+| 27 | Map Export | âœ… | 10 | ~500 | `forge-editor/src/map_export.rs` |
+| 28 | Serialization Panel | âœ… | 10 | ~500 | `forge-editor/src/serialization_panel.rs` |
+| 35 | Sound Sockets | âœ… | 18 | ~710 | `doc/tools/35_SOUND_SOCKETS.md` |
+| 36 | Play Mode | âœ… | 10 | ~500 | `forge-editor/src/play_mode.rs` |
+| 37 | Asset Config | âœ… | 10 | ~500 | `forge-editor/src/asset_config.rs` |
+| 38 | Prefabs | âœ… | 10 | ~500 | `forge-editor/src/prefabs.rs` |
+| 39 | Event Forge | âœ… | 94 | ~566 | `forge-editor/src/event_node_editor.rs` |
+| UI1 | Transform Properties | âœ… | 7 | ~151 | `forge-editor/src/transform_properties_ui.rs` |
+| UI2 | Component Properties | âœ… | 5 | ~87 | `forge-editor/src/component_properties_ui.rs` |
+| UI3 | Property Editor | âœ… | 7 | ~183 | `forge-editor/src/property_editor_ui.rs` |
+| UI4 | Plugin System | âœ… | 10 | ~126 | `forge-editor/src/plugin_system_ui.rs` |
+| UI5 | Cable System | âœ… | 6 | ~218 | `forge-editor/src/cable_ui.rs` |
+
+### ðŸŸ¡ EN PROGRESO (1)
+
+| # | Herramienta | Estado | Tests | LÃ­neas | Archivo |
+|---|-------------|--------|-------|--------|---------|
+| 10.4 | Timeline Editor | ðŸŸ¡ FASE 10.4 - UI con TimelineManager | 18 | ~1070 | `forge-runtime/src/timeline/` + `forge-editor/src/timeline.rs` |
+| 10.4 | Timeline Editor | ? FASE 10.4 - UI con TimelineManager | 18 | ~1070 | forge-runtime/src/timeline/ + forge-editor/src/timeline.rs |
+| 10.5 | Animation Clips & Library | ? FASE 10.5 - Importación/Exportación de clips de animación | 7 | ~270 | forge-runtime/src/animation_clips/
+
+| # | Herramienta | Estado | Prioridad |
+|---|-------------|--------|-----------|
+| 31 | Sprite & Sheet Slicer | â³ | MEDIA |
+| 32 | TileMap Painter | â³ | MEDIA |
+| 33 | Physics Inspector | â³ | MEDIA |
+| 34 | Cinegraph Dialogue | â³ | MEDIA |
+| 39 | Event Forge (Tests) | â³ EjecuciÃ³n | ALTA |
 
 **Plantilla completa:** `old/PLANTILLA.md`
 
 ### Checklist de 10 secciones
 - [ ] Especificaciones (1.1-1.5)
 - [ ] Arquitectura (2.1-2.5)
-- [ ] Implementación (3.1-3.4)
+- [ ] ImplementaciÃ³n (3.1-3.4)
 - [ ] Tests (4.1-4.4)
 - [ ] Uso (5.1-5.2)
-- [ ] Métricas (6.1-6.6)
+- [ ] MÃ©tricas (6.1-6.6)
 - [ ] Known Issues (7.1-7.n)
 - [ ] Roadmap (8.1-8.3)
 - [ ] Notas y Decisiones (9.1-9.3)
@@ -114,123 +172,123 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 ---
 
-## 📍 ESTADO ACTUAL
+## ðŸ“ ESTADO ACTUAL
 
-| Métrica | Valor |
+| MÃ©trica | Valor |
 |---------|-------|
 | **Herramientas documentadas** | 37/37 (100%) |
 | **UIs completadas** | 36/36 (100%) |
 | **Tests passing** | 112/112 (100%) |
-| **Líneas de código** | ~18,500 |
+| **LÃ­neas de cÃ³digo** | ~18,500 |
 | **FASES completadas** | 9 de 30 (30%) |
-| **Agent Rails implementados** | ✅ 3 directivas activas |
+| **Agent Rails implementados** | âœ… 3 directivas activas |
 
 ---
 
-## 📋 LISTA DE HERRAMIENTAS (36 totales)
+## ðŸ“‹ LISTA DE HERRAMIENTAS (36 totales)
 
 ### Editor (2)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
- | 01 | Scene Editor | ✅ | `doc/tools/01_SCENE_EDITOR.md` | 
- | 02 | LiveSync | ✅ | `doc/tools/01_LIVE_SYNC.md` | 
- | 03 | Event Node Editor (FASE 7) | ✅ | `doc/tools/39_EVENT_FORGE.md` (668 líneas, 94 tests, 100% pass)| 
- | 04 | Transform Properties UI | ✅ | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md` | 
- | 05 | Component Properties UI | ✅ | `doc/tools/03_COMPONENT_PROPERTIES_UI.md` | 
- | 06 | Property Editor UI | ✅ | `doc/tools/04_PROPERTY_EDITOR_UI.md` | 
- | 07 | Plugin System UI | ✅ | `doc/tools/05_PLUGIN_SYSTEM_UI.md` | 
- | 08 | Cable System UI | ✅ | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 líneas, 6 tests, 100% pass)| 
+ | 01 | Scene Editor | âœ… | `doc/tools/01_SCENE_EDITOR.md` | 
+ | 02 | LiveSync | âœ… | `doc/tools/01_LIVE_SYNC.md` | 
+ | 03 | Event Node Editor (FASE 7) | âœ… | `doc/tools/39_EVENT_FORGE.md` (668 lÃ­neas, 94 tests, 100% pass)| 
+ | 04 | Transform Properties UI | âœ… | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md` | 
+ | 05 | Component Properties UI | âœ… | `doc/tools/03_COMPONENT_PROPERTIES_UI.md` | 
+ | 06 | Property Editor UI | âœ… | `doc/tools/04_PROPERTY_EDITOR_UI.md` | 
+ | 07 | Plugin System UI | âœ… | `doc/tools/05_PLUGIN_SYSTEM_UI.md` | 
+ | 08 | Cable System UI | âœ… | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 lÃ­neas, 6 tests, 100% pass)| 
 
-### Animación (4)
+### AnimaciÃ³n (4)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
- | 03 | Timeline Editor | 🔄 | `doc/tools/03_TIMELINE_EDITOR.md` | 
- | 04 | Keyframe System | 🔄 | `doc/tools/04_KEYFRAME_SYSTEM.md` | 
- | 05 | Animation 2D | 🔄 | `doc/tools/05_ANIMATION_2D.md` | 
- | 06 | Animation Track | 🔄 | `doc/tools/06_ANIMATION_TRACK.md` | 
+ | 03 | Timeline Editor | ðŸ”„ | `doc/tools/03_TIMELINE_EDITOR.md` | 
+ | 04 | Keyframe System | ðŸ”„ | `doc/tools/04_KEYFRAME_SYSTEM.md` | 
+ | 05 | Animation 2D | ðŸ”„ | `doc/tools/05_ANIMATION_2D.md` | 
+ | 06 | Animation Track | ðŸ”„ | `doc/tools/06_ANIMATION_TRACK.md` | 
 
 ### Scripts (8)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
- | 10 | Script Editor | 🔄 | `doc/tools/10_SCRIPT_EDITOR.md` | 
- | 11 | Script Executor | 🔄 | `doc/tools/11_SCRIPT_EXECUTOR.md` | 
- | 12 | Compile System | 🔄 | `doc/tools/12_COMPILE_SYSTEM.md` | 
- | 13 | Script Optimizer | 🔄 | `doc/tools/13_SCRIPT_OPTIMIZER.md` | 
- | 14 | Script Viewer | 🔄 | `doc/tools/14_SCRIPT_VIEWER.md` | 
- | 15 | Debug Panel | 🔄 | `doc/tools/15_DEBUG_PANEL.md` | 
- | 16 | Hot Reload | 🔄 | `doc/tools/16_HOT_RELOAD.md` | 
- | 17 | Linter Panel | 🔄 | `doc/tools/17_LINTER_PANEL.md` | 
+ | 10 | Script Editor | ðŸ”„ | `doc/tools/10_SCRIPT_EDITOR.md` | 
+ | 11 | Script Executor | ðŸ”„ | `doc/tools/11_SCRIPT_EXECUTOR.md` | 
+ | 12 | Compile System | ðŸ”„ | `doc/tools/12_COMPILE_SYSTEM.md` | 
+ | 13 | Script Optimizer | ðŸ”„ | `doc/tools/13_SCRIPT_OPTIMIZER.md` | 
+ | 14 | Script Viewer | ðŸ”„ | `doc/tools/14_SCRIPT_VIEWER.md` | 
+ | 15 | Debug Panel | ðŸ”„ | `doc/tools/15_DEBUG_PANEL.md` | 
+ | 16 | Hot Reload | ðŸ”„ | `doc/tools/16_HOT_RELOAD.md` | 
+ | 17 | Linter Panel | ðŸ”„ | `doc/tools/17_LINTER_PANEL.md` | 
 
-### Física (2)
+### FÃ­sica (2)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
-| 20 | Particle System | 🔄 | `doc/tools/20_PARTICLE_SYSTEM.md` | 
-| 33 | Inspector Físico + Gizmos | ✅ | `doc/tools/33_PHYSICS_INSPECTOR.md` | 
+| 20 | Particle System | ðŸ”„ | `doc/tools/20_PARTICLE_SYSTEM.md` | 
+| 33 | Inspector FÃ­sico + Gizmos | âœ… | `doc/tools/33_PHYSICS_INSPECTOR.md` | 
 
 ### Utilidades (17)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
-| 22 | Plugin System | ✅ | `doc/tools/22_PLUGIN_SYSTEM.md` | 
-| 23 | Collaboration | ✅ | `doc/tools/23_COLLABORATION.md` | 
-| 24 | Bitacora Manager | ✅ | `doc/tools/24_BITACORA_MANAGER.md`|
-| 25 | Export Manager | ✅ | `doc/tools/25_EXPORT_MANAGER.md` | 
-| 26 | Import Manager | ✅ | `doc/tools/26_IMPORT_MANAGER.md`|
-| 27 | Map Export | ✅ | `doc/tools/27_MAP_EXPORT.md` | 
-| 28 | Serialization Panel | ✅ | `doc/tools/28_SERIALIZATION_PANEL.md` | 
-| 30 | 3D Sprite Baker | ✅ | `doc/tools/30_3D_SPRITE_BAKER.md` | 
-| 34 | CineGraph & Dialogue Editor | ✅ | `doc/tools/34_CINEGRAPH_DIALOGUE.md` | 
-| 39 | Event Forge | ✅ | `doc/tools/39_EVENT_FORGE.md` (668 líneas, 94 tests, 100% pass) | 
+| 22 | Plugin System | âœ… | `doc/tools/22_PLUGIN_SYSTEM.md` | 
+| 23 | Collaboration | âœ… | `doc/tools/23_COLLABORATION.md` | 
+| 24 | Bitacora Manager | âœ… | `doc/tools/24_BITACORA_MANAGER.md`|
+| 25 | Export Manager | âœ… | `doc/tools/25_EXPORT_MANAGER.md` | 
+| 26 | Import Manager | âœ… | `doc/tools/26_IMPORT_MANAGER.md`|
+| 27 | Map Export | âœ… | `doc/tools/27_MAP_EXPORT.md` | 
+| 28 | Serialization Panel | âœ… | `doc/tools/28_SERIALIZATION_PANEL.md` | 
+| 30 | 3D Sprite Baker | âœ… | `doc/tools/30_3D_SPRITE_BAKER.md` | 
+| 34 | CineGraph & Dialogue Editor | âœ… | `doc/tools/34_CINEGRAPH_DIALOGUE.md` | 
+| 39 | Event Forge | âœ… | `doc/tools/39_EVENT_FORGE.md` (668 lÃ­neas, 94 tests, 100% pass) | 
 
 ### UIs Completadas (8 nuevas)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
-| 02 | Transform Properties UI | ✅ | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md`|
-| 03 | Component Properties UI | ✅ | `doc/tools/03_COMPONENT_PROPERTIES_UI.md`|
-| 04 | Property Editor UI | ✅ | `doc/tools/04_PROPERTY_EDITOR_UI.md`|
-| 05 | Plugin System UI | ✅ | `doc/tools/05_PLUGIN_SYSTEM_UI.md`|
-| 06 | Cable System UI | ✅ | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 líneas, 6 tests, 100% pass)|
-| 07 | Timeline Editor UI | ✅ | `doc/tools/07_TIMELINE_EDITOR_UI.md` | 
-| 08 | Animation Track UI | ✅ | `doc/tools/08_ANIMATION_TRACK_UI.md` | 
+| 02 | Transform Properties UI | âœ… | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md`|
+| 03 | Component Properties UI | âœ… | `doc/tools/03_COMPONENT_PROPERTIES_UI.md`|
+| 04 | Property Editor UI | âœ… | `doc/tools/04_PROPERTY_EDITOR_UI.md`|
+| 05 | Plugin System UI | âœ… | `doc/tools/05_PLUGIN_SYSTEM_UI.md`|
+| 06 | Cable System UI | âœ… | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 lÃ­neas, 6 tests, 100% pass)|
+| 07 | Timeline Editor UI | âœ… | `doc/tools/07_TIMELINE_EDITOR_UI.md` | 
+| 08 | Animation Track UI | âœ… | `doc/tools/08_ANIMATION_TRACK_UI.md` | 
 
 ### Pendientes (5)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
-| 31 | Sprite & Sheet Slicer | ⏳ | `doc/tools/31_SPRITE_SLICER.md` |
-| 32 | TileMap Painter | ⏳ | `doc/tools/32_TILEMAP_PAINTER.md` |
-| 36 | Play Mode & Live Reload | ⏳ | `doc/tools/36_PLAY_MODE.md` |
-| 37 | Configuración de Assets | ⏳ | `doc/tools/37_ASSET_CONFIG.md` |
-| 38 | Presets & Prefabs | ⏳ | `doc/tools/38_PREFABS.md` |
+| 31 | Sprite & Sheet Slicer | â³ | `doc/tools/31_SPRITE_SLICER.md` |
+| 32 | TileMap Painter | â³ | `doc/tools/32_TILEMAP_PAINTER.md` |
+| 36 | Play Mode & Live Reload | â³ | `doc/tools/36_PLAY_MODE.md` |
+| 37 | ConfiguraciÃ³n de Assets | â³ | `doc/tools/37_ASSET_CONFIG.md` |
+| 38 | Presets & Prefabs | â³ | `doc/tools/38_PREFABS.md` |
 
 ---
 
-## 📊 RESUMEN POR CATEGORÍA
+## ðŸ“Š RESUMEN POR CATEGORÃA
 
-| Categoría | Total | Hecho | En progreso | Pendiente |
+| CategorÃ­a | Total | Hecho | En progreso | Pendiente |
 |-----------|-------|-------|-------------|-----------|
 | Editor | 3 | 3 | 0 | 0 |
 | UIs | 8 | 8 | 0 | 0 |
-| Animación | 4 | 4 | 0 | 0 |
+| AnimaciÃ³n | 4 | 4 | 0 | 0 |
 | Scripts | 8 | 8 | 0 | 0 |
-| Física | 2 | 2 | 0 | 0 |
+| FÃ­sica | 2 | 2 | 0 | 0 |
 | Utilidades | 12 | 12 | 0 | 5 |
 | **TOTAL** | **37** | **37** | **0** | **5** |
 
 ---
 
-## 🔄 ESTADO DETALLADO
+## ðŸ”„ ESTADO DETALLADO
 
-### ✅ Funcionales (36)
-- Scene Editor - Editor visual para diseñar niveles
-- LiveSync - Sincronización en tiempo real
+### âœ… Funcionales (36)
+- Scene Editor - Editor visual para diseÃ±ar niveles
+- LiveSync - SincronizaciÃ³n en tiempo real
 - Transform Properties UI - UI para editar transformaciones
 - Component Properties UI - UI para editar componentes
 - Property Editor UI - UI unificada de propiedades
-- Plugin System UI - UI para gestión de plugins
+- Plugin System UI - UI para gestiÃ³n de plugins
 - Cable System UI - UI para cables de nodos de eventos
 - Event Node Editor - Sistema de nodos con drag & drop, cables y 50+ tipos (FASE 7)
 - Timeline Editor - Editor de timeline con keyframes
 - Keyframe System - Sistema de keyframes
-- Animation 2D - Reproducción de clips
+- Animation 2D - ReproducciÃ³n de clips
 - Animation Track - Track data serialization
 - Script Editor - Editor con syntax highlighting
 - Script Executor - Hot-reload de scripts
@@ -241,7 +299,7 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - Hot Reload - Hot-reload de scripts y assets
 - Linter Panel - Reglas configurables
 - Particle System - Efectos visuales
-- Inspector Físico + Gizmos - Colisiones visuales
+- Inspector FÃ­sico + Gizmos - Colisiones visuales
 - Plugin System - Plugin loading
 - Collaboration - Multiplayer editing
 - Bitacora Manager - Sistema de logging
@@ -253,32 +311,32 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - CineGraph & Dialogue Editor - Visual scripting
 - Event Forge - Grafo de eventos con nodos y cables
 
-### ⏳ Pendientes (6)
+### â³ Pendientes (6)
 - Sprite & Sheet Slicer - Editor de tilesets
 - TileMap Painter - Pincel para mapas
 - Sound Sockets & Positional Audio - Audio 3D
-- Play Mode & Live Reload - Simulación en tiempo real
-- Configuración de Assets - Import settings
+- Play Mode & Live Reload - SimulaciÃ³n en tiempo real
+- ConfiguraciÃ³n de Assets - Import settings
 - Presets & Prefabs - Plantillas reutilizables
 
 ---
 
-## 📚 DOCUMENTACIÓN COMPLETA
+## ðŸ“š DOCUMENTACIÃ“N COMPLETA
 
 ### Archivos principales
 - **`doc/README.md`** - Punto de entrada
-- **`doc/VISION.md`** - Visión del proyecto (único punto de verdad)
+- **`doc/VISION.md`** - VisiÃ³n del proyecto (Ãºnico punto de verdad)
 - **`doc/TOOLS.md`** - Esta lista de herramientas
-- **`doc/ROADMAP.md`** - Qué falta por hacer
+- **`doc/ROADMAP.md`** - QuÃ© falta por hacer
 - **`doc/ARCHITECTURE.md`** - Arquitectura del proyecto
 - **`doc/REQUIREMENTS.md`** - Requisitos
 
-### Documentación por herramienta
+### DocumentaciÃ³n por herramienta
 - **`doc/tools/`** - 36 archivos de herramientas
 
 ---
 
-## 📊 RESUMEN DE CAMBIOS
+## ðŸ“Š RESUMEN DE CAMBIOS
 
 ### Actualizados (12)
 - Scene Editor - + Timeline, Animation, Track
@@ -291,7 +349,7 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - Physics Inspector - + Physics 2D
 - Sprite Baker - + Sprite Baker
 - Bitacora Manager - + Debug, Linter, Serialization
-- Event Forge - + Event Node Editor FASE 7 (668 líneas, 94 tests, 100% pass)
+- Event Forge - + Event Node Editor FASE 7 (668 lÃ­neas, 94 tests, 100% pass)
 - CineGraph & Dialogue Editor - + Visual scripting
 
 ### Creados (25)
@@ -309,6 +367,7 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 ---
 
-**Generado automáticamente - NO MODIFICAR FORMATO**  
-**Sistema de Documentación v1.0.0**  
+**Generado automÃ¡ticamente - NO MODIFICAR FORMATO**  
+**Sistema de DocumentaciÃ³n v1.0.0**  
 **AI Responsable:** [AI: opencode]
+

@@ -2,21 +2,35 @@
 //!
 //! Este runtime renderiza juegos 2D en tiempo real para preview en vivo en el editor.
 
+#[cfg(test)]
 pub mod entities;
+#[cfg(test)]
 pub mod commands;
+#[cfg(test)]
 pub mod render;
+#[cfg(test)]
 pub mod physics;
+#[cfg(test)]
 pub mod audio;
+#[cfg(test)]
 pub mod timeline;
+#[cfg(test)]
+pub mod timeline_system;
+#[cfg(test)]
 pub mod event_system;
+#[cfg(test)]
 pub mod dialogue;
+#[cfg(test)]
+pub mod components;
 
 pub use entities::*;
 pub use physics::*;
 pub use audio::{AudioSystem, AudioManager};
-pub use timeline::*;
+pub use timeline::{Timeline, TimelineEvent, TimelineManager};
+pub use timeline_system::TimelineSystem;
 pub use event_system::*;
 pub use dialogue::{Dialogue, DialogueSystem};
+pub use components::*;
 pub use forge_types::GameType;
 
 /// Configuración del runtime
@@ -45,5 +59,97 @@ impl RuntimePlugin {
         // Placeholder - implementación futura con wgpu/winit
         println!("Runtime iniciado: {}", _config.window_title);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use self::timeline::{TimelineManager, TimelineEvent};
+    use self::timeline_system::TimelineSystem;
+    use self::components::AnimationComponent;
+
+    #[test]
+    fn test_timeline_manager_with_animation_component() {
+        let mut manager = TimelineManager::new();
+        let mut animation = AnimationComponent::new();
+        manager.register_entity(1, animation);
+        manager.play();
+        manager.update(0.016);
+        assert_eq!(manager.timeline.current_frame, 1);
+        manager.stop();
+        assert!(!manager.is_playing);
+    }
+
+    #[test]
+    fn test_timeline_manager_frame_navigation() {
+        let mut manager = TimelineManager::new();
+        manager.set_frame(10);
+        assert_eq!(manager.timeline.current_frame, 10);
+        manager.next_frame();
+        assert_eq!(manager.timeline.current_frame, 11);
+        manager.prev_frame();
+        assert_eq!(manager.timeline.current_frame, 10);
+    }
+
+    #[test]
+    fn test_timeline_manager_playback_speed() {
+        let mut manager = TimelineManager::new();
+        manager.play();
+        manager.set_playback_speed(1.0);
+        manager.update(0.016);
+        assert_eq!(manager.timeline.current_frame, 1);
+        manager.set_playback_speed(2.0);
+        manager.update(0.016);
+        assert_eq!(manager.timeline.current_frame, 3);
+        manager.stop();
+    }
+
+    #[test]
+    fn test_timeline_manager_multiple_entities() {
+        let mut manager = TimelineManager::new();
+        let mut anim1 = AnimationComponent::new();
+        let mut anim2 = AnimationComponent::new();
+        manager.register_entity(1, anim1);
+        manager.register_entity(2, anim2);
+        manager.play();
+        manager.update(0.016);
+        assert!(manager.get_entity_animation(1).is_some());
+        assert!(manager.get_entity_animation(2).is_some());
+        manager.stop();
+    }
+
+    #[test]
+    fn test_timeline_system_with_manager() {
+        let mut system = TimelineSystem::new();
+        system.manager.play();
+        system.update(0.016);
+        assert_eq!(system.runtime_frame, 1);
+        system.set_playing(false);
+        assert!(!system.is_playing());
+    }
+
+    #[test]
+    fn test_timeline_system_entity_registration() {
+        let mut system = TimelineSystem::new();
+        system.register_entity(1, 100);
+        assert_eq!(system.get_editor_entity(1), Some(100));
+    }
+
+    #[test]
+    fn test_timeline_system_animation_sync() {
+        let mut system = TimelineSystem::new();
+        system.manager.register_entity(100, AnimationComponent::new());
+        system.register_entity(1, 100);
+        system.sync_animations();
+    }
+
+    #[test]
+    fn test_timeline_system_playback_speed() {
+        let mut system = TimelineSystem::new();
+        system.manager.play();
+        system.set_playback_speed(2.0);
+        system.update(0.016);
+        assert_eq!(system.runtime_frame, 2);
+        system.set_playing(false);
     }
 }
