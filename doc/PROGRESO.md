@@ -1,4 +1,4 @@
-# 📋 PROGRESO DE DESARROLLO - FORGE EDITOR
+﻿# 📋 PROGRESO DE DESARROLLO - FORGE EDITOR
 
 ## 🚦 SEMÁFORO DE INICIO (AI HANDOFF LOG)
 
@@ -1091,7 +1091,7 @@ mod ui_tests;
 **Total:** 30 fases planificadas
 
 **Progreso actual:** 
-- FASES 0-7: COMPLETADAS ✅
+- FASES 0-9: COMPLETADAS ✅
 - FASE 8: COMPLETADA ✅ (Física 2D)
 - FASE 8.5: COMPLETADA ✅ (Rendimiento/Capas)
 - FASE 2.1: COMPLETADA ✅ (LiveSync MVP)
