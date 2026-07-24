@@ -4,8 +4,6 @@
 
 use eframe::egui;
 use crate::event_nodes::{EventNode, Edge as EventEdge, NodeGroup};
-use std::collections::{HashMap, VecDeque, HashSet};
-use std::sync::{Arc, Mutex};
 use crate::event_nodes::RuntimeContext;
 
 /// Event Node Manager stub
@@ -444,7 +442,7 @@ impl EventNodeManager {
         }
         
         // Eliminar edges que conectan nodos de estos grupos
-        for id in ids_to_delete.iter() {
+        for _id in ids_to_delete.iter() {
             self.edges.retain(|e| {
                 !ids_to_delete.contains(&e.from) && !ids_to_delete.contains(&e.to)
             });

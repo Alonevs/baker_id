@@ -1,7 +1,6 @@
 //! Timeline System del editor
 
-use crate::timeline::{Timeline, TimelineEvent};
-use crate::components::AnimationComponent;
+use crate::timeline::Timeline;
 use std::collections::HashMap;
 
 /// Sistema de Timeline del editor
@@ -51,7 +50,7 @@ impl TimelineSystem {
         }
     }
 
-    fn apply_frame_events(&mut self, frame: u32) {
+    fn apply_frame_events(&mut self, _frame: u32) {
     }
 
     pub fn set_playing(&mut self, playing: bool) {

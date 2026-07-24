@@ -68,7 +68,7 @@ impl EventDialogManager {
         self.is_active = false;
     }
     
-    pub fn show_dialog_panel(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    pub fn show_dialog_panel(&mut self, ctx: &egui::Context, _ui: &mut egui::Ui) {
         egui::TopBottomPanel::top("event_dialog_panel").show(ctx, |ui| {
             if let Some(dialog_id) = &self.current_dialog {
                 if let Some(dialog) = self.dialogs.get(dialog_id) {

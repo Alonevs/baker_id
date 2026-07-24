@@ -34,7 +34,7 @@ impl DialogueExporter {
         for line in &dialogue.lines {
             let escaped_text = line.text.replace("\\", "\\\\").replace("\"", "\"\"");
             let escaped_speaker = line.speaker.as_deref().map(|s| s.replace("\\", "\\\\")).unwrap_or_default();
-            let escaped_vars = line.variables.join(",");
+            let _escaped_vars = line.variables.join(",");
             csv.push_str(&format!("\"{}\",\"{}\",\"{}\",{:?},{},{},\"\n",
                 line.id,
                 escaped_text,

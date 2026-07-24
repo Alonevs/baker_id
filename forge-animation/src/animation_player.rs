@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::animation::{LoopMode};
 use crate::animation_clip::{AnimationClip, AnimationEvent};
-use crate::keyframe::{Keyframe, Transform};
+use crate::keyframe::Keyframe;
 
 
 /// AnimationPlayer - Sistema de reproducción de animaciones en tiempo real

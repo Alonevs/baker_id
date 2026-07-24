@@ -11,7 +11,7 @@ impl DialogueEditorRenderer {
         Self
     }
     
-    pub fn render_dialogue_editor(&self, ui: &mut egui::Ui, dialogues: &HashMap<String, String>) {
+    pub fn render_dialogue_editor(&self, ui: &mut egui::Ui, _dialogues: &HashMap<String, String>) {
         ui.label("Dialogue Editor UI");
     }
 }

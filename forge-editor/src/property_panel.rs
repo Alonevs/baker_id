@@ -21,7 +21,7 @@ impl PropertyPanel {
         Self
     }
     
-    pub fn show(&self, ctx: &egui::Context, ui: &mut egui::Ui, entity_id: &EntityId) {
+    pub fn show(&self, _ctx: &egui::Context, ui: &mut egui::Ui, _entity_id: &EntityId) {
         ui.label("Property Panel");
     }
 }

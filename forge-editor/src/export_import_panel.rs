@@ -9,7 +9,7 @@ impl ExportImportPanel {
         Self
     }
     
-    pub fn show(&self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    pub fn show(&self, _ctx: &egui::Context, ui: &mut egui::Ui) {
         ui.label("Export Import Panel");
     }
 }

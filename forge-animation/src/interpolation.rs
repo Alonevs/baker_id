@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::animation::{Animation, InterpolationType, LoopMode};
+use crate::animation::{InterpolationType, LoopMode};
 use crate::keyframe::{Keyframe, Transform};
 
 /// Interpolador avanzado para animaciones 2D

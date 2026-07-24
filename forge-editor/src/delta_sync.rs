@@ -10,7 +10,7 @@ impl DeltaEncoder {
         Self
     }
     
-    pub fn encode_deltas(&self, old_state: &EntityId, new_state: &EntityId) -> Vec<u8> {
+    pub fn encode_deltas(&self, _old_state: &EntityId, _new_state: &EntityId) -> Vec<u8> {
         Vec::new()
     }
 }
@@ -23,7 +23,7 @@ impl DeltaDecoder {
         Self
     }
     
-    pub fn decode(&self, data: &[u8]) -> Result<EntityId, String> {
+    pub fn decode(&self, _data: &[u8]) -> Result<EntityId, String> {
         Ok(EntityId::default())
     }
 }

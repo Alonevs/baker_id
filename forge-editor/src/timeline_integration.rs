@@ -2,7 +2,6 @@
 
 use crate::timeline::TimelineSystem;
 use crate::components::AnimationComponent;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct EditorPlaybackState {
@@ -30,7 +29,7 @@ impl TimelineIntegration {
         self.timeline_manager.register_entity(runtime_id, 0);
     }
     
-    pub fn get_entity_animation(&self, runtime_id: u64) -> Option<&AnimationComponent> {
+    pub fn get_entity_animation(&self, _runtime_id: u64) -> Option<&AnimationComponent> {
         None
     }
     

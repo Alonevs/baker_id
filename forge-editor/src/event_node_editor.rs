@@ -7,7 +7,7 @@
 //! - Visualización de variables y flags
 
 use crate::event_node_manager::EventNodeManager;
-use crate::event_nodes::{EventNode, EventType, NodeData, Edge, NodeGroup};
+use crate::event_nodes::{EventNode, EventType, NodeData, Edge};
 use egui::{Color32, Vec2, Response, Ui, Sense};
 
 /// Editor de nodos de evento
@@ -257,8 +257,8 @@ impl EventNodeEditor {
         let edges = self.manager.get_edges();
         
         // Guardar rect para mostrar mensaje de error
-        let rect = _canvas_rect;
-        let painter = ui.painter();
+        let _rect = _canvas_rect;
+        let _painter = ui.painter();
         
         // 1. Dibujar Cables Bézier de conexiones permanentes
         for edge in edges {
@@ -402,8 +402,8 @@ impl EventNodeEditor {
         
         // Validar conexión antes de crearla
         let mut connection_valid = false;
-        let mut connection_from_id: Option<String> = None;
-        let mut connection_to_id: Option<String> = None;
+        let _connection_from_id: Option<String> = None;
+        let _connection_to_id: Option<String> = None;
         let mut temp_from_id: Option<String> = None;
         let mut temp_to_id: Option<String> = None;
         
@@ -511,7 +511,7 @@ impl EventNodeEditor {
         for group in &self.manager.groups {
             let group_nodes = self.manager.get_nodes_in_group(&group.id);
             let node_count = group_nodes.len();
-            let group_id = group.id.clone();
+            let _group_id = group.id.clone();
             let group_name = group.name.clone();
             let is_collapsed = group.is_collapsed;
             

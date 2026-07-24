@@ -61,7 +61,7 @@ impl BitacoraManager {
         self.entries.len()
     }
 
-    pub fn add_entry(&mut self, text: &str, related_to: Option<String>) -> String {
+    pub fn add_entry(&mut self, text: &str, _related_to: Option<String>) -> String {
         let id = format!("note_{}", self.entries.len());
         let entry = BitacoraEntry::new(id.clone(), text.to_string());
         self.entries.insert(id.clone(), entry);
@@ -98,7 +98,7 @@ impl BitacoraManager {
         println!("[Bitacora] {}", message);
     }
 
-    pub fn show_bitacora_panel(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    pub fn show_bitacora_panel(&mut self, ctx: &egui::Context, _ui: &mut egui::Ui) {
         egui::TopBottomPanel::top("bitacora_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new("Bitacora Interactiva").color(egui::Color32::WHITE));

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::{LoopMode, Transform, Keyframe};
+use crate::{Transform, Keyframe};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimationClip {

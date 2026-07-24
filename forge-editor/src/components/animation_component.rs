@@ -51,7 +51,7 @@ impl AnimationComponent {
         anim
     }
 
-    pub fn add_keyframe(&mut self, property: &str, value: f32, time: f32) {
+    pub fn add_keyframe(&mut self, _property: &str, value: f32, time: f32) {
         self.keyframes
             .push(Keyframe {
                 time,
@@ -60,7 +60,7 @@ impl AnimationComponent {
             });
     }
 
-    pub fn get_keyframes(&self, property: &str) -> Vec<&Keyframe> {
+    pub fn get_keyframes(&self, _property: &str) -> Vec<&Keyframe> {
         self.keyframes.iter().collect()
     }
 

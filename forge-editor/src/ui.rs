@@ -1,7 +1,6 @@
 ﻿//! UI del editor
 
 use crate::timeline_integration::TimelineIntegration;
-use std::collections::HashMap;
 use eframe::egui;
 use eframe::App;
 
@@ -29,7 +28,7 @@ impl Default for ForgeEditorApp {
 }
 
 impl ForgeEditorApp {
-    pub fn new(cc: &eframe::CreationContext) -> Self {
+    pub fn new(_cc: &eframe::CreationContext) -> Self {
         Self::default()
     }
     
@@ -39,7 +38,7 @@ impl ForgeEditorApp {
 }
 
 impl App for ForgeEditorApp {
-    fn update(&mut self, ctx: &egui::Context, _ui: &mut eframe::Frame) {
+    fn update(&mut self, _ctx: &egui::Context, _ui: &mut eframe::Frame) {
         // Update logic
     }
 }

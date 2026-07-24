@@ -62,7 +62,7 @@ impl LiveSyncManager {
         self.pending_events.clear();
     }
     
-    pub fn show_sync_panel(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    pub fn show_sync_panel(&mut self, ctx: &egui::Context, _ui: &mut egui::Ui) {
         egui::TopBottomPanel::top("sync_panel").show(ctx, |ui| {
             ui.label(egui::RichText::new("Live Sync").color(egui::Color32::WHITE));
             ui.label(format!("Pending: {}", self.pending_events.len()));

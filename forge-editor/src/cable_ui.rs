@@ -68,7 +68,7 @@ impl CableSystemUI {
             self.get_node_position(bounds, &edge.to)
         ) {
             let color = egui::Color32::from_rgb(100, 150, 255);
-            let stroke = egui::Stroke::new(2.0, color);
+            let stroke = egui::Stroke::new(2.0_f32, color);
             
             ui.painter().line_segment([from_pos, to_pos], stroke);
         }
@@ -127,7 +127,7 @@ impl CableSystemUI {
     }
 
     /// Maneja el drop en un nodo
-    pub fn on_drop(&mut self, data: &str, target_id: &str) -> bool {
+    pub fn on_drop(&mut self, _data: &str, target_id: &str) -> bool {
         if self.dragging {
             self.end_drag(target_id);
             true
@@ -205,7 +205,7 @@ impl CableSystemUI {
             Some(_) => egui::Color32::from_rgb(255, 100, 100), // Red para condiciones
             None => egui::Color32::from_rgb(100, 150, 255), // Azul normal
         };
-        let stroke = egui::Stroke::new(2.0, color);
+        let stroke = egui::Stroke::new(2.0_f32, color);
         
         ui.painter().line_segment([from, to], stroke);
     }

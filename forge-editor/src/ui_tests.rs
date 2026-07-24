@@ -1,7 +1,6 @@
 ﻿//! UI Tests - Pruebas de interfaz de usuario
 
 use crate::ui::ForgeEditorApp;
-use eframe::egui;
 
 pub fn test_editor_log() {
     // Create a minimal app instance directly
