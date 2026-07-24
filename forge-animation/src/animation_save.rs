@@ -94,6 +94,7 @@ impl KeyframeSaveData {
             target: Uuid::parse_str(&self.target).unwrap_or_else(|_| Uuid::new_v4()),
             transform: self.transform.to_transform(),
             blend_weight: self.blend_weight,
+            interpolation: crate::InterpolationType::default(),
         }
     }
 }
