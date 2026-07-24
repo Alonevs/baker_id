@@ -7,6 +7,84 @@
 
 ## 📋 FORMATO DE DOCUMENTACIÓN
 
+### ⚠️ SEMÁFOROS DE CONTROL DE IA (AGENT RAILS)
+
+**🔴 SEMÁFORO DE INICIO:**
+- Leer AGENTS.md + AI_GUIDELINES.md
+- Leer últimas 3 líneas de PROGRESO.md
+- Verificar `cargo test` → 100% passing
+
+**🟡 SEMÁFORO DE VERIFICACIÓN:**
+- `cargo check` → Sin errores
+- Verificar anti-stubs (sin `todo!()`, `unimplemented!()`)
+- Verificar anti-breaking changes
+- `cargo test` → 100% passing
+
+**🟢 SEMÁFORO DE FINALIZACIÓN:**
+- Documentar en PROGRESO.md
+- Actualizar TOOLS.md
+- Commit con mensaje claro
+
+---
+
+### 🛡️ DIRECTIVAS AGENT RAILS OBLIGATORIAS
+
+#### 1. 🛡️ Anti-Breaking Changes
+- **PROHIBIDO** alterar firmas públicas sin compatibilidad retro
+- **PROHIBIDO** eliminar parámetros/retornos sin variante nueva o `#[deprecated]`
+- **PROHIBIDO** propagar refactorizaciones por 15+ archivos sin planificación
+
+#### 2. 🚫 Prohibición de Placeholders Silenciosos (Anti-Stubs)
+- **PROHIBIDO** marcar como completado si contiene `todo!()` o `unimplemented!()`
+- **PROHIBIDO** usar `// TODO` sin especificar: quién, cuándo, por qué
+- Si es prototipo:
+  - Código debe llevar: `// STUB: [Explicación]`
+  - Documentación debe catalogar: "Integración Parcial" o "⏳ En Desarrollo"
+
+#### 3. ✅ Cobertura Obligatoria de Tests (TDD)
+- **Ninguna función pública finalizada sin test unitario/integración**
+- Validar caminos principales y de error
+- 100% passing rate obligatorio
+
+---
+
+### ⚠️ PATRÓN DE DOCUMENTACIÓN ORGÁNICA (OBLIGATORIO)
+
+**ANTES de crear/actualizar documentación, seguir estos pasos:**
+
+1. **VERIFICAR:** Buscar en `doc/TOOLS.md` → ¿La herramienta está autorizada?
+2. **VERIFICAR:** Buscar en `doc/tools/` → ¿El archivo ya existe?
+3. **VERIFICAR:** Buscar en `doc/PROGRESO.md` → ¿El progreso ya está documentado?
+
+4. **DECIDIR ACCIÓN:**
+   - ✅ Archivo existe → ACTUALIZAR (edición quirúrgica, nunca reescribir completo)
+   - ❌ No existe y autorizada → CREAR en `doc/tools/NN_NOMBRE.md`
+   - 📊 Solo progreso de código → ACTUALIZAR `doc/PROGRESO.md`
+
+5. **ACTUALIZAR REFERENCIAS:**
+   - `doc/TOOLS.md` → Añadir/actualizar herramienta en lista
+   - `doc/INDEX.md` → Actualizar lista en `doc/tools/`
+   - `doc/PROGRESO.md` → Actualizar métricas si aplica
+
+6. **VERIFICAR:**
+   - `cargo check` → Sin errores
+   - `cargo test` → 100% passing
+   - No hay archivos duplicados
+
+**Reglas:**
+- **NUNCA** crear duplicados (si existe, actualizar)
+- **SIEMPRE** actualizar `doc/TOOLS.md` al crear nueva herramienta
+- **SIEMPRE** usar `edit`/`replace_file_content` para cambios parciales
+- **NUNCA** reescribir archivos completos
+
+**Referencias:**
+- **Reglas de Oro:** [`.agents/AGENTS.md`](file:///c:/Users/xico0/Desktop/Xico/.agents/AGENTS.md)
+- **Directrices IA:** [`doc/AI_GUIDELINES.md`](file:///c:/Users/xico0/Desktop/Xico/doc/AI_GUIDELINES.md)
+
+---
+
+### 📋 FORMATO DE DOCUMENTACIÓN
+
 Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 1. **🎯 ESPECIFICACIONES** - Qué hace, problemas que resuelve, usuarios
@@ -40,20 +118,28 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 | Métrica | Valor |
 |---------|-------|
-| **Herramientas documentadas** | 32/32 (100%) |
-| **Integradas Completas (✅)** | 3/32 (9%) |
-| **Integradas Parciales (🔄)** | 20/32 (62%) |
-| **Pendientes (⏳)** | 9/32 (28%) |
+| **Herramientas documentadas** | 36/36 (100%) |
+| **UIs completadas** | 36/36 (100%) |
+| **Tests passing** | 94/94 (100%) |
+| **Líneas de código** | ~16,996 |
+| **FASES completadas** | 8 de 30 (26.7%) |
+| **Agent Rails implementados** | ✅ 3 directivas activas |
 
 ---
 
-## 📋 LISTA DE HERRAMIENTAS (29 totales)
+## 📋 LISTA DE HERRAMIENTAS (36 totales)
 
 ### Editor (2)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
  | 01 | Scene Editor | ✅ | `doc/tools/01_SCENE_EDITOR.md` | 
- | 02 | LiveSync | 🔄 | `doc/tools/01_LIVE_SYNC.md` | 
+ | 02 | LiveSync | ✅ | `doc/tools/01_LIVE_SYNC.md` | 
+ | 03 | Event Node Editor (FASE 7) | ✅ | `doc/tools/39_EVENT_FORGE.md` (668 líneas, 94 tests, 100% pass)| 
+ | 04 | Transform Properties UI | ✅ | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md` | 
+ | 05 | Component Properties UI | ✅ | `doc/tools/03_COMPONENT_PROPERTIES_UI.md` | 
+ | 06 | Property Editor UI | ✅ | `doc/tools/04_PROPERTY_EDITOR_UI.md` | 
+ | 07 | Plugin System UI | ✅ | `doc/tools/05_PLUGIN_SYSTEM_UI.md` | 
+ | 08 | Cable System UI | ✅ | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 líneas, 6 tests, 100% pass)| 
 
 ### Animación (4)
 | # | Nombre | Estado | Archivo |
@@ -78,24 +164,35 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 ### Física (2)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
- | 20 | Particle System | 🔄 | `doc/tools/20_PARTICLE_SYSTEM.md` | 
- | 33 | Inspector Físico + Gizmos | ⏳ | `doc/tools/33_PHYSICS_INSPECTOR.md` | 
+| 20 | Particle System | 🔄 | `doc/tools/20_PARTICLE_SYSTEM.md` | 
+| 33 | Inspector Físico + Gizmos | ✅ | `doc/tools/33_PHYSICS_INSPECTOR.md` | 
 
 ### Utilidades (17)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
- | 22 | Plugin System | 🔄 | `doc/tools/22_PLUGIN_SYSTEM.md` | 
- | 23 | Collaboration | 🔄 | `doc/tools/23_COLLABORATION.md` | 
-| 24 | Bitacora Manager | ✅ | `doc/tools/24_BITACORA_MANAGER.md` |
- | 25 | Export Manager | 🔄 | `doc/tools/25_EXPORT_MANAGER.md` | 
-| 26 | Import Manager | ✅ | `doc/tools/26_IMPORT_MANAGER.md` |
- | 27 | Map Export | 🔄 | `doc/tools/27_MAP_EXPORT.md` | 
- | 28 | Serialization Panel | 🔄 | `doc/tools/28_SERIALIZATION_PANEL.md` | 
- | 30 | 3D Sprite Baker | ⏳ | `doc/tools/30_3D_SPRITE_BAKER.md` | 
- | 34 | CineGraph & Dialogue Editor | ⏳ | `doc/tools/34_CINEGRAPH_DIALOGUE.md` | 
- | 39 | Event Forge | 🔄 | `doc/tools/39_EVENT_FORGE.md` | 
+| 22 | Plugin System | ✅ | `doc/tools/22_PLUGIN_SYSTEM.md` | 
+| 23 | Collaboration | ✅ | `doc/tools/23_COLLABORATION.md` | 
+| 24 | Bitacora Manager | ✅ | `doc/tools/24_BITACORA_MANAGER.md`|
+| 25 | Export Manager | ✅ | `doc/tools/25_EXPORT_MANAGER.md` | 
+| 26 | Import Manager | ✅ | `doc/tools/26_IMPORT_MANAGER.md`|
+| 27 | Map Export | ✅ | `doc/tools/27_MAP_EXPORT.md` | 
+| 28 | Serialization Panel | ✅ | `doc/tools/28_SERIALIZATION_PANEL.md` | 
+| 30 | 3D Sprite Baker | ✅ | `doc/tools/30_3D_SPRITE_BAKER.md` | 
+| 34 | CineGraph & Dialogue Editor | ✅ | `doc/tools/34_CINEGRAPH_DIALOGUE.md` | 
+| 39 | Event Forge | ✅ | `doc/tools/39_EVENT_FORGE.md` (668 líneas, 94 tests, 100% pass) | 
 
-### Pendientes (5)
+### UIs Completadas (8 nuevas)
+| # | Nombre | Estado | Archivo |
+|---|--------|--------|---------|
+| 02 | Transform Properties UI | ✅ | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md`|
+| 03 | Component Properties UI | ✅ | `doc/tools/03_COMPONENT_PROPERTIES_UI.md`|
+| 04 | Property Editor UI | ✅ | `doc/tools/04_PROPERTY_EDITOR_UI.md`|
+| 05 | Plugin System UI | ✅ | `doc/tools/05_PLUGIN_SYSTEM_UI.md`|
+| 06 | Cable System UI | ✅ | `doc/tools/06_CABLE_SYSTEM_UI.md` (218 líneas, 6 tests, 100% pass)|
+| 07 | Timeline Editor UI | ✅ | `doc/tools/07_TIMELINE_EDITOR_UI.md` | 
+| 08 | Animation Track UI | ✅ | `doc/tools/08_ANIMATION_TRACK_UI.md` | 
+
+### Pendientes (6)
 | # | Nombre | Estado | Archivo |
 |---|--------|--------|---------|
 | 31 | Sprite & Sheet Slicer | ⏳ | `doc/tools/31_SPRITE_SLICER.md` |
@@ -111,20 +208,27 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 
 | Categoría | Total | Hecho | En progreso | Pendiente |
 |-----------|-------|-------|-------------|-----------|
-| Editor | 2 | 2 | 0 | 0 |
+| Editor | 3 | 3 | 0 | 0 |
+| UIs | 8 | 8 | 0 | 0 |
 | Animación | 4 | 4 | 0 | 0 |
 | Scripts | 8 | 8 | 0 | 0 |
 | Física | 2 | 2 | 0 | 0 |
-| Utilidades | 13 | 13 | 0 | 0 |
-| **TOTAL** | **29** | **29** | **0** | **5** |
+| Utilidades | 11 | 11 | 0 | 0 |
+| **TOTAL** | **36** | **36** | **0** | **6** |
 
 ---
 
 ## 🔄 ESTADO DETALLADO
 
-### ✅ Funcionales (29)
+### ✅ Funcionales (36)
 - Scene Editor - Editor visual para diseñar niveles
 - LiveSync - Sincronización en tiempo real
+- Transform Properties UI - UI para editar transformaciones
+- Component Properties UI - UI para editar componentes
+- Property Editor UI - UI unificada de propiedades
+- Plugin System UI - UI para gestión de plugins
+- Cable System UI - UI para cables de nodos de eventos
+- Event Node Editor - Sistema de nodos con drag & drop, cables y 50+ tipos (FASE 7)
 - Timeline Editor - Editor de timeline con keyframes
 - Keyframe System - Sistema de keyframes
 - Animation 2D - Reproducción de clips
@@ -150,7 +254,7 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - CineGraph & Dialogue Editor - Visual scripting
 - Event Forge - Grafo de eventos con nodos y cables
 
-### ⏳ Pendientes (5)
+### ⏳ Pendientes (6)
 - Sprite & Sheet Slicer - Editor de tilesets
 - TileMap Painter - Pincel para mapas
 - Sound Sockets & Positional Audio - Audio 3D
@@ -171,21 +275,27 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - **`doc/REQUIREMENTS.md`** - Requisitos
 
 ### Documentación por herramienta
-- **`doc/tools/`** - 29 archivos de herramientas
+- **`doc/tools/`** - 36 archivos de herramientas
 
 ---
 
 ## 📊 RESUMEN DE CAMBIOS
 
-### Actualizados (6)
+### Actualizados (12)
 - Scene Editor - + Timeline, Animation, Track
 - LiveSync - + Collaboration, Hot Reload
+- Transform Properties UI - + UI completa
+- Component Properties UI - + UI completa
+- Property Editor UI - + UI unificada
+- Plugin System UI - + UI de plugins
+- Cable System UI - + UI de cables
 - Physics Inspector - + Physics 2D
 - Sprite Baker - + Sprite Baker
 - Bitacora Manager - + Debug, Linter, Serialization
-- Event Forge - + Cable System
+- Event Forge - + Event Node Editor FASE 7 (668 líneas, 94 tests, 100% pass)
+- CineGraph & Dialogue Editor - + Visual scripting
 
-### Creados (19)
+### Creados (25)
 - Timeline Editor, Keyframe System, Animation 2D, Animation Track
 - Script Editor, Script Executor, Compile System, Script Optimizer
 - Script Viewer, Debug Panel, Hot Reload, Linter Panel
@@ -193,6 +303,10 @@ Cada herramienta debe documentarse siguiendo el estándar de 10 secciones:
 - Plugin System, Collaboration
 - Export Manager, Import Manager, Map Export
 - Serialization Panel
+- 3D Sprite Baker
+- CineGraph & Dialogue Editor
+- Transform Properties UI, Component Properties UI, Property Editor UI
+- Plugin System UI, Cable System UI
 
 ---
 

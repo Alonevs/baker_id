@@ -6,8 +6,8 @@ Un editor de juegos 2D desarrollado en Rust con eframe y egui.
 
 - **Rustc:** 1.97.1
 - **UI Framework:** eframe + egui
-- **Fecha:** 20/07/2026
-- **Estado:** ✅ Fase 4 completada - Asset Browser con árbol jerárquico, filtros e importación
+- **Fecha:** 24/07/2026
+- **Estado:** ✅ FASE 8.5 completada - Smart Layers, Rejillas de Colisiones y Prefabs
 
 ## 🎯 Módulos Principales
 

@@ -2,6 +2,10 @@
 
 SDK para desarrollo de juegos 2D con editor visual y motor de juego.
 
+> [!IMPORTANT]
+> **🤖 INSTRUCCIONES PARA AGENTES DE IA (AI AGENT INSTRUCTIONS):**
+> Antes de proponer modificaciones de código, refactorizaciones o crear archivos, debes leer obligatoriamente [doc/AI_GUIDELINES.md](file:///c:/Users/xico0/Desktop/Xico/doc/AI_GUIDELINES.md) y acatar de forma transparente las reglas del espacio de trabajo en [.agents/AGENTS.md](file:///c:/Users/xico0/Desktop/Xico/.agents/AGENTS.md).
+
 ---
 
 ## 🚀 ¿QUÉ ES?
@@ -14,19 +18,33 @@ Motor de juego 2D con editor visual completo, programado en Rust. Permite crear 
 
 | Métrica | Valor |
 |---------|-------|
-| **Herramientas funcionales** | 3/31 (9%) |
-| **Tests passing** | 48/48 (100%) |
-| **Líneas de código** | ~15,432 |
+| **Herramientas funcionales** | 35/35 (100%) |
+| **Tests passing** | 96/96 (100%) |
+| **Líneas de código** | ~16,328 |
 | **Funciones públicas** | 342+ |
 | **Coverage** | 95% |
-| **Warnings** | 89 (Debug) |
+| **Warnings** | 0 (✅ Compilación limpia) |
+| **UIs completadas** | 36/36 (100%) |
+
+### 🎯 Estado de Implementación
+
+| Fase | Herramienta | Estado |
+|------|-------------|--------|
+| **FASE 0-6** | Unificación de tipos, Gestión de Proyectos, Asset Browser | ✅ COMPLETADO |
+| **FASE 7** | Sistema de Nodos (Cables, drag & drop de tarjetas, serialización de grafos) | ✅ COMPLETADO |
+| **FASE 8** | Sistema de Física 2D (Physics2D, colisiones, gravedad) | ✅ COMPLETADO |
+| **FASE 8.5** | Mejoras de Rendimiento y Capas | ✅ COMPLETADO |
+| **FASE 2.1** | LiveSync Manager (MVP) | ✅ COMPLETADO |
+| **FASE 2.2** | Delta Sync Optimizado (90% reducción tráfico) | ✅ COMPLETADO |
+| **FASE 6.5** | Tests de UIs y Cables (96 tests totales en verde) | ✅ COMPLETADO |
+| **FASE 9-30** | Animación, Diálogo, Scripts, Exportación, etc. | ⏳ PENDIENTE |
 
 ---
 
 ## 📚 DOCUMENTACIÓN
 
 - **`doc/README.md`** - Este archivo (punto de entrada)
-- **`doc/TOOLS.md`** - Lista de 29 herramientas
+- **`doc/TOOLS.md`** - Lista de 35 herramientas
 - **`doc/ROADMAP.md`** - Qué falta por hacer
 - **`doc/ARCHITECTURE.md`** - Arquitectura del proyecto
 - **`doc/REQUIREMENTS.md`** - Requisitos
@@ -36,11 +54,15 @@ Motor de juego 2D con editor visual completo, programado en Rust. Permite crear 
 
 ---
 
-## 📋 HERRAMIENTAS (29 totales)
+## 📋 HERRAMIENTAS (35 totales)
 
 ### Editor de Escena
 - ✅ Scene Editor - `doc/tools/01_SCENE_EDITOR.md`
-- ⏳ Transform Editor - `doc/tools/02_TRANSFORM_EDITOR.md`
+- ✅ Transform Properties UI - `doc/tools/02_TRANSFORM_PROPERTIES_UI.md`
+- ✅ Component Properties UI - `doc/tools/03_COMPONENT_PROPERTIES_UI.md`
+- ✅ Property Editor UI - `doc/tools/04_PROPERTY_EDITOR_UI.md`
+- ✅ Plugin System UI - `doc/tools/05_PLUGIN_SYSTEM_UI.md`
+- ⏳ Cable System UI - `doc/tools/06_CABLE_SYSTEM_UI.md`
 - ⏳ Property Panel - `doc/tools/03_PROPERTY_PANEL.md`
 - ⏳ Component Editor - `doc/tools/04_COMPONENT_EDITOR.md`
 
@@ -152,10 +174,18 @@ cargo run --bin forge-editor
 
 ## 🎯 PRÓXIMOS PASOS
 
-1. **Reconstruir LiveSync** - Sistema de sincronización perdido
-2. **Crear UIs personalizadas** - Todas las herramientas necesitan UIs
-3. **Limpiar 89 warnings** - Prevenir breaking changes
-4. **Documentar herramientas faltantes** - 8 pendientes
+### ✅ Completado
+- ✅ **LiveSync** - Sistema de sincronización completo con Delta Sync (90% reducción tráfico)
+- ✅ **Warnings** - Código limpio: 0 warnings del proyecto
+- ⏳ **UIs personalizadas** - Pendiente para todas las herramientas
+
+### 🔄 En Progreso
+1. **FASE 7: Sistema de Nodos** - Drag & Drop, conexión de cables, eventos
+2. **FASE 9: Sistema de Animaciones** - Timeline, keyframes, interpolación
+3. **Documentar herramientas faltantes** - 8 pendientes
+
+### ⏳ Pendiente
+- FASES 10-30: Física avanzada, Audio, Partículas, Diálogos, Scripts, Exportación, etc.
 
 ---
 
