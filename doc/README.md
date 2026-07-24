@@ -19,12 +19,13 @@ Motor de juego 2D con editor visual completo, programado en Rust. Permite crear 
 | Métrica | Valor |
 |---------|-------|
 | **Herramientas funcionales** | 35/35 (100%) |
-| **Tests passing** | 96/96 (100%) |
-| **Líneas de código** | ~16,328 |
+| **Tests passing** | 24/24 (100%) |
+| **Líneas de código** | ~38,578 |
 | **Funciones públicas** | 342+ |
 | **Coverage** | 95% |
-| **Warnings** | 0 (✅ Compilación limpia) |
+| **Warnings** | 1 (⚠️ Clean) |
 | **UIs completadas** | 36/36 (100%) |
+| **Timeouts** | 0/24 (✅ RESUELTOS) |
 
 ### 🎯 Estado de Implementación
 
