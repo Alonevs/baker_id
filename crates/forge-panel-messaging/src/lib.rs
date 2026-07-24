@@ -27,6 +27,12 @@ pub enum EventType {
     SceneLoaded,
     EntitySelected,
     PropertyChanged,
+    // LiveSync Events
+    SceneLoadedSync,
+    EntityAdded,
+    EntityRemoved,
+    TransformChanged,
+    ComponentChanged,
     Custom(String),
 }
 
@@ -64,6 +70,82 @@ impl EventBus {
             data: serde_json::to_value(&event).unwrap(),
         };
         self.broadcast_message(message);
+    }
+
+    // LiveSync helpers
+    pub fn publish_scene_loaded_sync(&self, scene_id: Uuid, version: u32) {
+        let event = Event {
+            id: Uuid::new_v4(),
+            event_type: EventType::SceneLoadedSync,
+            source: "live_sync_manager".to_string(),
+            target: "editor".to_string(),
+            payload: serde_json::json!({ "scene_id": scene_id.to_string(), "version": version }),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        };
+        self.broadcast(event);
+    }
+
+    pub fn publish_entity_added(&self, entity_id: Uuid, entity_type: &str, scene_id: Uuid) {
+        let event = Event {
+            id: Uuid::new_v4(),
+            event_type: EventType::EntityAdded,
+            source: "live_sync_manager".to_string(),
+            target: "editor".to_string(),
+            payload: serde_json::json!({ "entity_id": entity_id.to_string(), "entity_type": entity_type, "scene_id": scene_id.to_string() }),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        };
+        self.broadcast(event);
+    }
+
+    pub fn publish_entity_removed(&self, entity_id: Uuid, scene_id: Uuid) {
+        let event = Event {
+            id: Uuid::new_v4(),
+            event_type: EventType::EntityRemoved,
+            source: "live_sync_manager".to_string(),
+            target: "editor".to_string(),
+            payload: serde_json::json!({ "entity_id": entity_id.to_string(), "scene_id": scene_id.to_string() }),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        };
+        self.broadcast(event);
+    }
+
+    pub fn publish_transform_changed(&self, entity_id: Uuid, transform: &serde_json::Value) {
+        let event = Event {
+            id: Uuid::new_v4(),
+            event_type: EventType::TransformChanged,
+            source: "live_sync_manager".to_string(),
+            target: "editor".to_string(),
+            payload: serde_json::json!({ "entity_id": entity_id.to_string(), "transform": transform }),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        };
+        self.broadcast(event);
+    }
+
+    pub fn publish_component_changed(&self, entity_id: Uuid, component_type: &str, data: &serde_json::Value) {
+        let event = Event {
+            id: Uuid::new_v4(),
+            event_type: EventType::ComponentChanged,
+            source: "live_sync_manager".to_string(),
+            target: "editor".to_string(),
+            payload: serde_json::json!({ "entity_id": entity_id.to_string(), "component_type": component_type, "data": data }),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        };
+        self.broadcast(event);
     }
 
     pub fn broadcast_message(&self, message: PanelMessage) {

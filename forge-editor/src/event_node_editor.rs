@@ -7,12 +7,12 @@
 //! - Visualización de variables y flags
 
 use crate::event_node_manager::EventNodeManager;
-use crate::event_nodes::{EventNode, EventType, NodeData, Edge};
+use crate::event_nodes::{EventNode, EventType, NodeData, Edge, NodeGroup};
 use egui::{Color32, Vec2, Response, Ui, Sense};
 
 /// Editor de nodos de evento
 pub struct EventNodeEditor {
-    manager: EventNodeManager,
+    pub manager: EventNodeManager,
     selected_node: Option<String>,
     #[allow(dead_code)]
     show_properties: bool,
@@ -21,6 +21,9 @@ pub struct EventNodeEditor {
     #[allow(dead_code)]
     execution_count: u32,
     drag_connection: Option<(String, egui::Pos2)>,
+    drag_node_id: Option<String>,
+    drag_node_start_pos: Option<egui::Pos2>,
+    connection_error: Option<String>,
 }
 
 impl EventNodeEditor {
@@ -33,7 +36,18 @@ impl EventNodeEditor {
             show_nodes_list: true,
             execution_count: 0,
             drag_connection: None,
+            drag_node_id: None,
+            drag_node_start_pos: None,
+            connection_error: None,
         }
+    }
+
+    pub fn get_graph(&self) -> crate::event_nodes::EventGraph {
+        self.manager.get_graph()
+    }
+
+    pub fn load_graph(&mut self, graph: crate::event_nodes::EventGraph) {
+        self.manager.load_graph(graph);
     }
 
     /// Renderiza el editor completo
@@ -69,27 +83,75 @@ impl EventNodeEditor {
                 }
             );
             
-            // Panel central: Visualización del grafo
-            ui.allocate_ui_with_layout(
-                Vec2::new(ui.available_width() - 260.0, ui.available_height()),
-                egui::Layout::top_down(egui::Align::Min),
-                |ui| {
-                    ui.group(|ui| {
-                        self.render_graph_view(ui);
-                    });
+            // Tabs de visualización usando botones
+            ui.horizontal(|ui| {
+                let show_graph = ui.button("🎨 Graph").clicked();
+                let show_nodes = ui.button("📋 Nodes").clicked();
+                let show_execution = ui.button("🎮 Execution").clicked();
+                let show_groups = ui.button("📁 Groups").clicked();
+                
+                if show_graph {
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(ui.available_width() - 260.0, ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_graph_view(ui);
+                            });
+                        }
+                    );
+                    
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(240.0, ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_properties_panel(ui);
+                            });
+                        }
+                    );
+                } else if show_nodes {
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(ui.available_width() - 260.0, ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_nodes_list(ui);
+                            });
+                        }
+                    );
+                    
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(240.0, ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_properties_panel(ui);
+                            });
+                        }
+                    );
+                } else if show_execution {
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(ui.available_width(), ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_execution_panel(ui);
+                            });
+                        }
+                    );
+                } else if show_groups {
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(ui.available_width(), ui.available_height()),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
+                            ui.group(|ui| {
+                                self.render_groups_panel(ui);
+                            });
+                        }
+                    );
                 }
-            );
-            
-            // Panel derecho: Propiedades del nodo seleccionado
-            ui.allocate_ui_with_layout(
-                Vec2::new(240.0, ui.available_height()),
-                egui::Layout::top_down(egui::Align::Min),
-                |ui| {
-                    ui.group(|ui| {
-                        self.render_properties_panel(ui);
-                    });
-                }
-            );
+            });
         });
     }
 
@@ -193,6 +255,10 @@ impl EventNodeEditor {
         
         let nodes = self.manager.get_all_nodes();
         let edges = self.manager.get_edges();
+        
+        // Guardar rect para mostrar mensaje de error
+        let rect = _canvas_rect;
+        let painter = ui.painter();
         
         // 1. Dibujar Cables Bézier de conexiones permanentes
         for edge in edges {
@@ -334,19 +400,56 @@ impl EventNodeEditor {
             self.drag_connection = Some((from_id, pos));
         }
         
-        // Consolidar la conexión final del cable al soltar el ratón
-        if mouse_released {
-            if let Some((from_id, _)) = self.drag_connection.take() {
-                if let Some(to_id) = end_connection {
-                    if from_id != to_id && !self.manager.edges.iter().any(|e| e.from == from_id && e.to == to_id) {
-                        self.manager.edges.push(Edge {
-                            from: from_id,
-                            to: to_id,
-                            condition: None,
-                        });
+        // Validar conexión antes de crearla
+        let mut connection_valid = false;
+        let mut connection_from_id: Option<String> = None;
+        let mut connection_to_id: Option<String> = None;
+        let mut temp_from_id: Option<String> = None;
+        let mut temp_to_id: Option<String> = None;
+        
+        // Guardar end_connection antes de usarlo
+        let end_connection_opt = end_connection.clone();
+        
+        // Validar fuera del bucle para evitar conflictos de préstamo
+        if !connection_valid {
+            if mouse_released {
+                if let Some((from_id, _)) = self.drag_connection.take() {
+                    if let Some(to_id) = end_connection_opt.clone() {
+                        temp_from_id = Some(from_id.clone());
+                        temp_to_id = Some(to_id.clone());
+                        // Validación 1: No conectar un nodo consigo mismo
+                        if from_id != to_id {
+                            // Validación 2: Verificar que el nodo destino existe
+                            if self.manager.get_node(&to_id).is_some() {
+                                // Validación 3: Verificar que el nodo origen existe
+                                if self.manager.get_node(&from_id).is_some() {
+                                    // Validación 4: Verificar que no ya existe la conexión
+                                    if !self.manager.edges.iter().any(|e| e.from == from_id && e.to == to_id) {
+                                        // Validación 5: Verificar tipos compatibles (opcional - futuro)
+                                        // Por ahora permitimos todas las conexiones
+                                        connection_valid = true;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+        }
+        
+        // Crear conexión si es válida
+        if connection_valid {
+            if let Some((from_id, _)) = self.drag_connection.take() {
+                if let Some(to_id) = end_connection_opt {
+                    self.manager.edges.push(Edge {
+                        from: from_id,
+                        to: to_id,
+                        condition: None,
+                    });
+                }
+            }
+            // Limpiar error de conexión si se creó exitosamente
+            self.connection_error = None;
         }
     }
 
@@ -363,6 +466,145 @@ impl EventNodeEditor {
         painter.add(shape);
     }
 
+    /// Renderiza el panel de grupos de nodos
+    fn render_groups_panel(&mut self, ui: &mut Ui) {
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.heading("📁 Node Groups");
+            ui.separator();
+            
+            // Botón para crear nuevo grupo
+            ui.horizontal(|ui| {
+                if ui.button("+ New Group").clicked() {
+                    let mut group_name = String::from("New Group");
+                    ui.text_edit_singleline(&mut group_name);
+                    if !group_name.is_empty() {
+                        let _ = self.manager.create_group(group_name.clone());
+                    }
+                }
+                ui.add_space(10.0);
+                if ui.button("📂 New Subgroup").clicked() {
+                    let mut subgroup_name = String::from("Subgroup");
+                    ui.text_edit_singleline(&mut subgroup_name);
+                    if !subgroup_name.is_empty() {
+                        let first_group_id = self.manager.groups.first().map(|g| g.id.clone());
+                        if let Some(first_group_id) = first_group_id {
+                            let _ = self.manager.create_child_group(&first_group_id, subgroup_name.clone());
+                        }
+                    }
+                }
+            });
+            
+            ui.add_space(10.0);
+            
+            // Renderizar grupos
+            self.render_groups_list(ui);
+        });
+    }
+    
+    /// Renderiza la lista de grupos
+    fn render_groups_list(&self, ui: &mut Ui) {
+        if self.manager.groups.is_empty() {
+            ui.label("No groups yet.");
+            return;
+        }
+        
+        for group in &self.manager.groups {
+            let group_nodes = self.manager.get_nodes_in_group(&group.id);
+            let node_count = group_nodes.len();
+            let group_id = group.id.clone();
+            let group_name = group.name.clone();
+            let is_collapsed = group.is_collapsed;
+            
+            ui.group(|ui| {
+                ui.horizontal(|ui| {
+                    ui.label(format!("{} Group", group_name));
+                    
+                    let collapsed_icon = if is_collapsed { "▶" } else { "▼" };
+                    
+                    ui.label(format!(" {} ({})", collapsed_icon, node_count));
+                });
+                
+                ui.separator();
+                ui.label(format!("Nodes in {} ({}):", group_name, node_count));
+                
+                if node_count == 0 {
+                    ui.label("  (no nodes)");
+                } else {
+                    for node in &group_nodes {
+                        ui.label(format!("  • {:?} [{}]", node.event_type, node.id));
+                    }
+                }
+                
+                if !group.children.is_empty() {
+                    ui.separator();
+                    ui.label(format!("Subgroups ({}):", group_name));
+                    for child_id in &group.children {
+                        if let Some(child_group) = self.manager.groups.iter().find(|g| g.id.as_str() == child_id.as_str()) {
+                            let child_nodes = self.manager.get_nodes_in_group(child_id);
+                            ui.label(format!("  └─ {} ({} nodes)", child_group.name, child_nodes.len()));
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    /// Renderiza el panel de ejecución del grafo
+    fn render_execution_panel(&mut self, ui: &mut Ui) {
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.heading("🎮 Graph Execution");
+            ui.separator();
+            
+            // Botones de ejecución
+            ui.horizontal(|ui| {
+                if ui.button("▶ Execute Graph").clicked() {
+                    self.manager.execute_all();
+                    ui.label(format!("Executed {} nodes", self.manager.nodes.len()));
+                }
+                if ui.button("▶ Execute Selected").clicked() {
+                    if let Some(ref node_id) = self.selected_node {
+                        self.manager.execute_node(node_id.clone());
+                    }
+                }
+                if ui.button("🔄 Reset Counts").clicked() {
+                    for node in &mut self.manager.nodes {
+                        node.execution_count = 0;
+                        node.is_active = false;
+                    }
+                }
+            });
+            
+            ui.add_space(10.0);
+            
+            // Verificar ciclos
+            if self.manager.has_cycle() {
+                ui.label("⚠️ Warning: Graph contains a cycle!");
+            } else {
+                ui.label("✓ Graph is acyclic (DAG)");
+            }
+            
+            // Mostrar contadores de ejecución
+            ui.separator();
+            ui.label("Execution Counts:");
+            
+            let execution_counts = self.manager.get_execution_counts();
+            if execution_counts.is_empty() {
+                ui.label("No nodes executed yet");
+            } else {
+                egui::ScrollArea::horizontal().show(ui, |ui| {
+                    for (node_id, count) in execution_counts {
+                        let node = self.manager.get_node(&node_id);
+                        let node_name = node.as_ref().map(|n| format!("{:?}", n.event_type)).unwrap_or_else(|| "Unknown".to_string());
+                        ui.horizontal(|ui| {
+                            ui.label(format!("{} ({})", node_name, node_id));
+                            ui.label(format!("Exec: {}", count));
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
     /// Renderiza el panel de propiedades
     fn render_properties_panel(&mut self, ui: &mut Ui) {
         egui::ScrollArea::vertical().show(ui, |ui| {
@@ -384,6 +626,30 @@ impl EventNodeEditor {
                         }
                         if ui.button("Execute All").clicked() {
                             self.manager.execute_all();
+                        }
+                        if ui.button("Duplicate").clicked() {
+                            // Duplicar nodo manteniendo posición y conexiones
+                            if let Some(node) = self.manager.get_node(&id) {
+                                let node_name = id.clone();
+                                let new_id = format!("{}_copy", node_name);
+                                let mut new_node = node.clone();
+                                new_node.id = new_id.clone();
+                                // Mantener misma posición pero desplazada ligeramente
+                                new_node.position = egui::Pos2::new(
+                                    node.position.x + 20.0,
+                                    node.position.y + 20.0
+                                );
+                                self.manager.nodes.push(new_node);
+                                self.selected_node = Some(new_id);
+                            }
+                        }
+                        if ui.button("Delete Node").clicked() {
+                            let should_deselect = self.selected_node == Some(id.clone());
+                            if self.manager.delete_node(&id) {
+                                if should_deselect {
+                                    self.selected_node = None;
+                                }
+                            }
                         }
                         if ui.button("Delete").clicked() {
                             self.manager.delete_node(&id);
@@ -412,13 +678,44 @@ impl EventNodeEditor {
             .default_open(true)
             .show(ui, |ui| {
                 match &node.event_type {
+                    // Triggers
                     EventType::OnStart => Self::render_on_start_properties(ui, node),
                     EventType::OnClick => Self::render_on_click_properties(ui, node),
                     EventType::OnTimer => Self::render_on_timer_properties(ui, node),
+                    EventType::OnEnter => Self::render_on_enter_properties(ui, node),
+                    EventType::OnExit => Self::render_on_exit_properties(ui, node),
+                    EventType::OnCollision => Self::render_on_collision_properties(ui, node),
+                    EventType::OnTrigger => Self::render_on_trigger_properties(ui, node),
+                    EventType::OnKeyPress => Self::render_on_key_press_properties(ui, node),
+                    EventType::OnMouseOver => Self::render_on_mouse_over_properties(ui, node),
+                    EventType::OnMouseClick => Self::render_on_mouse_click_properties(ui, node),
+                    // Actions
                     EventType::ShowDialog => Self::render_show_dialog_properties(ui, node),
                     EventType::PlayAnimation => Self::render_play_animation_properties(ui, node),
+                    EventType::StopAnimation => Self::render_stop_animation_properties(ui, node),
+                    EventType::PauseAnimation => Self::render_pause_animation_properties(ui, node),
+                    EventType::ResumeAnimation => Self::render_resume_animation_properties(ui, node),
                     EventType::ChangeVariable => Self::render_change_variable_properties(ui, node),
+                    EventType::CallFunction => Self::render_call_function_properties(ui, node),
+                    EventType::SetFlag => Self::render_set_flag_properties(ui, node),
+                    EventType::ClearFlag => Self::render_clear_flag_properties(ui, node),
+                    EventType::SpawnEntity => Self::render_spawn_entity_properties(ui, node),
+                    EventType::RemoveEntity => Self::render_remove_entity_properties(ui, node),
+                    EventType::PlaySound => Self::render_play_sound_properties(ui, node),
+                    EventType::ChangeColor => Self::render_change_color_properties(ui, node),
+                    EventType::ChangePosition => Self::render_change_position_properties(ui, node),
+                    EventType::Rotate => Self::render_rotate_properties(ui, node),
+                    EventType::Scale => Self::render_scale_properties(ui, node),
+                    // Conditionals
                     EventType::IfCondition => Self::render_if_condition_properties(ui, node),
+                    EventType::WhileLoop => Self::render_while_loop_properties(ui, node),
+                    EventType::ForLoop => Self::render_for_loop_properties(ui, node),
+                    EventType::Switch => Self::render_switch_properties(ui, node),
+                    EventType::AndCondition => Self::render_and_condition_properties(ui, node),
+                    EventType::OrCondition => Self::render_or_condition_properties(ui, node),
+                    EventType::NotCondition => Self::render_not_condition_properties(ui, node),
+                    // System
+                    EventType::Empty => { ui.label("No configuration"); },
                     _ => { ui.label("No specific configuration"); }
                 }
             });
@@ -428,6 +725,22 @@ impl EventNodeEditor {
     fn render_on_start_properties(ui: &mut Ui, node: &mut EventNode) {
         if let NodeData::OnStart { auto_execute } = &mut node.data {
             ui.checkbox(auto_execute, "Auto Execute on Start");
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnEnter
+    fn render_on_enter_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnEnter { target } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnExit
+    fn render_on_exit_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnExit { target } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
         }
     }
 
@@ -494,6 +807,252 @@ impl EventNodeEditor {
             ui.text_edit_singleline(then_branch);
             ui.label("Else Branch:");
             ui.text_edit_singleline(else_branch);
+        }
+    }
+
+    /// Renderiza propiedades de nodo StopAnimation
+    fn render_stop_animation_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::StopAnimation { target, animation } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+            ui.label("Animation:");
+            ui.text_edit_singleline(animation);
+        }
+    }
+
+    /// Renderiza propiedades de nodo PauseAnimation
+    fn render_pause_animation_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::PauseAnimation { target, animation } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+            ui.label("Animation:");
+            ui.text_edit_singleline(animation);
+        }
+    }
+
+    /// Renderiza propiedades de nodo ResumeAnimation
+    fn render_resume_animation_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::ResumeAnimation { target, animation } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+            ui.label("Animation:");
+            ui.text_edit_singleline(animation);
+        }
+    }
+
+    /// Renderiza propiedades de nodo CallFunction
+    fn render_call_function_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::CallFunction { function_name, args } = &mut node.data {
+            ui.label("Function Name:");
+            ui.text_edit_singleline(function_name);
+            ui.label("Arguments:");
+            for (i, arg) in args.iter_mut().enumerate() {
+                ui.label(format!("Arg {}: ", i + 1));
+                ui.text_edit_singleline(arg);
+            }
+        }
+    }
+
+    /// Renderiza propiedades de nodo SetFlag
+    fn render_set_flag_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::SetFlag { flag } = &mut node.data {
+            ui.label("Flag:");
+            ui.text_edit_singleline(flag);
+        }
+    }
+
+    /// Renderiza propiedades de nodo ClearFlag
+    fn render_clear_flag_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::ClearFlag { flag } = &mut node.data {
+            ui.label("Flag:");
+            ui.text_edit_singleline(flag);
+        }
+    }
+
+    /// Renderiza propiedades de nodo SpawnEntity
+    fn render_spawn_entity_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::SpawnEntity { entity_type, position } = &mut node.data {
+            ui.label("Entity Type:");
+            ui.text_edit_singleline(entity_type);
+            ui.label("Position X:");
+            ui.add(egui::Slider::new(&mut position[0], -1000.0..=1000.0).text("X"));
+            ui.label("Position Y:");
+            ui.add(egui::Slider::new(&mut position[1], -1000.0..=1000.0).text("Y"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo RemoveEntity
+    fn render_remove_entity_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::RemoveEntity { entity_id } = &mut node.data {
+            ui.label("Entity ID:");
+            ui.text_edit_singleline(entity_id);
+        }
+    }
+
+    /// Renderiza propiedades de nodo PlaySound
+    fn render_play_sound_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::PlaySound { sound_name, volume } = &mut node.data {
+            ui.label("Sound Name:");
+            ui.text_edit_singleline(sound_name);
+            ui.label("Volume:");
+            ui.add(egui::Slider::new(volume, 0.0..=1.0).text("0.0 - 1.0"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo ChangeColor
+    fn render_change_color_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::ChangeColor { r, g, b, a } = &mut node.data {
+            ui.label("Red:");
+            ui.add(egui::Slider::new(r, 0.0..=1.0).text("R"));
+            ui.label("Green:");
+            ui.add(egui::Slider::new(g, 0.0..=1.0).text("G"));
+            ui.label("Blue:");
+            ui.add(egui::Slider::new(b, 0.0..=1.0).text("B"));
+            ui.label("Alpha:");
+            ui.add(egui::Slider::new(a, 0.0..=1.0).text("A"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo ChangePosition
+    fn render_change_position_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::ChangePosition { x, y } = &mut node.data {
+            ui.label("X:");
+            ui.add(egui::Slider::new(x, -1000.0..=1000.0).text("X"));
+            ui.label("Y:");
+            ui.add(egui::Slider::new(y, -1000.0..=1000.0).text("Y"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo Rotate
+    fn render_rotate_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::Rotate { angle_degrees } = &mut node.data {
+            ui.label("Angle (degrees):");
+            ui.add(egui::Slider::new(angle_degrees, -360.0..=360.0).text("°"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo Scale
+    fn render_scale_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::Scale { x, y } = &mut node.data {
+            ui.label("Scale X:");
+            ui.add(egui::Slider::new(x, 0.0..=2.0).text("X"));
+            ui.label("Scale Y:");
+            ui.add(egui::Slider::new(y, 0.0..=2.0).text("Y"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo WhileLoop
+    fn render_while_loop_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::WhileLoop { condition, body_branch } = &mut node.data {
+            ui.label("Condition:");
+            ui.text_edit_singleline(condition);
+            ui.label("Body Branch:");
+            ui.text_edit_singleline(body_branch);
+        }
+    }
+
+    /// Renderiza propiedades de nodo ForLoop
+    fn render_for_loop_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::ForLoop { variable, start, end, body_branch } = &mut node.data {
+            ui.label("Variable:");
+            ui.text_edit_singleline(variable);
+            ui.label("Start:");
+            ui.text_edit_singleline(start);
+            ui.label("End:");
+            ui.text_edit_singleline(end);
+            ui.label("Body Branch:");
+            ui.text_edit_singleline(body_branch);
+        }
+    }
+
+    /// Renderiza propiedades de nodo Switch
+    fn render_switch_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::Switch { value, cases } = &mut node.data {
+            ui.label("Value:");
+            ui.text_edit_singleline(value);
+            ui.label("Cases:");
+            for (i, (condition, branch)) in cases.iter_mut().enumerate() {
+                ui.label(format!("Case {}: Condition:", i + 1));
+                ui.text_edit_singleline(condition);
+                ui.label(format!("Case {}: Branch:", i + 1));
+                ui.text_edit_singleline(branch);
+            }
+        }
+    }
+
+    /// Renderiza propiedades de nodo AndCondition
+    fn render_and_condition_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::AndCondition { conditions } = &mut node.data {
+            ui.label("Conditions:");
+            for (i, condition) in conditions.iter_mut().enumerate() {
+                ui.label(format!("Condition {}: ", i + 1));
+                ui.text_edit_singleline(condition);
+            }
+        }
+    }
+
+    /// Renderiza propiedades de nodo OrCondition
+    fn render_or_condition_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OrCondition { conditions } = &mut node.data {
+            ui.label("Conditions:");
+            for (i, condition) in conditions.iter_mut().enumerate() {
+                ui.label(format!("Condition {}: ", i + 1));
+                ui.text_edit_singleline(condition);
+            }
+        }
+    }
+
+    /// Renderiza propiedades de nodo NotCondition
+    fn render_not_condition_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::NotCondition { condition } = &mut node.data {
+            ui.label("Condition:");
+            ui.text_edit_singleline(condition);
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnCollision
+    fn render_on_collision_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnCollision { target, normal } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+            ui.label("Normal X:");
+            ui.add(egui::Slider::new(&mut normal[0], -1.0..=1.0).text("X"));
+            ui.label("Normal Y:");
+            ui.add(egui::Slider::new(&mut normal[1], -1.0..=1.0).text("Y"));
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnTrigger
+    fn render_on_trigger_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnTrigger { target } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnKeyPress
+    fn render_on_key_press_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnKeyPress { key } = &mut node.data {
+            ui.label("Key:");
+            ui.text_edit_singleline(key);
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnMouseOver
+    fn render_on_mouse_over_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnMouseOver { target } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+        }
+    }
+
+    /// Renderiza propiedades de nodo OnMouseClick
+    fn render_on_mouse_click_properties(ui: &mut Ui, node: &mut EventNode) {
+        if let NodeData::OnMouseClick { target, button } = &mut node.data {
+            ui.label("Target:");
+            ui.text_edit_singleline(target);
+            ui.label("Button:");
+            ui.add(egui::Slider::new(button, 0..=2).text("0=Left, 1=Middle, 2=Right"));
         }
     }
 

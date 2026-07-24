@@ -685,7 +685,7 @@ mod integration_tests {
 #[test]
 fn test_documentation_completeness() {
     // Test que verifica que la documentación está completa
-    let documentation = include_str!("../../PROGRESO.md");
+    let documentation = include_str!("../../doc/PROGRESO.md");
     
     assert!(documentation.contains("FASE 0"), "Debe documentar FASE 0");
     assert!(documentation.contains("FASE 1"), "Debe documentar FASE 1");

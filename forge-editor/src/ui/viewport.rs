@@ -5,6 +5,22 @@
 use eframe::egui;
 use serde_json;
 
+/// Herramientas de edición en el Viewport
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum EditTool {
+    Translate,
+    Rotate,
+    Scale,
+}
+
+/// Tipos de Gizmos activos de arrastre
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GizmoType {
+    Translate,
+    Rotate,
+    Scale,
+}
+
 /// Viewport 2D para renderizado
 #[derive(Debug, Clone)]
 pub struct Viewport {
@@ -30,6 +46,10 @@ pub struct Viewport {
     pub drag_node_id: Option<uuid::Uuid>,
     /// Posición inicial al comenzar el arrastre
     pub drag_start_pos: Option<[f32; 3]>,
+    /// Herramienta de edición activa
+    pub active_tool: EditTool,
+    /// Gizmo que se está arrastrando actualmente
+    pub drag_gizmo: Option<GizmoType>,
 }
 
 impl Default for Viewport {
@@ -53,6 +73,8 @@ impl Viewport {
             pan_down: false,
             drag_node_id: None,
             drag_start_pos: None,
+            active_tool: EditTool::Translate,
+            drag_gizmo: None,
         }
     }
 
@@ -249,6 +271,29 @@ impl Viewport {
         });
         ui.add_space(5.0);
 
+        // Capturar atajos de teclado para herramientas de edición (W, E, R)
+        if ui.input(|i| i.key_pressed(egui::Key::W)) {
+            app.viewport.active_tool = EditTool::Translate;
+            app.console.add_message(crate::debugger::LogLevel::Info, "Herramienta activa: Traslación (W)");
+        }
+        if ui.input(|i| i.key_pressed(egui::Key::E)) {
+            app.viewport.active_tool = EditTool::Rotate;
+            app.console.add_message(crate::debugger::LogLevel::Info, "Herramienta activa: Rotación (E)");
+        }
+        if ui.input(|i| i.key_pressed(egui::Key::R)) {
+            app.viewport.active_tool = EditTool::Scale;
+            app.console.add_message(crate::debugger::LogLevel::Info, "Herramienta activa: Escalado (R)");
+        }
+
+        // Selector visual de herramientas W/E/R
+        ui.horizontal(|ui| {
+            ui.label("Herramienta:");
+            ui.selectable_value(&mut app.viewport.active_tool, EditTool::Translate, " W: ⬈ Mover");
+            ui.selectable_value(&mut app.viewport.active_tool, EditTool::Rotate, " E: ⟲ Rotar");
+            ui.selectable_value(&mut app.viewport.active_tool, EditTool::Scale, " R: ⤢ Escalar");
+        });
+        ui.add_space(5.0);
+
         let rect = ui.available_rect_before_wrap();
         app.viewport_rect = rect;
         
@@ -357,33 +402,99 @@ impl Viewport {
         let mouse_clicked = response.clicked_by(egui::PointerButton::Primary);
         let pointer_pos = ui.input(|i| i.pointer.interact_pos());
         let mut clicked_node = None;
+        let mut clicked_gizmo = None;
         
+        // 1. Hit-test para Gizmos del nodo activo primero
+        if let Some(active_id) = app.active_node_id {
+            if let Some(node) = app.scene_tree.nodes.get(&active_id) {
+                if let Some(mpos) = pointer_pos {
+                    if mouse_clicked {
+                        let pos = node.transform.transform.position;
+                        let scale = node.transform.transform.scale;
+                        let col_center = virtual_center + egui::vec2(pos[0] * zoom, pos[1] * zoom);
+                        let col_size = egui::vec2(64.0 * scale[0] * zoom, 64.0 * scale[1] * zoom);
+                        
+                        match app.viewport.active_tool {
+                            EditTool::Rotate => {
+                                let rot_handle = col_center + egui::vec2(0.0, -col_size.y / 2.0 - 20.0 * zoom);
+                                let rot_handle_rect = egui::Rect::from_center_size(rot_handle, egui::vec2(16.0 * zoom, 16.0 * zoom));
+                                if rot_handle_rect.contains(mpos) {
+                                    clicked_node = Some(active_id);
+                                    clicked_gizmo = Some(GizmoType::Rotate);
+                                }
+                            }
+                            EditTool::Scale => {
+                                let scale_handle = col_center + egui::vec2(col_size.x / 2.0 + 10.0 * zoom, col_size.y / 2.0 + 10.0 * zoom);
+                                let scale_handle_rect = egui::Rect::from_center_size(scale_handle, egui::vec2(16.0 * zoom, 16.0 * zoom));
+                                if scale_handle_rect.contains(mpos) {
+                                    clicked_node = Some(active_id);
+                                    clicked_gizmo = Some(GizmoType::Scale);
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Dibujar Sprites
         for (_layer, id, name, path, sprite_rect) in &sprites_to_draw {
             let uri = get_file_uri(path);
             ui.put(*sprite_rect, egui::Image::new(&uri));
             
-            // Capturar click para selección
-            if mouse_clicked {
+            // Capturar click para selección si no se hizo click en un gizmo
+            if clicked_gizmo.is_none() && mouse_clicked {
                 if let Some(mpos) = pointer_pos {
                     if sprite_rect.contains(mpos) {
                         clicked_node = Some(*id);
+                        clicked_gizmo = Some(GizmoType::Translate);
                     }
                 }
             }
             
-            // Dibujar contorno de selección activo (amarillo)
+            // Dibujar contorno de selección activo (amarillo) y gizmos
             if app.active_node_id == Some(*id) {
                 painter.rect_stroke(*sprite_rect, 0.0, egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(255, 215, 0)), egui::StrokeKind::Inside);
                 
                 // Mostrar nombre del sprite
-                let label_pos = sprite_rect.left_top() - egui::vec2(0.0, 14.0);
+                let label_pos = sprite_rect.left_top() - egui::vec2(0.0, 14.0 * zoom);
                 painter.text(
                     label_pos,
                     egui::Align2::LEFT_TOP,
                     name,
-                    egui::FontId::proportional(12.0),
+                    egui::FontId::proportional(12.0 * zoom),
                     egui::Color32::from_rgb(255, 215, 0)
                 );
+
+                // Dibujar Gizmos interactivos según la herramienta activa
+                match app.viewport.active_tool {
+                    EditTool::Translate => {
+                        let center = sprite_rect.center();
+                        painter.line_segment([center, center + egui::vec2(30.0 * zoom, 0.0)], egui::Stroke::new(2.0 * zoom, egui::Color32::from_rgb(220, 50, 50)));
+                        painter.line_segment([center, center + egui::vec2(0.0, -30.0 * zoom)], egui::Stroke::new(2.0 * zoom, egui::Color32::from_rgb(50, 220, 50)));
+                    }
+                    EditTool::Rotate => {
+                        let center = sprite_rect.center();
+                        let size = sprite_rect.size();
+                        let rot_handle = center + egui::vec2(0.0, -size.y / 2.0 - 20.0 * zoom);
+                        
+                        painter.line_segment([center, rot_handle], egui::Stroke::new(1.5 * zoom, egui::Color32::from_rgb(0, 255, 255)));
+                        painter.circle_filled(rot_handle, 7.0 * zoom, egui::Color32::from_rgb(0, 255, 255));
+                        painter.circle_stroke(rot_handle, 7.0 * zoom, egui::Stroke::new(1.0_f32, egui::Color32::WHITE));
+                        painter.circle_stroke(center, size.x / 2.0 + 10.0 * zoom, egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_unmultiplied(0, 255, 255, 100)));
+                    }
+                    EditTool::Scale => {
+                        let center = sprite_rect.center();
+                        let size = sprite_rect.size();
+                        let scale_handle = center + egui::vec2(size.x / 2.0 + 10.0 * zoom, size.y / 2.0 + 10.0 * zoom);
+                        
+                        painter.line_segment([center + egui::vec2(size.x / 2.0, size.y / 2.0), scale_handle], egui::Stroke::new(1.5 * zoom, egui::Color32::from_rgb(255, 215, 0)));
+                        let square_rect = egui::Rect::from_center_size(scale_handle, egui::vec2(12.0 * zoom, 12.0 * zoom));
+                        painter.rect_filled(square_rect, 0.0, egui::Color32::from_rgb(255, 215, 0));
+                        painter.rect_stroke(square_rect, 0.0, egui::Stroke::new(1.0_f32, egui::Color32::WHITE), egui::StrokeKind::Outside);
+                    }
+                }
             }
         }
         
@@ -415,8 +526,9 @@ impl Viewport {
         // Manejar lógica de selección y arrastre
         if let Some(id) = clicked_node {
             app.active_node_id = Some(id);
+            app.viewport.drag_node_id = Some(id);
+            app.viewport.drag_gizmo = clicked_gizmo;
             if let Some(node) = app.scene_tree.nodes.get(&id) {
-                app.viewport.drag_node_id = Some(id);
                 app.viewport.drag_start_pos = Some(node.transform.transform.position);
             }
         } else if mouse_clicked {
@@ -433,21 +545,44 @@ impl Viewport {
                         app.active_node_id = None;
                         app.viewport.drag_node_id = None;
                         app.viewport.drag_start_pos = None;
+                        app.viewport.drag_gizmo = None;
                     }
                 }
             }
         }
         
-        // Realizar traslación durante el arrastre
+        // Realizar traslación / rotación / escalado durante el arrastre
         if let Some(dragged_id) = app.viewport.drag_node_id {
             if response.dragged_by(egui::PointerButton::Primary) {
                 if let Some(mpos) = pointer_pos {
-                    let new_scene_x = (mpos.x - virtual_center.x) / zoom;
-                    let new_scene_y = (mpos.y - virtual_center.y) / zoom;
-                    
                     if let Some(node) = app.scene_tree.nodes.get(&dragged_id) {
                         let mut updated_node = node.as_ref().clone();
-                        updated_node.transform.transform.position = [new_scene_x, new_scene_y, 0.0];
+                        let gizmo_type = app.viewport.drag_gizmo.unwrap_or(GizmoType::Translate);
+                        
+                        match gizmo_type {
+                            GizmoType::Translate => {
+                                let new_scene_x = (mpos.x - virtual_center.x) / zoom;
+                                let new_scene_y = (mpos.y - virtual_center.y) / zoom;
+                                updated_node.transform.transform.position = [new_scene_x, new_scene_y, 0.0];
+                            }
+                            GizmoType::Rotate => {
+                                let pos = node.transform.transform.position;
+                                let col_center = virtual_center + egui::vec2(pos[0] * zoom, pos[1] * zoom);
+                                let diff = mpos - col_center;
+                                // Calcular ángulo en radianes respecto a la vertical
+                                let angle = diff.y.atan2(diff.x) + std::f32::consts::FRAC_PI_2;
+                                updated_node.transform.transform.rotation = angle;
+                            }
+                            GizmoType::Scale => {
+                                let pos = node.transform.transform.position;
+                                let col_center = virtual_center + egui::vec2(pos[0] * zoom, pos[1] * zoom);
+                                let base_dist = egui::vec2(64.0 / 2.0, 64.0 / 2.0).length();
+                                let current_dist = (mpos - col_center).length();
+                                let new_scale = (current_dist / (base_dist * zoom)).max(0.1);
+                                updated_node.transform.transform.scale = [new_scale, new_scale, 1.0];
+                            }
+                        }
+                        
                         let arc_node = std::sync::Arc::new(updated_node);
                         app.scene_tree.nodes.insert(dragged_id, arc_node.clone());
                         if app.scene_tree.root.as_ref().map(|n| n.id) == Some(dragged_id) {
@@ -461,6 +596,7 @@ impl Viewport {
             } else if response.drag_stopped() {
                 app.viewport.drag_node_id = None;
                 app.viewport.drag_start_pos = None;
+                app.viewport.drag_gizmo = None;
             }
         }
         

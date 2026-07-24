@@ -671,7 +671,44 @@ impl AssetBrowser {
                         let asset_type = crate::ui::AssetType::from_extension(&asset_ext);
                         let preview_type = AssetPreviewType::from_extension(&asset_ext);
                         
-                        if ui.selectable_label(is_selected, asset).clicked() {
+                        let response = ui.selectable_label(is_selected, asset);
+                        if response.double_clicked() {
+                            app.asset_browser.selected_asset = Some(index);
+                            let extension = asset.split('.').last().unwrap_or("").to_lowercase();
+                            match extension.as_str() {
+                                "rs" | "lua" | "gdscript" | "js" | "ts" => {
+                                    if let Some(path) = app.asset_browser.get_selected_asset_path() {
+                                        if let Ok(content) = std::fs::read_to_string(&path) {
+                                            app.script_viewer.current_script = Some(content);
+                                            app.script_viewer.script_path = Some(path);
+                                            app.central_tab = crate::CentralTab::ScriptViewer;
+                                            app.console.add_message(
+                                                LogLevel::Info,
+                                                &format!("Script abierto en editor: {}", asset)
+                                            );
+                                        }
+                                    }
+                                }
+                                "json" | "dialogue" | "csv" => {
+                                    app.central_tab = crate::CentralTab::EventForge;
+                                    app.console.add_message(
+                                        LogLevel::Info,
+                                        &format!("Abriendo Event Forge para diálogo: {}", asset)
+                                    );
+                                }
+                                "prefab" => {
+                                    app.console.add_message(
+                                        LogLevel::Info,
+                                        &format!("Instanciando prefab en escena: {}", asset)
+                                    );
+                                    app.add_asset_to_scene(asset);
+                                }
+                                _ => {
+                                    app.add_asset_to_scene(asset);
+                                }
+                            }
+                        } else if response.clicked() {
+                            app.asset_browser.selected_asset = Some(index);
                             let asset_real = app.create_asset(asset);
                             app.dragged_asset = Some(asset_real);
                             app.drag_operation = Some(DragOperation::Asset {

@@ -193,6 +193,8 @@ pub struct SceneFile {
     pub root_id: Option<String>,
     pub groups: std::collections::HashMap<String, Vec<String>>,
     pub animations: std::collections::HashMap<String, Vec<String>>,
+    #[serde(default)]
+    pub event_graph: Option<crate::event_nodes::EventGraph>,
 }
 
 /// Guarda la escena actual como archivo JSON
@@ -247,6 +249,7 @@ fn save_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
         root_id: None,
         groups: std::collections::HashMap::new(),
         animations: std::collections::HashMap::new(),
+        event_graph: Some(app.event_node_editor.get_graph()),
     };
 
     let json = serde_json::to_string_pretty(&scene_data).unwrap();
@@ -304,6 +307,7 @@ fn save_scene_as(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> 
         root_id: None,
         groups: std::collections::HashMap::new(),
         animations: std::collections::HashMap::new(),
+        event_graph: Some(app.event_node_editor.get_graph()),
     };
 
     let json = serde_json::to_string_pretty(&scene_data).unwrap();
@@ -391,6 +395,10 @@ fn open_scene(app: &mut crate::ForgeEditorApp) -> Option<std::path::PathBuf> {
         if arc_node.parent_id.is_none() {
             app.scene_tree.root = Some(arc_node);
         }
+    }
+
+    if let Some(graph) = scene_data.event_graph {
+        app.event_node_editor.load_graph(graph);
     }
 
     Some(path)

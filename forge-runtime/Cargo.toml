@@ -1,10 +1,13 @@
 [package]
 name = "forge-runtime"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Runtime"
+license = "MIT"
 
 [dependencies]
-serde.workspace = true
-serde_json.workspace = true
-uuid.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+forge-editor = { path = "../forge-editor" }

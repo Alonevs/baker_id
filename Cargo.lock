@@ -1176,6 +1176,7 @@ dependencies = [
  "forge-physics",
  "forge-project",
  "forge-resource",
+ "forge-runtime",
  "forge-scene",
  "notify",
  "parking_lot",
@@ -1278,6 +1279,7 @@ dependencies = [
 name = "forge-physics"
 version = "1.0.0"
 dependencies = [
+ "parking_lot",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -1301,6 +1303,16 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
+name = "forge-runtime"
+version = "1.0.0"
+dependencies = [
+ "forge-editor",
+ "serde",
+ "serde_json",
  "uuid",
 ]
 

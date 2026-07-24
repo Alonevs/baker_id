@@ -13,7 +13,13 @@ pub use event_system::EventManager;
 pub struct Runtime;
 
 impl Runtime {
+    /// Crea un nuevo Runtime con EventManager integrado
     pub fn new() -> Self {
         Self
+    }
+
+    /// Obtiene un EventManager nuevo
+    pub fn create_event_manager(&self) -> EventManager {
+        EventManager::new()
     }
 }

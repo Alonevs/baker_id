@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -8,7 +9,7 @@ use thiserror::Error;
 use crate::physics::PhysicsBody;
 use crate::animation::Animation;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EntityType {
     Node,
     GameObject,
@@ -94,6 +95,101 @@ pub enum EntityType {
     TextureRect,
 }
 
+impl AsRef<str> for EntityType {
+    fn as_ref(&self) -> &str {
+        match self {
+            EntityType::Node => "Node",
+            EntityType::GameObject => "GameObject",
+            EntityType::Sprite => "Sprite",
+            EntityType::Mesh => "Mesh",
+            EntityType::Camera => "Camera",
+            EntityType::Light => "Light",
+            EntityType::Audio => "Audio",
+            EntityType::Particle => "Particle",
+            EntityType::PhysicsBody => "PhysicsBody",
+            EntityType::Joint => "Joint",
+            EntityType::TileMap => "TileMap",
+            EntityType::TileLayer => "TileLayer",
+            EntityType::TileSet => "TileSet",
+            EntityType::Animation => "Animation",
+            EntityType::AnimationPlayer => "AnimationPlayer",
+            EntityType::Marker2D => "Marker2D",
+            EntityType::Marker3D => "Marker3D",
+            EntityType::Line2D => "Line2D",
+            EntityType::Line3D => "Line3D",
+            EntityType::Curve2D => "Curve2D",
+            EntityType::Curve3D => "Curve3D",
+            EntityType::CharacterBody2D => "CharacterBody2D",
+            EntityType::CharacterBody3D => "CharacterBody3D",
+            EntityType::Area2D => "Area2D",
+            EntityType::Area3D => "Area3D",
+            EntityType::StaticBody2D => "StaticBody2D",
+            EntityType::StaticBody3D => "StaticBody3D",
+            EntityType::CharacterBody => "CharacterBody",
+            EntityType::Spatial => "Spatial",
+            EntityType::Node2D => "Node2D",
+            EntityType::Node3D => "Node3D",
+            EntityType::Control => "Control",
+            EntityType::SubViewport => "SubViewport",
+            EntityType::SubViewportContainer => "SubViewportContainer",
+            EntityType::CanvasLayer => "CanvasLayer",
+            EntityType::MarginContainer => "MarginContainer",
+            EntityType::HBoxContainer => "HBoxContainer",
+            EntityType::VBoxContainer => "VBoxContainer",
+            EntityType::PanelContainer => "PanelContainer",
+            EntityType::ColorRect => "ColorRect",
+            EntityType::Label => "Label",
+            EntityType::RichTextLabel => "RichTextLabel",
+            EntityType::Button => "Button",
+            EntityType::TextureButton => "TextureButton",
+            EntityType::ColorPickerButton => "ColorPickerButton",
+            EntityType::ProgressBar => "ProgressBar",
+            EntityType::TextureProgressBar => "TextureProgressBar",
+            EntityType::ScrollContainer => "ScrollContainer",
+            EntityType::ScrollBar => "ScrollBar",
+            EntityType::TabBar => "TabBar",
+            EntityType::TabContainer => "TabContainer",
+            EntityType::NinePatchRect => "NinePatchRect",
+            EntityType::OptionButton => "OptionButton",
+            EntityType::CheckBox => "CheckBox",
+            EntityType::ButtonGroup => "ButtonGroup",
+            EntityType::MenuButton => "MenuButton",
+            EntityType::TooltipPopup => "TooltipPopup",
+            EntityType::Popup => "Popup",
+            EntityType::PopupMenu => "PopupMenu",
+            EntityType::Window => "Window",
+            EntityType::FileSystemControl => "FileSystemControl",
+            EntityType::FileDialog => "FileDialog",
+            EntityType::Tree => "Tree",
+            EntityType::ItemList => "ItemList",
+            EntityType::ItemEdit => "ItemEdit",
+            EntityType::ListView => "ListView",
+            EntityType::ListBox => "ListBox",
+            EntityType::ListContainer => "ListContainer",
+            EntityType::GridContainer => "GridContainer",
+            EntityType::BoxContainer => "BoxContainer",
+            EntityType::CenterContainer => "CenterContainer",
+            EntityType::AnchorLayout => "AnchorLayout",
+            EntityType::MarginLayout => "MarginLayout",
+            EntityType::BoxLayout => "BoxLayout",
+            EntityType::BoxLayoutContainer => "BoxLayoutContainer",
+            EntityType::HSplitContainer => "HSplitContainer",
+            EntityType::VSplitContainer => "VSplitContainer",
+            EntityType::Accordion => "Accordion",
+            EntityType::AccordionContainer => "AccordionContainer",
+            EntityType::NinePatch => "NinePatch",
+            EntityType::TextureRect => "TextureRect",
+            _ => "Unknown",
+        }
+    }
+}
+
+impl EntityType {
+    pub fn default() -> Self {
+        Self::Node
+    }
+}
+
 use crate::component_data::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,12 +198,26 @@ pub struct Transform {
 }
 
 impl Default for Transform {
-      fn default() -> Self {
-          Self {
-              transform: TransformData::default(),
-          }
-      }
-  }
+    fn default() -> Self {
+        Self {
+            transform: TransformData::default(),
+        }
+    }
+}
+
+impl PartialEq for Transform {
+    fn eq(&self, other: &Self) -> bool {
+        self.transform == other.transform
+    }
+}
+
+impl Eq for Transform {}
+
+impl Hash for Transform {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.transform.hash(state);
+    }
+}
   
   
   #[derive(Debug, Clone, Serialize, Deserialize)]

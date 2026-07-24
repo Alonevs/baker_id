@@ -5,8 +5,21 @@
 use crate::ui::Widget;
 
 /// Identificador único de una entidad
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct EntityId(pub i32);
+
+impl From<uuid::Uuid> for EntityId {
+    fn from(uuid: uuid::Uuid) -> Self {
+        EntityId(uuid.as_u128() as i32)
+    }
+}
+
+impl EntityId {
+    /// Convierte EntityId a Uuid
+    pub fn as_uuid(&self) -> uuid::Uuid {
+        uuid::Uuid::from_u128(self.0 as u128)
+    }
+}
 
 /// Propiedades de transformación de una entidad
 #[derive(Debug, Clone, Copy, PartialEq)]

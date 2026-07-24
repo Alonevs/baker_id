@@ -147,6 +147,20 @@ impl Default for TransformData {
     }
 }
 
+impl Eq for TransformData {}
+
+impl std::hash::Hash for TransformData {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        for &val in &self.position {
+            val.to_bits().hash(state);
+        }
+        self.rotation.to_bits().hash(state);
+        for &val in &self.scale {
+            val.to_bits().hash(state);
+        }
+    }
+}
+
 /// Collider component data
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ColliderData {

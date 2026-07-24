@@ -120,14 +120,15 @@ impl BitacoraLinter {
 /// Parseador de patrones de la bitácora
 pub fn parse_bitacora_pattern(text: &str) -> Option<(String, String)> {
     let re = Regex::new(r"\{(\w+):([^}]+)\}").unwrap();
+    let mut caps = re.captures_iter(text);
     
-    for cap in re.captures_iter(text) {
+    if let Some(cap) = caps.next() {
         let ty = cap.get(1).unwrap().as_str();
         let id = cap.get(2).unwrap().as_str();
-        return Some((ty.to_string(), id.to_string()));
+        Some((ty.to_string(), id.to_string()))
+    } else {
+        None
     }
-    
-    None
 }
 
 #[cfg(test)]

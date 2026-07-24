@@ -52,6 +52,10 @@ pub mod animation_track;
 #[cfg(test)]
 mod integration_validation_tests;
 
+/// UI Tests for editor UIs
+#[cfg(test)]
+mod ui_tests;
+
 pub use ::forge_scene::{
     Scene, Asset, SceneTree, Transform, EntityType
 };
@@ -89,7 +93,14 @@ pub mod plugins;
 pub mod event_node_manager;
 pub mod event_nodes;
 pub mod cable_system;
+pub mod cable_ui;
 pub mod project_manager;
+pub mod live_sync_manager;
+pub mod delta_sync;
+pub mod transform_properties_ui;
+pub mod component_properties_ui;
+pub mod property_editor_ui;
+pub mod plugin_system_ui;
 
 pub use math::*;
 pub use physics_2d::{Physics2D, PhysicsBlock, ColliderType};
@@ -179,6 +190,7 @@ pub use plugins::{
 pub use project_manager::{
     Project, GameType, PhysicsConfig, ProjectWizard, ProjectManager,
 };
+pub use live_sync_manager::{LiveSyncManager, SyncEvent, SyncCallback};
 
 use egui_dock::DockState;
 
@@ -186,6 +198,7 @@ use egui_dock::DockState;
 pub enum CentralTab {
     Viewport,
     EventForge,
+    ScriptViewer,
 }
 
 /// Aplicación principal del Forge Editor
@@ -386,6 +399,21 @@ pub struct ForgeEditorApp {
     /// Plugin UI panel
     pub plugin_panel: crate::ui::plugin_panel::PluginPanel,
     
+    /// Transform Properties UI
+    pub transform_properties_ui: crate::transform_properties_ui::TransformPropertiesUI,
+    
+    /// Component Properties UI
+    pub component_properties_ui: crate::component_properties_ui::ComponentPropertiesUI,
+    
+    /// Property Editor UI
+    pub property_editor_ui: crate::property_editor_ui::PropertyEditorUI,
+    
+    /// Plugin System UI
+    pub plugin_system_ui: crate::plugin_system_ui::PluginSystemUI,
+    
+    /// Cable System UI
+    pub cable_system_ui: crate::cable_ui::CableSystemUI,
+    
     /// Project manager
     pub project_manager: crate::project_manager::ProjectManager,
     
@@ -394,6 +422,9 @@ pub struct ForgeEditorApp {
     
     /// Game type
     pub game_type: GameType,
+    
+    /// LiveSync manager
+    pub live_sync: crate::live_sync_manager::LiveSyncManager,
 }
 
 impl Default for ForgeEditorApp {
@@ -470,12 +501,18 @@ impl Default for ForgeEditorApp {
             ),
             extension_loader: crate::plugins::ExtensionLoader::new(None, None, true, 60000),
             extension_registry: crate::plugins::ExtensionRegistry::new(None, 300000),
-            event_system: crate::plugins::EventSystem::new(1000),
-            event_manager: crate::plugins::EventManager::new(),
-            plugin_panel: crate::ui::plugin_panel::PluginPanel::new(),
-            project_manager: crate::project_manager::ProjectManager::new(),
-            current_project_path: None,
-            game_type: crate::project_manager::GameType::default(),
+             event_system: crate::plugins::EventSystem::new(1000),
+             event_manager: crate::plugins::EventManager::new(),
+             plugin_panel: crate::ui::plugin_panel::PluginPanel::new(),
+             transform_properties_ui: crate::transform_properties_ui::TransformPropertiesUI::new(),
+             component_properties_ui: crate::component_properties_ui::ComponentPropertiesUI::new(),
+             property_editor_ui: crate::property_editor_ui::PropertyEditorUI::new(),
+             plugin_system_ui: crate::plugin_system_ui::PluginSystemUI::new(),
+             cable_system_ui: crate::cable_ui::CableSystemUI::new(),
+             project_manager: crate::project_manager::ProjectManager::new(),
+             current_project_path: None,
+             game_type: crate::project_manager::GameType::default(),
+             live_sync: crate::live_sync_manager::LiveSyncManager::new(),
         }
     }
 }
@@ -513,17 +550,23 @@ impl ForgeEditorApp {
                 "0.0.0".to_string(),
                 "999.999.999".to_string(),
             ),
-            extension_loader: crate::plugins::ExtensionLoader::new(None, None, true, 60000),
-            extension_registry: crate::plugins::ExtensionRegistry::new(None, 300000),
-            event_system: crate::plugins::EventSystem::new(1000),
-            event_manager: crate::plugins::EventManager::new(),
-            plugin_panel: crate::ui::plugin_panel::PluginPanel::new(),
-            component_props: crate::ui::component_properties::ComponentProperties::new(),
-            script_props: crate::ui::script_properties::ScriptProperties::new(),
-            pending_import: None,
-            ..Default::default()
-        }
-    }
+             extension_loader: crate::plugins::ExtensionLoader::new(None, None, true, 60000),
+              extension_registry: crate::plugins::ExtensionRegistry::new(None, 300000),
+              event_system: crate::plugins::EventSystem::new(1000),
+              event_manager: crate::plugins::EventManager::new(),
+               plugin_panel: crate::ui::plugin_panel::PluginPanel::new(),
+               transform_properties_ui: crate::transform_properties_ui::TransformPropertiesUI::new(),
+               component_properties_ui: crate::component_properties_ui::ComponentPropertiesUI::new(),
+               property_editor_ui: crate::property_editor_ui::PropertyEditorUI::new(),
+               plugin_system_ui: crate::plugin_system_ui::PluginSystemUI::new(),
+               cable_system_ui: crate::cable_ui::CableSystemUI::new(),
+               component_props: crate::ui::component_properties::ComponentProperties::new(),
+               script_props: crate::ui::script_properties::ScriptProperties::new(),
+               pending_import: None,
+              live_sync: crate::live_sync_manager::LiveSyncManager::new(),
+              ..Default::default()
+          }
+      }
     
     /// Carga una escena desde un archivo
     pub fn load_scene(&mut self, path: &str) -> Result<(), String> {
@@ -752,7 +795,7 @@ impl ForgeEditorApp {
 
     /// Renderiza el script viewer
     pub fn render_script_viewer(&mut self, ui: &mut egui::Ui) {
-        self.script_viewer.render(ui, self);
+        self.script_viewer.render(ui, &mut self.console);
     }
 
     /// Obtiene el panel de serialización
@@ -949,6 +992,16 @@ impl ForgeEditorApp {
     /// Obtiene last error
     pub fn get_last_error(&self) -> Option<&CompileError> {
         self.hot_reload_manager.get_last_error()
+    }
+
+    /// Obtiene LiveSync manager
+    pub fn live_sync(&self) -> &crate::live_sync_manager::LiveSyncManager {
+        &self.live_sync
+    }
+
+    /// Obtiene LiveSync manager mutable
+    pub fn live_sync_mut(&mut self) -> &mut crate::live_sync_manager::LiveSyncManager {
+        &mut self.live_sync
     }
 
     /// Obtiene debounce count
@@ -1879,6 +1932,42 @@ crate::export_manager::ProjectData {
             }
         }
     }
+
+    /// Sincroniza la escena actual con LiveSync
+    pub fn sync_scene(&mut self) {
+        let scene_id = self.scene.root_id.unwrap_or(Uuid::new_v4());
+        let version = self.live_sync.scene_version();
+        self.live_sync.publish(&SyncEvent::scene_loaded(scene_id, version));
+        
+        // Sincronizar todas las entidades
+        for node in self.scene_tree.nodes.values() {
+            self.live_sync.register_entity_added(
+                node.id.into(),
+                node.entity_type.clone(),
+                Some(serde_json::to_value(node).unwrap_or_default()),
+            );
+        }
+    }
+
+    /// Registra un cambio de transformación
+    pub fn register_transform_change(&mut self, entity_id: EntityId, transform: Transform) {
+        self.live_sync.register_transform_change(entity_id, transform);
+    }
+
+    /// Registra un cambio de componente
+    pub fn register_component_change(&mut self, entity_id: EntityId, component_type: String, data: Option<serde_json::Value>) {
+        self.live_sync.register_component_change(entity_id, component_type, data);
+    }
+
+    /// Registra una entidad como nueva
+    pub fn register_entity_added(&mut self, entity_id: EntityId, entity_type: EntityType, data: Option<serde_json::Value>) {
+        self.live_sync.register_entity_added(entity_id, entity_type, data);
+    }
+
+    /// Registra una entidad como removida
+    pub fn register_entity_removed(&mut self, entity_id: EntityId) {
+        self.live_sync.register_entity_removed(entity_id);
+    }
 }
 
 /// Implementación del trait App de eframe para ForgeEditorApp
@@ -1933,7 +2022,7 @@ impl eframe::App for ForgeEditorApp {
             ui::AssetBrowser::render(ui, self);
         });
 
-        // Panel central — Viewport / Event Forge
+        // Panel central — Viewport / Event Forge / Script Editor
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal(|ui| {
                 if ui.selectable_label(self.central_tab == CentralTab::Viewport, "👁️ Viewport").clicked() {
@@ -1942,6 +2031,10 @@ impl eframe::App for ForgeEditorApp {
                 ui.add_space(10.0);
                 if ui.selectable_label(self.central_tab == CentralTab::EventForge, "⚡ Event Forge").clicked() {
                     self.central_tab = CentralTab::EventForge;
+                }
+                ui.add_space(10.0);
+                if ui.selectable_label(self.central_tab == CentralTab::ScriptViewer, "📝 Script Editor").clicked() {
+                    self.central_tab = CentralTab::ScriptViewer;
                 }
             });
             ui.separator();
@@ -1952,6 +2045,9 @@ impl eframe::App for ForgeEditorApp {
                 }
                 CentralTab::EventForge => {
                     self.event_node_editor.render(ui);
+                }
+                CentralTab::ScriptViewer => {
+                    self.render_script_viewer(ui);
                 }
             }
         });
