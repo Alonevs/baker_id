@@ -1320,7 +1320,7 @@ dependencies = [
 name = "forge-runtime"
 version = "1.0.0"
 dependencies = [
- "forge-editor",
+ "forge-types",
  "serde",
  "serde_json",
  "uuid",
@@ -1336,6 +1336,15 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
+name = "forge-types"
+version = "1.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
  "uuid",
 ]
 

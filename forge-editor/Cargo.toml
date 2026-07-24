@@ -37,11 +37,3 @@ forge-event = { path = "../forge-event" }
 forge-dialog = { path = "../forge-dialog" }
 forge-linter = { path = "../forge-linter" }
 dirs = "6.0.0"
-
-[[bin]]
-name = "forge-editor"
-path = "src/main.rs"
-
-[[example]]
-name = "export_import"
-path = "examples/export_import.rs"

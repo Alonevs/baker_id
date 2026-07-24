@@ -45,6 +45,39 @@ Su propósito es evitar la duplicación de código, la creación redundante de d
 
 ---
 
+## ✅ CHECKLIST OBLIGATORIO DE FINALIZACIÓN (REGLA 8)
+
+**⚠️ CRÍTICO:** ANTES de considerar cualquier tarea como "COMPLETADA", la IA DEBE verificar y completar TODOS los siguientes items sin excepción:
+
+### 📋 CHECKLIST DE DOCUMENTACIÓN (OBLIGATORIO)
+- [ ] **Actualización de PROGRESO.md:** He actualizado `doc/PROGRESO.md` con:
+  - [ ] Detalles detallados de los cambios realizados
+  - [ ] Métricas actualizadas de tests (conteo real total)
+  - [ ] Redefinición clara de objetivos en sección "🎯 PRÓXIMOS OBJETIVOS"
+  - [ ] Fecha y responsable de los cambios
+
+### 📋 CHECKLIST DE CÓDIGO (OBLIGATORIO)
+- [ ] **Registro de Funciones:** He registrado todas las nuevas funciones/estructuras públicas en Sección 3 del documento de herramienta correspondiente
+- [ ] **Ediciones Quirúrgicas:** He usado ediciones parciales (`edit`/`replace_file_content`) en lugar de reescribir archivos completos
+- [ ] **Consistencia de Estilo:** El nuevo código mantiene el estilo y patrones del código existente
+- [ ] **Sin Breaking Changes:** No he alterado firmas públicas sin compatibilidad retro
+
+### 📋 CHECKLIST DE VERIFICACIÓN (OBLIGATORIO)
+- [ ] **Cargo Check:** `cargo check` pasa sin errores
+- [ ] **Cargo Test:** `cargo test` pasa 100% (si aplica)
+- [ ] **Anti-Stubs:** No hay `todo!()`, `unimplemented!()` o placeholders en código de producción
+- [ ] **Referencias Actualizadas:** He actualizado referencias en TOOLS.md, INDEX.md si aplica
+
+### 📋 CHECKLIST DE HANDOFF (OBLIGATORIO)
+- [ ] **Métricas Reales:** Los números en documentación reflejan la realidad actual
+- [ ] **Objetivos Claros:** El siguiente agente puede continuar sin preguntar
+- [ ] **Estado Preciso:** Herramientas marcadas con estado correcto (✅, 🟡, ⏳)
+- [ ] **Contexto Completo:** Toda la información necesaria está documentada
+
+**⚠️ ADVERTENCIA:** NO marques una tarea como "completada" hasta que TODOS los items de este checklist estén verificados. Si algún item no aplica, explica por qué en PROGRESO.md.
+
+---
+
 ## 🗃️ 2. ESTÁNDAR DE REGISTRO DE FUNCIONES (GRANULARIDAD DE CÓDIGO)
 
 Para cumplir con el requerimiento de **documentar cada función a detalle** y evitar colisiones de nombres o re-implementaciones, cualquier IA que cree o modifique funciones debe registrarlas en la **Sección 3 (IMPLEMENTACIÓN ACTUAL)** del archivo correspondiente de la herramienta en `doc/tools/NN_NOMBRE.md`.

@@ -1,12 +1,524 @@
 # 🤖 FORGE SDK 2D - AI AGENT RULES
 
-Before modifying any code, proposing refactors, or writing new files, you MUST comply with these instructions:
+**Versión:** 2.0 | **Última actualización:** 24/07/2026 | **Estado:** Activo
 
-1. **Read Guidelines First:** You MUST read [doc/AI_GUIDELINES.md](file:///c:/Users/xico0/Desktop/Xico/doc/AI_GUIDELINES.md) and [doc/README.md](file:///c:/Users/xico0/Desktop/Xico/doc/README.md) before proposing or implementing changes.
-2. **Obey Workspace Rules:** Acatar las reglas de agentes descritas en [.agents/AGENTS.md](file:///c:/Users/xico0/Desktop/Xico/.agents/AGENTS.md).
-3. **No Duplicate Files:** Under NO circumstances should you create new documentation files in `doc/tools/` unless they are explicitly authorized in [doc/TOOLS.md](file:///c:/Users/xico0/Desktop/Xico/doc/TOOLS.md). Individual `.md` files for unit tests, secondary UI components, or auxiliary helper modules are strictly prohibited. Document all new tests in `doc/tools/TESTS.md`, all new UIs in `doc/tools/Uis.md`, and catalog minor utilities in Section 3 of their corresponding main tool's document. Loose task list files (such as `todo.md`) in the workspace root are strictly prohibited; document plans/tasks only in [doc/PROGRESO.md](file:///c:/Users/xico0/Desktop/Xico/doc/PROGRESO.md). Logic updates, integrations, synchronizations, or cross-cutting queries must be documented by updating the existing corresponding tool documents, never by creating new integration docs. If a new tool doc is authorized, create it named after its exact usage using the 10-section template. Markdown files must not exceed 1,500-3,000 lines; if a document grows too large, logically split it (e.g. `_PART2.md` or `_HISTORY.md`). Each time a significant `.md` file is created or edited, you MUST generate or update a Table of Contents (Index) header at the top of the file to enable surgical partial reads. Always edit the original file for changes to pre-existing features.
-4. **Surgical Edits Only:** Perform surgical edits using partial replacements rather than rewriting complete documentation files.
-5. **Path Tolerance:** If files or directories have been refactored, perform recursive searches (grep/find) rather than assuming they don't exist.
-6. **Detailed Functions Catalog:** Register all new public Rust structures or functions in Section 3 of their corresponding tool markdown files.
-7. **Style Consistency:** Prioritize and maintain the existing code structure, formatting, style, and patterns of the files you edit. Do NOT perform full-file reformats or rewrite logic in different styles (e.g., changing error handling, control flows, or borrowing models) unless explicitly requested. New code must blend seamlessly with the surrounding code.
-8. **Automatic Handoff (Progress Update):** At the end of every task or session, you MUST update [doc/PROGRESO.md](file:///c:/Users/xico0/Desktop/Xico/doc/PROGRESO.md) with details of your work, updated tests count (currently 96 total), and define the next goals clearly under "🎯 PRÓXIMOS OBJETIVOS" so the next AI agent can resume without friction.
+---
+
+## 🎯 PROPÓSITO
+
+Este archivo define las reglas **OBLIGATORIAS** que todo agente de Inteligencia Artificial (Qwen, Claude, GPT, Gemini, etc.) debe cumplir antes, durante y después de realizar cualquier cambio en el proyecto Forge SDK 2D.
+
+**⚠️ IMPORTANTE:** El incumplimiento de estas reglas comprometerá la integridad del proyecto y la sincronización entre código y documentación.
+
+---
+
+## 🚦 FLUJO DE TRABAJO OBLIGATORIO
+
+### 🔴 FASE 1: INICIO (Antes de cualquier acción)
+
+**Checklist de Inicio:**
+- [ ] He leído completamente este archivo (`.opencoderules`)
+- [ ] He leído `doc/AI_GUIDELINES.md` (directrices detalladas)
+- [ ] He leído `.agents/AGENTS.md` (reglas de workspace)
+- [ ] He leído las últimas 3 líneas de `doc/PROGRESO.md` (estado actual)
+- [ ] He verificado el estado con `cargo test`
+- [ ] He entendido el contexto y objetivos de la sesión
+
+### 🟡 FASE 2: VERIFICACIÓN (Durante el desarrollo)
+
+**Checklist de Verificación:**
+- [ ] `cargo check` pasa sin errores
+- [ ] `cargo test` pasa 100% (si aplica)
+- [ ] No hay `todo!()`, `unimplemented!()` o placeholders en código de producción
+- [ ] El código mantiene el estilo y patrones existentes
+- [ ] No he alterado firmas públicas sin compatibilidad retro
+
+### 🟢 FASE 3: FINALIZACIÓN (Antes de marcar como completado)
+
+**Checklist de Finalización:**
+- [ ] He actualizado `doc/PROGRESO.md` con detalles de cambios
+- [ ] He registrado nuevas funciones en Sección 3 del documento correspondiente
+- [ ] He actualizado métricas con números reales
+- [ ] He redefinido objetivos en "🎯 PRÓXIMOS OBJETIVOS"
+- [ ] El siguiente agente puede continuar sin preguntar
+
+---
+
+## 📋 REGLAS DE ORO (8 MANDAMIENTOS)
+
+### 1️⃣ **LECTURA OBLIGATORIA DE GUÍAS**
+
+**✅ DEBES HACER:**
+- Leer `doc/AI_GUIDELINES.md` antes de proponer cualquier cambio
+- Leer `doc/README.md` para entender el contexto del proyecto
+- Verificar que entiendes las restricciones y patrones del proyecto
+
+**❌ PROHIBIDO:**
+- Proponer cambios sin entender el contexto del proyecto
+- Asumir patrones sin verificar en la documentación
+
+---
+
+### 2️⃣ **CUMPLIMIENTO DE REGLAS DE WORKSPACE**
+
+**✅ DEBES HACER:**
+- Obedecer todas las reglas descritas en `.agents/AGENTS.md`
+- Seguir los semáforos de control (🔴 inicio, 🟡 verificación, 🟢 finalización)
+- Respetar las directivas anti-breaking changes y anti-stubs
+
+**❌ PROHIBIDO:**
+- Saltarse semáforos de verificación
+- Ignorar reglas de prevención de duplicidad
+- Alterar firmas públicas sin compatibilidad retro
+
+---
+
+### 3️⃣ **PROHIBICIÓN DE ARCHIVOS DUPLICADOS**
+
+**✅ DEBES HACER:**
+- Verificar en `doc/TOOLS.md` si una herramienta está autorizada antes de crear documentación
+- Documentar tests nuevos en `doc/tools/TESTS.md`
+- Documentar UIs nuevas en `doc/tools/Uis.md`
+- Catalogar utilidades menores en Sección 3 del documento de herramienta principal
+- Documentar planes/tareas solo en `doc/PROGRESO.md`
+- Usar la plantilla de 10 secciones para nuevas herramientas
+- Mantener archivos .md entre 1,500-3,000 líneas (dividir si es necesario)
+- Generar/actualizar índice (TOC) al inicio de archivos .md significativos
+
+**❌ PROHIBIDO:**
+- Crear archivos `.md` en `doc/tools/` sin autorización en `doc/TOOLS.md`
+- Crear archivos `.md` independientes para tests unitarios
+- Crear archivos `.md` para componentes de UI secundarios
+- Crear archivos de tareas sueltos (`todo.md`, etc.) en la raíz
+- Crear nuevos documentos de integración (actualizar existentes)
+- Reescribir archivos completos (usar ediciones quirúrgicas)
+
+**📁 UBICACIONES PERMITIDAS:**
+```
+doc/tools/TESTS.md          → Tests unitarios
+doc/tools/Uis.md            → UIs y componentes visuales
+doc/tools/NN_NOMBRE.md      → Documentación de herramientas (solo si está en TOOLS.md)
+doc/PROGRESO.md            → Planes, tareas, progreso general
+```
+
+---
+
+### 4️⃣ **EDICIONES QUIRÚRGICAS SOLAMENTE**
+
+**✅ DEBES HACER:**
+- Usar herramientas de reemplazo parcial (`edit`/`replace_file_content`)
+- Modificar solo las secciones relevantes de los archivos
+- Preservar notas de diseño valiosas en archivos existentes
+
+**❌ PROHIBIDO:**
+- Reescribir archivos completos de documentación
+- Eliminar contenido valioso durante actualizaciones
+- Reformatear archivos completos sin necesidad
+
+**💡 EJEMPLO CORRECTO:**
+```rust
+// CORRECTO: Edición quirúrgica
+edit_file(
+    "doc/tools/01_SCENE_EDITOR.md",
+    old_string: "### 3.1 Catálogo de Funciones\n[contenido viejo]",
+    new_string: "### 3.1 Catálogo de Funciones\n[contenido actualizado]"
+)
+
+// INCORRECTO: Reescritura completa
+rewrite_file("doc/tools/01_SCENE_EDITOR.md", nuevo_contenido_completo)
+```
+
+---
+
+### 5️⃣ **TOLERANCIA A REFACTORIZACIONES (RUTAS DINÁMICAS)**
+
+**✅ DEBES HACER:**
+- Usar búsquedas recursivas (`grep`/`find`) cuando archivos se movieron
+- Verificar si estructuras fueron reubicadas en lugar de asumir que no existen
+- Actualizar diagramas y mapas en `doc/ARCHITECTURE.md` si cambia la estructura
+- Actualizar rutas en `doc/README.md` si hay cambios organizacionales
+
+**❌ PROHIBIDO:**
+- Asumir que un componente no existe porque no está en la ruta exacta
+- Duplicar código o estructuras porque las rutas cambiaron
+- Ignorar cambios organizacionales en la documentación
+
+**💡 EJEMPLO:**
+```rust
+// Si doc dice: "forge-editor/src/ui/mod.rs"
+// Pero archivo fue movido a: "forge-editor/src/interface/mod.rs"
+// DEBES: Buscar recursivamente y actualizar documentación
+```
+
+---
+
+### 6️⃣ **CATÁLOGO DETALLADO DE FUNCIONES**
+
+**✅ DEBES HACER:**
+- Registrar TODAS las nuevas funciones públicas en Sección 3 del documento correspondiente
+- Incluir: signatura, parámetros, retorno, estado/propósito
+- Usar formato de tabla para claridad
+- Actualizar inmediatamente después de implementar una función
+
+**❌ PROHIBIDO:**
+- Dejar funciones sin registrar en la documentación
+- Registrar funciones con información incompleta
+- Actualizar el catálogo después de la sesión (debe ser inmediato)
+
+---
+
+### 6️⃣-B **ACTUALIZACIÓN OBLIGATORIA DE DOCUMENTACIÓN DE HERRAMIENTAS**
+
+**⚠️ REGLA CRÍTICA:** Cuando modifiques código de una herramienta, DEBES actualizar el archivo `.md` correspondiente en `doc/tools/`.
+
+**✅ DEBES HACER:**
+- Identificar qué herramienta corresponde al código modificado
+- Localizar el archivo `.md` correspondiente en `doc/tools/`
+- Actualizar la Sección 3 (Catálogo de Funciones) con cambios
+- Actualizar métricas (líneas de código, tests, funciones públicas)
+- Actualizar estado de la herramienta si aplica (✅, 🟡, ⏳)
+- Realizar esta actualización INMEDIATAMENTE después de modificar el código
+
+**❌ PROHIBIDO:**
+- Modificar código sin actualizar el `.md` correspondiente
+- Dejar la documentación desactualizada respecto al código
+- Actualizar la documentación en una sesión posterior (debe ser inmediata)
+- Asumir que "no es importante" para cambios pequeños
+
+**🔍 FLUJO DE TRABAJO PARA IDENTIFICAR EL .md CORRECTO:**
+
+```mermaid
+graph TD
+    A[Modificaste código] --> B{¿Qué archivo modificaste?}
+    B --> C[forge-editor/src/scene_editor.rs]
+    C --> D[Actualizar doc/tools/01_SCENE_EDITOR.md]
+    B --> E[forge-editor/src/timeline.rs]
+    E --> F[Actualizar doc/tools/03_TIMELINE_EDITOR.md]
+    B --> G[forge-editor/src/cable_ui.rs]
+    G --> H[Actualizar doc/tools/06_CABLE_SYSTEM_UI.md]
+    B --> I[forge-editor/src/event_node_editor.rs]
+    I --> J[Actualizar doc/tools/39_EVENT_FORGE.md]
+    B --> K[Archivo no reconocido]
+    K --> L[Buscar en doc/TOOLS.md la herramienta correspondiente]
+```
+
+**💡 EJEMPLOS PRÁCTICOS:**
+
+**EJEMPLO 1: Modificaste una función en scene_editor.rs**
+```rust
+// Código modificado en: forge-editor/src/scene_editor.rs
+pub fn new_entity(&mut self, name: String) -> Uuid {
+    // nueva implementación
+}
+
+// ACCIÓN OBLIGATORIA: Actualizar doc/tools/01_SCENE_EDITOR.md
+// En Sección 3, agregar o actualizar:
+// | pub fn new_entity(&mut self, name: String) | name: String | Uuid | ✅ Mejorada. Ahora incluye validación de nombres duplicados. |
+```
+
+**EJEMPLO 2: Agregaste una nueva función en cable_ui.rs**
+```rust
+// Nueva función en: forge-editor/src/cable_ui.rs
+pub fn disconnect_cable(&mut self, cable_id: Uuid) -> bool {
+    // implementación
+}
+
+// ACCIÓN OBLIGATORIA: Actualizar doc/tools/06_CABLE_SYSTEM_UI.md
+// En Sección 3, agregar:
+// | pub fn disconnect_cable(&mut self, cable_id: Uuid) | cable_id: Uuid | bool | ✅ Nueva. Permite desconectar cables individualmente. |
+```
+
+**EJEMPLO 3: Modificaste timeline.rs significativamente**
+```rust
+// Cambios mayores en: forge-editor/src/timeline.rs
+// - Agregaste 3 funciones nuevas
+// - Modificaste 2 funciones existentes
+// - Líneas de código aumentaron de 300 a 450
+
+// ACCIÓN OBLIGATORIA: Actualizar doc/tools/03_TIMELINE_EDITOR.md
+// 1. Actualizar Sección 3 con las 3 funciones nuevas
+// 2. Actualizar las 2 funciones modificadas
+// 3. Actualizar métricas: Líneas de código: ~450 (antes ~300)
+// 4. Actualizar funciones públicas: N+3 (donde N es el anterior)
+```
+
+**📋 CHECKLIST RÁPIDO DE ACTUALIZACIÓN DE .md:**
+
+Después de modificar código, verifica:
+- [ ] ¿Qué archivo de código modifiqué?
+- [ ] ¿Cuál es el archivo .md correspondiente en doc/tools/?
+- [ ] ¿Necesito agregar nuevas funciones a Sección 3?
+- [ ] ¿Necesito actualizar funciones existentes en Sección 3?
+- [ ] ¿Necesito actualizar métricas (líneas, tests, funciones)?
+- [ ] ¿Necesito actualizar el estado de la herramienta?
+- [ ] ¿Realicé la actualización inmediatamente después del cambio de código?
+
+**⚠️ ADVERTENCIA:** Si no encuentras el archivo .md correspondiente, busca en `doc/TOOLS.md` para identificar la herramienta correcta. NO asumas que no existe documentación.
+
+---
+
+### 6️⃣-C **ESCENARIO "CONSTRUCCIÓN DE 0": QUÉ HACER CUANDO EL .MD NO EXISTE**
+
+**⚠️ REGLA CRÍTICA:** Cuando modifiques código pero el `.md` correspondiente aún no existe, DEBES seguir el "Patrón de Documentación Orgánica" establecido en `doc/INDEX.md` para mantener la centralización.
+
+**📋 FLUJO OBLIGATORIO (SIGUIENDO doc/INDEX.md):**
+
+```
+¿Existe el .md en doc/tools/?
+├─ SÍ → Actualizar usando REGLA 6-B
+└─ NO → ¿Está autorizada en doc/TOOLS.md? (NIVEL 1)
+    ├─ SÍ → Crear .md en doc/tools/NN_NOMBRE.md (NIVEL 2)
+    └─ NO → Documentar en doc/PROGRESO.md (NIVEL 3)
+```
+
+**✅ PASO A PASO (SIGUIENDO PATRÓN DE 5 PASOS DE doc/INDEX.md):**
+
+#### PASO 1: VERIFICAR
+- Buscar en `doc/TOOLS.md` → ¿La herramienta está autorizada? (NIVEL 1)
+- Buscar en `doc/tools/` → ¿El archivo ya existe? (NIVEL 2)
+- Buscar en `doc/PROGRESO.md` → ¿El progreso ya está documentado? (NIVEL 3)
+
+#### PASO 2: DECIDIR ACCIÓN
+| Situación | Acción |
+|-----------|--------|
+| ✅ Archivo existe | ACTUALIZAR (edición quirúrgica, REGLA 6-B) |
+| ❌ No existe y autorizada | CREAR en `doc/tools/NN_NOMBRE.md` |
+| 📊 No existe y NO autorizada | ACTUALIZAR `doc/PROGRESO.md` como pendiente |
+
+#### PASO 3: SEGUIR REGLAS (SI ESTÁ AUTORIZADA)
+- **NUNCA** crear duplicados (si existe, actualizar)
+- **SIEMPRE** actualizar `doc/TOOLS.md` al crear nueva herramienta
+- **SIEMPRE** registrar funciones en Sección 3 del .md correspondiente
+- **NUNCA** reescribir archivos completos (usar `edit`/`replace_file_content`)
+
+#### PASO 4: ACTUALIZAR REFERENCIAS (SI CREASTE NUEVO .MD)
+- `doc/TOOLS.md` → Añadir/actualizar herramienta en lista
+- `doc/INDEX.md` → Actualizar lista en `doc/tools/`
+- `doc/PROGRESO.md` → Actualizar métricas si aplica
+
+#### PASO 5: VERIFICAR
+- `cargo check` → Sin errores
+- `cargo test` → 100% passing (si aplica)
+- Consistencia con TOOLS.md y PROGRESO.md
+- No hay archivos duplicados en `doc/tools/`
+
+**🎯 PRINCIPIOS DE CENTRALIZACIÓN (SIGUIENDO doc/INDEX.md):**
+
+**Niveles de Documentación:**
+- **Nivel 1:** `doc/TOOLS.md` → Autorización de herramientas (SI NO ESTÁ AQUÍ → NO CREAR)
+- **Nivel 2:** `doc/tools/NN_NOMBRE.md` → Documentación técnica completa (SI EXISTE → ACTUALIZAR)
+- **Nivel 3:** `doc/PROGRESO.md` → Progreso de desarrollo, métricas, tests (Solo cambios de progreso)
+
+**Flujo correcto:** Nivel 1 (autorizar) → Nivel 2 (documentar) → Nivel 3 (progreso)
+
+**💡 EJEMPLO PRÁCTICO:**
+
+```rust
+// Modificaste: forge-editor/src/new_system.rs
+// ¿Existe doc/tools/XX_NEW_SYSTEM.md? → NO
+
+// PASO 1: VERIFICAR
+// doc/TOOLS.md → ¿Está autorizada? 
+
+// CASO 1: SÍ está autorizada (NIVEL 1)
+// → PASO 2: DECIDIR → CREAR en doc/tools/XX_NEW_SYSTEM.md
+// → PASO 3: Seguir reglas (plantilla 10 secciones, no duplicados)
+// → PASO 4: Actualizar referencias (TOOLS.md, INDEX.md)
+// → PASO 5: Verificar (cargo check, cargo test)
+
+// CASO 2: NO está autorizada
+// → PASO 2: DECIDIR → ACTUALIZAR doc/PROGRESO.md
+// → Documentar como pendiente en "🎯 PRÓXIMOS OBJETIVOS"
+// → NO crear el .md (esperar autorización NIVEL 1)
+```
+
+**📋 CHECKLIST "SIN .MD" (SIGUIENDO doc/INDEX.md):**
+- [ ] ¿Verifiqué en doc/TOOLS.md (NIVEL 1 - autorización)?
+- [ ] ¿Verifiqué en doc/tools/ (NIVEL 2 - existe)?
+- [ ] ¿Verifiqué en doc/PROGRESO.md (NIVEL 3 - progreso)?
+- [ ] Si autorizada: ¿Creé .md en doc/tools/NN_NOMBRE.md?
+- [ ] Si autorizada: ¿Actualicé doc/TOOLS.md y doc/INDEX.md?
+- [ ] Si NO autorizada: ¿Documenté en doc/PROGRESO.md sin crear .md?
+- [ ] ¿Seguí el flujo correcto: Nivel 1 → Nivel 2 → Nivel 3?
+
+**⚠️ ADVERTENCIA IMPORTANTE:**
+- **NUNCA** crees un archivo .md si NO está en `doc/TOOLS.md` (NIVEL 1)
+- **SIEMPRE** sigue el "Patrón de Documentación Orgánica" de `doc/INDEX.md`
+- **MANTÉN** la centralización: todo .md debe estar en `doc/tools/` y autorizado en `doc/TOOLS.md`
+- Si hay duda, documenta en `doc/PROGRESO.md` (NIVEL 3) y espera autorización (NIVEL 1)
+
+**� TABLA DE REFERENCIA RÁPIDA (Código → .md):**
+
+| Archivo de Código | Archivo .md Correspondiente | Herramienta |
+|---|---|---|
+| `forge-editor/src/scene_editor.rs` | `doc/tools/01_SCENE_EDITOR.md` | Scene Editor |
+| `forge-editor/src/project_manager.rs` | `doc/tools/02_PROJECT_MANAGER.md` | Project Manager |
+| `forge-editor/src/timeline.rs` | `doc/tools/03_TIMELINE_EDITOR.md` | Timeline Editor |
+| `forge-editor/src/keyframe.rs` | `doc/tools/04_KEYFRAME_SYSTEM.md` | Keyframe System |
+| `forge-editor/src/animation_2d.rs` | `doc/tools/05_ANIMATION_2D.md` | Animation 2D |
+| `forge-editor/src/cable_ui.rs` | `doc/tools/06_CABLE_SYSTEM_UI.md` | Cable System UI |
+| `forge-editor/src/animation_track.rs` | `doc/tools/06_ANIMATION_TRACK.md` | Animation Track |
+| `forge-editor/src/script_editor.rs` | `doc/tools/10_SCRIPT_EDITOR.md` | Script Editor |
+| `forge-editor/src/script_executor.rs` | `doc/tools/11_SCRIPT_EXECUTOR.md` | Script Executor |
+| `forge-editor/src/compile_system.rs` | `doc/tools/12_COMPILE_SYSTEM.md` | Compile System |
+| `forge-editor/src/script_optimizer.rs` | `doc/tools/13_SCRIPT_OPTIMIZER.md` | Script Optimizer |
+| `forge-editor/src/script_viewer.rs` | `doc/tools/14_SCRIPT_VIEWER.md` | Script Viewer |
+| `forge-editor/src/debugger.rs` | `doc/tools/15_DEBUG_PANEL.md` | Debug Panel |
+| `forge-editor/src/hot_reload.rs` | `doc/tools/16_HOT_RELOAD.md` | Hot Reload |
+| `forge-editor/src/linter_panel.rs` | `doc/tools/17_LINTER_PANEL.md` | Linter Panel |
+| `forge-editor/src/particle_system.rs` | `doc/tools/20_PARTICLE_SYSTEM.md` | Particle System |
+| `forge-editor/src/plugin_system_ui.rs` | `doc/tools/22_PLUGIN_SYSTEM.md` | Plugin System |
+| `forge-editor/src/collaboration.rs` | `doc/tools/23_COLLABORATION.md` | Collaboration |
+| `forge-editor/src/bitacora_manager.rs` | `doc/tools/24_BITACORA_MANAGER.md` | Bitacora Manager |
+| `forge-editor/src/export_manager.rs` | `doc/tools/25_EXPORT_MANAGER.md` | Export Manager |
+| `forge-editor/src/import_manager.rs` | `doc/tools/26_IMPORT_MANAGER.md` | Import Manager |
+| `forge-editor/src/map_export.rs` | `doc/tools/27_MAP_EXPORT.md` | Map Export |
+| `forge-editor/src/serialization_panel.rs` | `doc/tools/28_SERIALIZATION_PANEL.md` | Serialization Panel |
+| `forge-editor/src/event_node_editor.rs` | `doc/tools/39_EVENT_FORGE.md` | Event Forge |
+| `forge-editor/src/transform_properties_ui.rs` | `doc/tools/02_TRANSFORM_PROPERTIES_UI.md` | Transform Properties UI |
+| `forge-editor/src/component_properties_ui.rs` | `doc/tools/03_COMPONENT_PROPERTIES_UI.md` | Component Properties UI |
+| `forge-editor/src/property_editor_ui.rs` | `doc/tools/04_PROPERTY_EDITOR_UI.md` | Property Editor UI |
+
+**💡 USO DE ESTA TABLA:**
+1. Cuando modifiques un archivo de código, busca el archivo en la columna izquierda
+2. Identifica el archivo .md correspondiente en la columna central
+3. Actualiza ese archivo .md inmediatamente después de tu cambio de código
+4. Si el archivo no está en la tabla, busca en `doc/TOOLS.md` para identificar la herramienta correcta
+
+**�💡 FORMATO REQUERIDO:**
+```markdown
+### 3.5 Catálogo de Funciones Detalladas
+
+#### Struct `MiEstructura` (Archivo: `ruta/al/archivo.rs`)
+| Signatura de la Función | Parámetros | Retorno | Estado / Propósito |
+|---|---|---|---|
+| `pub fn new() -> Self` | Ninguno | `Self` | ✅ Funcional. Inicializa con valores por defecto. |
+| `pub fn update(&mut self, dt: f32)` | `dt: f32` (delta time) | `()` | 🔄 En Progreso. Integra físicas aplicadas en frame. |
+```
+
+---
+
+### 7️⃣ **CONSISTENCIA DE ESTILO DE CÓDIGO**
+
+**✅ DEBES HACER:**
+- Mantener la estructura, formato, estilo y patrones del código existente
+- Integrar nuevo código de manera invisible con el código existente
+- Respetar patrones de error handling, borrowing, y control de flujo existentes
+- Seguir las convenciones de nomenclatura del proyecto
+
+**❌ PROHIBIDO:**
+- Reformatear archivos completos
+- Reescribir lógica con diferentes estilos sin solicitud explícita
+- Cambiar patrones de error handling sin razón técnica
+- Introducir nuevos paradigmas de programación inconsistentes
+
+**💡 PRINCIPIO:** "El nuevo código debe parecerse al código existente como si hubiera sido escrito por el mismo autor."
+
+---
+
+### 8️⃣ **ACTUALIZACIÓN AUTOMÁTICA DE PROGRESO (HANDOFF)**
+
+**✅ DEBES HACER:**
+- Actualizar `doc/PROGRESO.md` al finalizar CUALQUIER tarea o sesión
+- Registrar detalles específicos de los cambios realizados
+- Actualizar métricas de tests con conteo real (actual: 96 totales)
+- Redefinir objetivos en sección "🎯 PRÓXIMOS OBJETIVOS"
+- Incluir fecha y responsable de los cambios
+- Asegurar que el siguiente agente pueda continuar sin preguntar
+
+**❌ PROHIBIDO:**
+- Finalizar una sesión sin actualizar PROGRESO.md
+- Usar métricas desactualizadas o incorrectas
+- Dejar objetivos vagos o confusos para el siguiente agente
+- Omitir detalles importantes de los cambios realizados
+
+---
+
+## ✅ CHECKLIST OBLIGATORIO DE FINALIZACIÓN (REGLA 8)
+
+**⚠️ CRÍTICO:** ANTES de considerar cualquier tarea como "COMPLETADA", DEBES verificar y completar TODOS los siguientes items:
+
+### 📋 CHECKLIST DE DOCUMENTACIÓN (OBLIGATORIO)
+- [ ] **Actualización de PROGRESO.md:** He actualizado `doc/PROGRESO.md` con:
+  - [ ] Detalles detallados de los cambios realizados
+  - [ ] Métricas actualizadas de tests (conteo real total)
+  - [ ] Redefinición clara de objetivos en sección "🎯 PRÓXIMOS OBJETIVOS"
+  - [ ] Fecha y responsable de los cambios
+
+### 📋 CHECKLIST DE CÓDIGO (OBLIGATORIO)
+- [ ] **Registro de Funciones:** He registrado todas las nuevas funciones/estructuras públicas en Sección 3 del documento de herramienta correspondiente
+- [ ] **Actualización de .md de Herramienta:** He actualizado el archivo .md correspondiente en doc/tools/ cuando modifiqué código de una herramienta (VER REGLA 6️⃣-B)
+- [ ] **Ediciones Quirúrgicas:** He usado ediciones parciales (`edit`/`replace_file_content`) en lugar de reescribir archivos completos
+- [ ] **Consistencia de Estilo:** El nuevo código mantiene el estilo y patrones del código existente
+- [ ] **Sin Breaking Changes:** No he alterado firmas públicas sin compatibilidad retro
+
+### 📋 CHECKLIST DE VERIFICACIÓN (OBLIGATORIO)
+- [ ] **Cargo Check:** `cargo check` pasa sin errores
+- [ ] **Cargo Test:** `cargo test` pasa 100% (si aplica)
+- [ ] **Anti-Stubs:** No hay `todo!()`, `unimplemented!()` o placeholders en código de producción
+- [ ] **Referencias Actualizadas:** He actualizado referencias en TOOLS.md, INDEX.md si aplica
+
+### 📋 CHECKLIST DE HANDOFF (OBLIGATORIO)
+- [ ] **Métricas Reales:** Los números en documentación reflejan la realidad actual
+- [ ] **Objetivos Claros:** El siguiente agente puede continuar sin preguntar
+- [ ] **Estado Preciso:** Herramientas marcadas con estado correcto (✅, 🟡, ⏳)
+- [ ] **Contexto Completo:** Toda la información necesaria está documentada
+
+**⚠️ ADVERTENCIA:** NO marques una tarea como "completada" hasta que TODOS los items de este checklist estén verificados. Si algún item no aplica, explica por qué en PROGRESO.md.
+
+---
+
+## 🚨 SITUACIONES DE EMERGENCIA
+
+### Si encuentras `todo!()` o `unimplemented!()`:
+1. **NO** marcar la herramienta como "✅ Completado"
+2. Documentar como "⏳ En Desarrollo" o "🔄 Integración Parcial"
+3. Agregar comentario: `// STUB: [Explicación detallada]`
+4. Actualizar PROGRESO.md con el estado real
+
+### Si necesitas alterar una firma pública:
+1. **NO** eliminar o cambiar directamente
+2. Marcar como `#[deprecated]` con mensaje de migración
+3. Crear variante nueva con prefijo `_v2` o similar
+4. Actualizar documentación en TOOLS.md y AI_GUIDELINES.md
+5. Asegurar que tests existentes sigan passing
+
+### Si la ruta de un archivo cambió:
+1. **NO** asumir que el componente no existe
+2. Usar `grep`/`find` para localizar la nueva ubicación
+3. Actualizar documentación con la nueva ruta
+4. Actualizar diagramas en ARCHITECTURE.md si aplica
+
+---
+
+## 📊 MÉTRICAS ACTUALES (REFERENCIA)
+
+- **Tests totales:** 96 (verificar con `cargo test`)
+- **Herramientas documentadas:** 37/37 (100%)
+- **Líneas de código:** ~18,500 (verificar con herramienta de conteo)
+- **Crates en workspace:** 11 principales
+- **Archivos de documentación:** 40+ en `doc/tools/`
+
+**⚠️ NOTA:** Estas métricas deben verificarse y actualizarse regularmente. No uses números desactualizados.
+
+---
+
+## 🎓 CONSEJOS PARA AGENTES DE IA
+
+1. **Sé transparente:** Si no estás seguro de algo, pregunta en lugar de asumir
+2. **Sé consistente:** Sigue los patrones existentes en lugar de inventar nuevos
+3. **Sé detallado:** Más información es mejor que menos información
+4. **Sé quirúrgico:** Edita solo lo que necesitas editar
+5. **Sé responsable:** Actualiza la documentación inmediatamente después de cada cambio
+
+---
+
+## 📞 SOPORTE Y CONSULTAS
+
+Si tienes dudas sobre estas reglas:
+1. Revisa `doc/AI_GUIDELINES.md` para directrices detalladas
+2. Consulta `.agents/AGENTS.md` para reglas de workspace
+3. Verifica `doc/PROGRESO.md` para contexto actual
+4. Lee las últimas 3 líneas de PROGRESO.md para el estado más reciente
+
+**Recuerda:** Estas reglas existen para mantener la integridad y consistencia del proyecto. Seguirlas beneficia a todos los agentes y usuarios del Forge SDK 2D.

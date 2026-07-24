@@ -23,6 +23,7 @@ members = [
       "forge-linter",
       "forge-runtime",
       "forge-audio",
+      "forge-types",
 ]
 
 [workspace.dependencies]

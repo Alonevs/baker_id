@@ -25,6 +25,7 @@ Este archivo define las directivas automáticas que todo agente de Inteligencia 
 - Actualizar métricas en TOOLS.md
 - Commit con mensaje claro
 - Registrar en Historial de Sesiones
+- **✅ COMPLETAR CHECKLIST OBLIGATORIO DE REGLA 8 (ver abajo)**
 
 ---
 
@@ -73,6 +74,39 @@ Este archivo define las directivas automáticas que todo agente de Inteligencia 
 8. **Actualización Automática de Progreso (Handoff de Agentes):**
    - Al finalizar cualquier tarea, sesión o cambio en el código, debes actualizar obligatoriamente el archivo [doc/PROGRESO.md](file:///c:/Users/xico0/Desktop/Xico/doc/PROGRESO.md).
    - Registra de forma detallada los cambios realizados, actualiza las métricas de tests totales activos en verde (ej: 96 tests totales) y redefine con precisión el estado y tareas pendientes en la sección `## 🎯 PRÓXIMOS OBJETIVOS` para que el siguiente agente retome el trabajo sin fricciones y sin necesidad de preguntar.
+
+---
+
+## ✅ CHECKLIST OBLIGATORIO DE FINALIZACIÓN (REGLA 8)
+
+**⚠️ IMPORTANTE:** ANTES de considerar cualquier tarea como "COMPLETADA", DEBES verificar y completar TODOS los siguientes items:
+
+### 📋 CHECKLIST DE DOCUMENTACIÓN (OBLIGATORIO)
+- [ ] **Actualización de PROGRESO.md:** He actualizado `doc/PROGRESO.md` con:
+  - [ ] Detalles detallados de los cambios realizados
+  - [ ] Métricas actualizadas de tests (conteo real total)
+  - [ ] Redefinición clara de objetivos en sección "🎯 PRÓXIMOS OBJETIVOS"
+  - [ ] Fecha y responsable de los cambios
+
+### 📋 CHECKLIST DE CÓDIGO (OBLIGATORIO)
+- [ ] **Registro de Funciones:** He registrado todas las nuevas funciones/estructuras públicas en Sección 3 del documento de herramienta correspondiente
+- [ ] **Ediciones Quirúrgicas:** He usado ediciones parciales (`edit`/`replace_file_content`) en lugar de reescribir archivos completos
+- [ ] **Consistencia de Estilo:** El nuevo código mantiene el estilo y patrones del código existente
+- [ ] **Sin Breaking Changes:** No he alterado firmas públicas sin compatibilidad retro
+
+### 📋 CHECKLIST DE VERIFICACIÓN (OBLIGATORIO)
+- [ ] **Cargo Check:** `cargo check` pasa sin errores
+- [ ] **Cargo Test:** `cargo test` pasa 100% (si aplica)
+- [ ] **Anti-Stubs:** No hay `todo!()`, `unimplemented!()` o placeholders en código de producción
+- [ ] **Referencias Actualizadas:** He actualizado referencias en TOOLS.md, INDEX.md si aplica
+
+### 📋 CHECKLIST DE HANDOFF (OBLIGATORIO)
+- [ ] **Métricas Reales:** Los números en documentación reflejan la realidad actual
+- [ ] **Objetivos Claros:** El siguiente agente puede continuar sin preguntar
+- [ ] **Estado Preciso:** Herramientas marcadas con estado correcto (✅, 🟡, ⏳)
+- [ ] **Contexto Completo:** Toda la información necesaria está documentada
+
+**⚠️ ADVERTENCIA:** NO marques una tarea como "completada" hasta que TODOS los items de este checklist estén verificados. Si algún item no aplica, explica por qué en PROGRESO.md.
 
 ---
 

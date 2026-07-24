@@ -1,12 +1,12 @@
-pub mod project;
-pub mod scene;
-pub mod events;
-pub mod audio;
-pub mod dialogue;
-pub mod event_system;
-pub mod gdd;
-pub mod sequencer;
+﻿[package]
+name = "forge-types"
+version = "1.0.0"
+edition = "2021"
+authors = ["Forge Team"]
+description = "Forge Game Types"
+license = "MIT"
 
-pub use project::ProjectData;
-pub use scene::SceneData;
-pub use events::EventData;
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }

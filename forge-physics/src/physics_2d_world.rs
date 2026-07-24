@@ -157,34 +157,43 @@ impl Physics2DWorld {
         for _ in 0..steps {
             let step_dt = dt / steps as f32;
 
+            // 1. Actualizar posiciones y velocidades
             {
                 let mut bodies = self.bodies.write().unwrap();
                 for (_id, body) in bodies.iter_mut() {
-                    if body.lock().unwrap().is_active {
-                        body.lock().unwrap().update(step_dt, self.gravity);
+                    let mut body_m = body.lock().unwrap();
+                    if body_m.is_active {
+                        body_m.update(step_dt, self.gravity);
                     }
                 }
             }
 
-            let all_bodies: Vec<Arc<Mutex<PhysicsBody2D>>> = self.get_all_bodies();
+            // 2. Detectar colisiones (O(n²)) - sin locks anidados
+            let bodies_guard = self.bodies.read().unwrap();
+            let bodies_list: Vec<&Arc<Mutex<PhysicsBody2D>>> = bodies_guard.values().collect();
 
-            for body1 in all_bodies.iter() {
+            for (i, body1) in bodies_list.iter().enumerate() {
                 if !body1.lock().unwrap().is_active { continue; }
 
-                for body2 in all_bodies.iter() {
+                for body2 in bodies_list.iter().skip(i + 1) {
                     if !body2.lock().unwrap().is_active { continue; }
                     if body1.lock().unwrap().id == body2.lock().unwrap().id { continue; }
 
-                    let dist = ((body2.lock().unwrap().position[0] - body1.lock().unwrap().position[0]).powi(2) + 
-                               (body2.lock().unwrap().position[1] - body1.lock().unwrap().position[1]).powi(2)).sqrt();
-                    let min_dist = body1.lock().unwrap().collider.size[0] / 2.0 + body2.lock().unwrap().collider.size[0] / 2.0;
+                    let b1 = body1.lock().unwrap();
+                    let b2 = body2.lock().unwrap();
+
+                    let dist = ((b2.position[0] - b1.position[0]).powi(2) + 
+                               (b2.position[1] - b1.position[1]).powi(2)).sqrt();
+                    let min_dist = b1.collider.size[0] / 2.0 + b2.collider.size[0] / 2.0;
 
                     if dist < min_dist {
-                        collisions.push((body1.lock().unwrap().id, body2.lock().unwrap().id, body1.lock().unwrap().position));
+                        collisions.push((b1.id, b2.id, b1.position));
                     }
                 }
             }
+            drop(bodies_guard);
 
+            // 3. Resolver colisiones
             let bodies_to_resolve: Vec<(Uuid, Uuid)> = collisions.iter()
                 .map(|(b1, b2, _)| (*b1, *b2))
                 .collect();
@@ -196,16 +205,19 @@ impl Physics2DWorld {
                 drop(bodies_read);
 
                 if let (Some(b1), Some(b2)) = (body1, body2) {
-                    let dist = ((b2.lock().unwrap().position[0] - b1.lock().unwrap().position[0]).powi(2) + 
-                               (b2.lock().unwrap().position[1] - b1.lock().unwrap().position[1]).powi(2)).sqrt();
-                    let overlap = (b1.lock().unwrap().collider.size[0] / 2.0 + b2.lock().unwrap().collider.size[0] / 2.0) - dist;
+                    let b1 = b1.lock().unwrap();
+                    let b2 = b2.lock().unwrap();
+
+                    let dist = ((b2.position[0] - b1.position[0]).powi(2) + 
+                               (b2.position[1] - b1.position[1]).powi(2)).sqrt();
+                    let overlap = (b1.collider.size[0] / 2.0 + b2.collider.size[0] / 2.0) - dist;
 
                     if dist > 0.0 && overlap > 0.0 {
-                        let normal_x = (b2.lock().unwrap().position[0] - b1.lock().unwrap().position[0]) / dist;
-                        let normal_y = (b2.lock().unwrap().position[1] - b1.lock().unwrap().position[1]) / dist;
+                        let normal_x = (b2.position[0] - b1.position[0]) / dist;
+                        let normal_y = (b2.position[1] - b1.position[1]) / dist;
 
-                        let mut b1_m = b1.lock().unwrap();
-                        let mut b2_m = b2.lock().unwrap();
+                        let mut b1_m = b1.clone();
+                        let mut b2_m = b2.clone();
 
                         if b1_m.body_type == BodyType::Dynamic {
                             b1_m.velocity[0] -= normal_x * overlap * 0.5;
@@ -405,7 +417,8 @@ mod tests {
 
         let body = world.get_body(&body_arc.lock().unwrap().id).unwrap();
         let body = body.lock().unwrap();
-        assert!((body.velocity[1] - (-9.81 * 1.0 / 60.0)).abs() < 0.01);
+        let expected_velocity = -9.81 * (1.0 / 60.0) * (1.0 / 60.0); // dt * self.dt
+        assert!((body.velocity[1] - expected_velocity).abs() < 0.01);
     }
 
     #[test]

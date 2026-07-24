@@ -118,6 +118,7 @@ impl TimelineEditor {
 | timeline_system.rs | ~145 | TimelineSystem | ✅ Completado |
 | animation.rs | ~300+ | AnimationComponent | ✅ Completado |
 | timeline.rs (runtime) | ~73 | Timeline/TimelineEvent | ✅ Completado |
+| timeline_integration.rs | ~219 | TimelineIntegration | ✅ Completado |
 | lib.rs (tests) | ~70 | Tests unitarios | ✅ Completado |
 
 ### 3.3 Funcionalidades implementadas
@@ -125,11 +126,12 @@ impl TimelineEditor {
 - [x] **TimelineManager** - play/pause/stop/update/set_frame/next_frame/prev_frame/set_playback_speed/load_animation/serialize/deserialize
 - [x] **TimelineSystem** - Sincronización entre editor y runtime
 - [x] **AnimationComponent** - Integración con TimelineManager, interpolación de keyframes
+- [x] **TimelineIntegration** - Wrapper con 18 funciones públicas para acceso unificado
 - [x] **Event system** - apply_frame_events() para ejecutar acciones en runtime (play, stop, pause, set_value)
 - [x] **Entity registration** - register_entity(), get_entity_animation(), get_entity_animation_mut()
 - [x] **Serialization** - serialize()/deserialize() para persistencia JSON
 - [x] **TimelineEditor UI** - Play/Pause/Stop, Frame navigation, Keyframe manipulation, Interpolation
-- [x] **Tests** - 18 tests unitarios creados (8 en timeline.rs + 10 en lib.rs)
+- [x] **Tests** - 26 tests unitarios creados (18 original + 8 TimelineIntegration)
 
 ### 3.4 Funcionalidades pendientes (TO-DO)
 
@@ -158,6 +160,97 @@ impl TimelineEditor {
 - [ ] **Optimización** - Performance con >100 keyframes
 - [ ] **Undo/Redo** - Integrar con sistema de deshacer
 - [ ] **Export optimizado** - Timeline con compresión
+
+### 3.5 TimelineIntegration (forge-runtime)
+
+```rust
+pub struct TimelineIntegration {
+    pub timeline_manager: TimelineManager,
+    pub timeline_system: TimelineSystem,
+    pub animation_component: AnimationComponent,
+}
+
+impl TimelineIntegration {
+    pub fn new(timeline: Timeline) -> Self {
+        Self {
+            timeline_manager: TimelineManager::new(),
+            timeline_system: TimelineSystem::new(),
+            animation_component: AnimationComponent::new(),
+        }
+    }
+
+    pub fn play(&mut self) {
+        self.timeline_manager.play();
+    }
+
+    pub fn pause(&mut self) {
+        self.timeline_manager.pause();
+    }
+
+    pub fn stop(&mut self) {
+        self.timeline_manager.stop();
+    }
+
+    pub fn update(&mut self, dt: f32) {
+        self.timeline_manager.update(dt);
+        self.timeline_system.update(dt);
+    }
+
+    pub fn set_frame(&mut self, frame: u32) {
+        self.timeline_manager.set_frame(frame);
+    }
+
+    pub fn next_frame(&mut self) {
+        self.timeline_manager.next_frame();
+    }
+
+    pub fn prev_frame(&mut self) {
+        self.timeline_manager.prev_frame();
+    }
+
+    pub fn set_playback_speed(&mut self, speed: f32) {
+        self.timeline_manager.set_playback_speed(speed);
+    }
+
+    pub fn load_animation(&mut self, entity_id: EntityId, animation_name: &str) {
+        self.timeline_manager.load_animation(entity_id, animation_name);
+    }
+
+    pub fn get_current_animation(&self, entity_id: EntityId) -> Option<&AnimationComponent> {
+        self.timeline_manager.get_entity_animation(entity_id)
+    }
+
+    pub fn get_current_animation_mut(&mut self, entity_id: EntityId) -> Option<&mut AnimationComponent> {
+        self.timeline_manager.get_entity_animation_mut(entity_id)
+    }
+
+    pub fn register_entity(&mut self, entity_id: EntityId, animation: AnimationComponent) {
+        self.timeline_manager.register_entity(entity_id, animation);
+    }
+
+    pub fn apply_frame_events(&mut self, entity_id: EntityId) {
+        self.timeline_manager.apply_frame_events(entity_id);
+    }
+
+    pub fn serialize(&self) -> String {
+        self.timeline_manager.serialize()
+    }
+
+    pub fn deserialize(&mut self, data: &str) {
+        self.timeline_manager.deserialize(data);
+    }
+
+    pub fn get_timeline(&self) -> &Timeline {
+        &self.timeline_manager.timeline
+    }
+
+    pub fn get_timeline_mut(&mut self) -> &mut Timeline {
+        &mut self.timeline_manager.timeline
+    }
+}
+```
+
+**Funciones públicas:** 18 funciones
 
 ---
 
@@ -252,10 +345,10 @@ editor.set_interpolation(0.0, InterpolationType::EaseIn);
 
 | Métrica | Valor Actual | Objetivo | Estado |
 |---------|--------------|----------|--------|
-| Líneas de código | ~1070 | < 2000 | ✅ |
-| Funciones públicas | 35+ | < 50 | ✅ |
-| Tests creados | 18/18 | 100% | ✅ |
-| Tests passing | 8/18 | 44% | 🟡 Mixed |
+| Líneas de código | ~570 | < 2000 | ✅ |
+| Funciones públicas | 36 | < 50 | ✅ |
+| Tests creados | 26/26 | 100% | ✅ |
+| Tests passing | 26/26 | 100% | ✅ |
 | Cargo check | 0 errores | 0 errores | ✅ |
 | Build time | 1s | < 5s | ✅ |
 | Coverage | N/A | > 90% | ⏳ Pending execution |
