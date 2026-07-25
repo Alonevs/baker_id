@@ -36,8 +36,10 @@ pub mod export_import_panel;
 pub mod export_manager;
 pub mod hot_reload;
 pub mod hot_reload_panel;
+pub mod hot_reload_integration;
 
 pub use hot_reload::ChangeType;
+pub use hot_reload_integration::SimpleFileWatcherIntegration;
 pub mod import_manager;
 pub mod keyframe;
 pub mod map_export;

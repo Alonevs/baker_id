@@ -32,6 +32,7 @@ pub struct HotReloadManager {
     pub pending_changes: Vec<PendingChange>,
     pub is_hot_reload_enabled: bool,
     pub file_watcher: Option<FileWatcher>,
+    pub change_callback: Option<Box<dyn Fn(String, ChangeType, Option<String>) + Send + Sync>>,
 }
 
 pub struct FileWatcher {
@@ -55,6 +56,7 @@ impl HotReloadManager {
             pending_changes: Vec::new(),
             is_hot_reload_enabled: true,
             file_watcher: None,
+            change_callback: None,
         }
     }
     
@@ -63,6 +65,19 @@ impl HotReloadManager {
             self.file_watcher = Some(FileWatcher::new(dir, 100));
         }
         self
+    }
+    
+    pub fn set_change_callback<F>(&mut self, callback: F) 
+    where 
+        F: Fn(String, ChangeType, Option<String>) + Send + Sync + 'static
+    {
+        self.change_callback = Some(Box::new(callback));
+    }
+    
+    pub fn notify_change(&self, file_path: String, change_type: ChangeType) {
+        if let Some(ref callback) = self.change_callback {
+            callback(file_path, change_type, None);
+        }
     }
     
     pub fn enable(&mut self) {
@@ -143,6 +158,19 @@ impl HotReloadManager {
     
     pub fn update(&mut self, dt: f32) {
         self.hot_reload_panel.update(dt);
+    }
+}
+
+impl Clone for HotReloadManager {
+    fn clone(&self) -> Self {
+        Self {
+            script_executor: Some(ScriptExecutor::new()),
+            hot_reload_panel: HotReloadPanel::new(),
+            pending_changes: Vec::new(),
+            is_hot_reload_enabled: self.is_hot_reload_enabled,
+            file_watcher: None,
+            change_callback: None,
+        }
     }
 }
 
@@ -228,9 +256,12 @@ impl FileWatcher {
     
     fn notify_change(&self, file_path: String, change_type: ChangeType, 
                     _old_content: Option<String>, new_content: Option<String>) {
-        // Aquí se notificaría al HotReloadManager
-        // En una implementación real, usaríamos un canal o callback
+        // Notificar al HotReloadManager
+        // En una implementación real, se usaría un canal o callback
         println!("[FILE WATCHER] Notifying change: {:?} - {}", change_type, file_path);
+        if let Some(content) = new_content {
+            println!("[FILE WATCHER] New content length: {} bytes", content.len());
+        }
     }
 }
 

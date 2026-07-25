@@ -5,6 +5,7 @@ use crate::snapshot_manager::SnapshotManager;
 use crate::timeline_integration::TimelineIntegration;
 use crate::input_capture::UserInput;
 use crate::hot_reload_panel::HotReloadPanel;
+use crate::hot_reload_integration::SimpleFileWatcherIntegration;
 use eframe::egui;
 use eframe::App;
 
@@ -18,6 +19,7 @@ pub struct ForgeEditorApp {
     pub is_playing: bool,
     pub hot_reload_panel: HotReloadPanel,
     pub hot_reload_manager: crate::hot_reload::HotReloadManager,
+    pub file_watcher_integration: Option<SimpleFileWatcherIntegration>,
 }
 
 impl Default for ForgeEditorApp {
@@ -31,13 +33,24 @@ impl Default for ForgeEditorApp {
             is_playing: false,
             hot_reload_panel: HotReloadPanel::new(),
             hot_reload_manager: crate::hot_reload::HotReloadManager::new(),
+            file_watcher_integration: None,
         }
     }
 }
 
 impl ForgeEditorApp {
     pub fn new(_cc: &eframe::CreationContext) -> Self {
-        Self::default()
+        let mut app = Self::default();
+        
+        // Inicializar FileWatcher Integration
+        app.file_watcher_integration = Some(SimpleFileWatcherIntegration::new(
+            app.hot_reload_manager.clone(),
+            &std::env::temp_dir(),
+            100
+        ));
+        app.file_watcher_integration.as_mut().unwrap().start();
+        
+        app
     }
     
     pub fn log(&mut self, message: String) {
@@ -69,6 +82,13 @@ impl ForgeEditorApp {
         
         // Actualizar hot reload con file watcher
         self.hot_reload_manager.update(delta);
+        
+        // Verificar cambios periódicamente cada 100ms
+        if let Some(ref mut integration) = self.file_watcher_integration {
+            if delta > 0.1 {
+                integration.check();
+            }
+        }
     }
 }
 

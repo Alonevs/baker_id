@@ -15,6 +15,7 @@ pub fn test_editor_log() {
         is_playing: false,
         hot_reload_panel: HotReloadPanel::new(),
         hot_reload_manager: HotReloadManager::new(),
+        file_watcher_integration: None,
     };
     app.log("Test log message".to_string());
     assert_eq!(app.logs.len(), 1);
