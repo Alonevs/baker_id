@@ -1,0 +1,32 @@
+{
+  "enemies": {
+    "sprite_size": 64,
+    "animations": {
+      "idle": {
+        "frames": 3,
+        "frame_rate": 10,
+        "source": "sprites/enemies/enemy_idle_1.png"
+      },
+      "walk": {
+        "frames": 8,
+        "frame_rate": 12,
+        "source": "sprites/enemies/enemy_walk_1.png"
+      },
+      "attack": {
+        "frames": 5,
+        "frame_rate": 12,
+        "source": "sprites/enemies/enemy_attack_1.png"
+      },
+      "hurt": {
+        "frames": 4,
+        "frame_rate": 8,
+        "source": "sprites/enemies/enemy_hurt_1.png"
+      },
+      "die": {
+        "frames": 6,
+        "frame_rate": 10,
+        "source": "sprites/enemies/enemy_die_1.png"
+      }
+    }
+  }
+}

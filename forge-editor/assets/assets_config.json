@@ -1,0 +1,42 @@
+{
+  "game_type": "isometric_rpg",
+  "assets": {
+    "characters": {
+      "player": {
+        "sprite_size": 64,
+        "animations": ["idle", "walk", "attack", "jump", "die"],
+        "frames": {
+          "idle": 3,
+          "walk": 8,
+          "attack": 5,
+          "jump": 4,
+          "die": 6
+        }
+      },
+      "enemies": {
+        "sprite_size": 64,
+        "animations": ["idle", "walk", "attack", "hurt", "die"],
+        "frames": {
+          "idle": 3,
+          "walk": 8,
+          "attack": 5,
+          "hurt": 4,
+          "die": 6
+        }
+      }
+    },
+    "environment": {
+      "tiles": {
+        "grass": "grass_01.png",
+        "water": "water_01.png",
+        "wall": "wall_01.png",
+        "door": "door_01.png"
+      }
+    },
+    "objects": {
+      "item": "item_base.png",
+      "chest": "chest_closed.png",
+      "chest_open": "chest_open.png"
+    }
+  }
+}

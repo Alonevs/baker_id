@@ -1,0 +1,30 @@
+{
+  "level_name": "isometric_forest",
+  "dimensions": {
+    "width": 100,
+    "height": 100
+  },
+  "tiles": [
+    {"x": 0, "y": 0, "type": "grass"},
+    {"x": 1, "y": 0, "type": "grass"},
+    {"x": 2, "y": 0, "type": "water"},
+    {"x": 0, "y": 1, "type": "grass"},
+    {"x": 1, "y": 1, "type": "grass"},
+    {"x": 2, "y": 1, "type": "wall"},
+    {"x": 3, "y": 1, "type": "grass"},
+    {"x": 0, "y": 2, "type": "wall"},
+    {"x": 1, "y": 2, "type": "grass"},
+    {"x": 2, "y": 2, "type": "grass"},
+    {"x": 3, "y": 2, "type": "grass"},
+    {"x": 4, "y": 2, "type": "door"}
+  ],
+  "platforms": [
+    {"x": 5, "y": 3, "width": 3, "height": 1},
+    {"x": 8, "y": 5, "width": 2, "height": 1}
+  ],
+  "spawn_point": {"x": 1, "y": 1},
+  "enemy_spawns": [
+    {"x": 8, "y": 4},
+    {"x": 3, "y": 6}
+  ]
+}

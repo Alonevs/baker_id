@@ -1,0 +1,92 @@
+{
+  "atlases": {
+    "characters": {
+      "size": [512, 512],
+      "padding": 2,
+      "sprites": [
+        {
+          "name": "player_idle",
+          "region": { "x": 0, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/characters/player_idle_1.png"
+        },
+        {
+          "name": "player_walk",
+          "region": { "x": 66, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/characters/player_walk_1.png"
+        },
+        {
+          "name": "player_attack",
+          "region": { "x": 130, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/characters/player_attack_1.png"
+        },
+        {
+          "name": "player_jump",
+          "region": { "x": 194, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/characters/player_jump_1.png"
+        },
+        {
+          "name": "player_die",
+          "region": { "x": 258, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/characters/player_die_1.png"
+        }
+      ]
+    },
+    "enemies": {
+      "size": [512, 512],
+      "padding": 2,
+      "sprites": [
+        {
+          "name": "enemy_idle",
+          "region": { "x": 0, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/enemies/enemy_idle_1.png"
+        },
+        {
+          "name": "enemy_walk",
+          "region": { "x": 66, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/enemies/enemy_walk_1.png"
+        },
+        {
+          "name": "enemy_attack",
+          "region": { "x": 130, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/enemies/enemy_attack_1.png"
+        },
+        {
+          "name": "enemy_hurt",
+          "region": { "x": 194, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/enemies/enemy_hurt_1.png"
+        },
+        {
+          "name": "enemy_die",
+          "region": { "x": 258, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/enemies/enemy_die_1.png"
+        }
+      ]
+    },
+    "environment": {
+      "size": [256, 256],
+      "padding": 1,
+      "sprites": [
+        {
+          "name": "tile_grass",
+          "region": { "x": 0, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/environment/grass_01.png"
+        },
+        {
+          "name": "tile_water",
+          "region": { "x": 65, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/environment/water_01.png"
+        },
+        {
+          "name": "tile_wall",
+          "region": { "x": 129, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/environment/wall_01.png"
+        },
+        {
+          "name": "tile_door",
+          "region": { "x": 193, "y": 0, "w": 64, "h": 64 },
+          "source": "sprites/environment/door_01.png"
+        }
+      ]
+    }
+  }
+}
