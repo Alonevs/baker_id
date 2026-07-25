@@ -11,6 +11,7 @@ use crate::toolbar::ToolbarWidget;
 use crate::event_forge::EventForgeWidget;
 use crate::property_panel::PropertyPanel;
 use crate::export_import_panel::ExportImportPanel;
+use crate::preview_panel::PreviewPanel;
 use eframe::egui;
 use eframe::App;
 
@@ -30,6 +31,7 @@ pub struct ForgeEditorApp {
     pub event_forge_widget: EventForgeWidget,
     pub property_panel: PropertyPanel,
     pub export_import_panel: ExportImportPanel,
+    pub preview_panel: PreviewPanel,
 }
 
 impl Default for ForgeEditorApp {
@@ -49,6 +51,7 @@ impl Default for ForgeEditorApp {
             event_forge_widget: EventForgeWidget::new(),
             property_panel: PropertyPanel::new(),
             export_import_panel: ExportImportPanel::new(),
+            preview_panel: PreviewPanel::new(),
         }
     }
 }
@@ -76,6 +79,10 @@ impl ForgeEditorApp {
         app.export_import_panel.export_path = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("project_export.json"));
         app.export_import_panel.import_path = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("project_import.json"));
         app.export_import_panel.update_summary();
+        
+        // Configurar Preview Panel con assets del directorio actual
+        let current_dir = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+        app.preview_panel.scan_directory(&current_dir);
         
         app
     }
@@ -138,6 +145,11 @@ impl App for ForgeEditorApp {
         
         // Renderizar Export/Import Panel
         self.export_import_panel.ui(ctx, &mut egui::CentralPanel::default().show(ctx, |ui| {
+            ui.label("Viewport");
+        }));
+        
+        // Renderizar Preview Panel
+        self.preview_panel.ui(ctx, &mut egui::CentralPanel::default().show(ctx, |ui| {
             ui.label("Viewport");
         }));
         
