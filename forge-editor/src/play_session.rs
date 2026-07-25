@@ -12,6 +12,8 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
+use crate::audio_system::AudioManager;
+
 /// Vector 2D
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec2 {
@@ -217,6 +219,8 @@ pub struct PlaySession {
     pub last_change_time: Option<Instant>,
     pub change_count: u32,
     pub event_integration: Option<Box<crate::event_play_integration::EventPlayIntegration>>,
+    pub audio_manager: crate::audio_system::AudioManager,
+    pub dialogue_ui: crate::dialogue_ui::DialogueUI,
 }
 
 impl PlaySession {
@@ -234,6 +238,8 @@ impl PlaySession {
             last_change_time: None,
             change_count: 0,
             event_integration,
+            audio_manager: crate::audio_system::AudioManager::new(),
+            dialogue_ui: crate::dialogue_ui::DialogueUI::new(),
         }
     }
     
@@ -420,6 +426,118 @@ impl PlaySession {
     pub fn is_active(&self) -> bool {
         self.is_running
     }
+    
+    /// Obtiene referencia al AudioManager
+    pub fn audio_manager(&self) -> &crate::audio_system::AudioManager {
+        &self.audio_manager
+    }
+    
+    /// Obtiene referencia mutante al AudioManager
+    pub fn audio_manager_mut(&mut self) -> &mut crate::audio_system::AudioManager {
+        &mut self.audio_manager
+    }
+    
+    /// Obtiene referencia al DialogueUI
+    pub fn dialogue_ui(&self) -> &crate::dialogue_ui::DialogueUI {
+        &self.dialogue_ui
+    }
+    
+    /// Obtiene referencia mutante al DialogueUI
+    pub fn dialogue_ui_mut(&mut self) -> &mut crate::dialogue_ui::DialogueUI {
+        &mut self.dialogue_ui
+    }
+    
+    /// Mostrar diálogo en el juego
+    pub fn show_dialogue(&mut self, speaker: String, text: String) {
+        self.dialogue_ui.show(speaker, text);
+        println!("[PLAY SESSION] Dialogo mostrado: {}", text);
+    }
+    
+    /// Ocultar diálogo actual
+    pub fn hide_dialogue(&mut self) {
+        self.dialogue_ui.hide();
+        println!("[PLAY SESSION] Dialogo oculto");
+    }
+    
+    /// Mostrar diálogo de entidad
+    pub fn show_entity_dialogue(&mut self, entity: &crate::Entity, text: String) {
+        let speaker = entity.name.clone();
+        self.show_dialogue(speaker, text);
+    }
+    
+    /// Actualizar diálogo UI con delta de tiempo
+    pub fn update_dialogue_ui(&mut self, delta: f32) {
+        self.dialogue_ui.update(delta);
+    }
+    
+    /// Verificar si hay diálogo activo
+    pub fn has_active_dialogue(&self) -> bool {
+        self.dialogue_ui.state == crate::dialogue_ui::DialogueState::Visible
+    }
+    
+    /// Obtener/establecer variable de diálogo
+    pub fn dialogue_variable(&mut self, key: &str, value: String) -> Option<String> {
+        self.dialogue_ui.manager.set_variable(key, value)
+    }
+    
+    /// Obtener valor de variable de diálogo
+    pub fn get_dialogue_variable(&self, key: &str) -> Option<String> {
+        self.dialogue_ui.manager.get_variable(key)
+    }
+    
+    /// Obtener todas las variables de diálogo
+    pub fn get_all_dialogue_variables(&self) -> &HashMap<String, String> {
+        &self.dialogue_ui.manager.variables
+    }
+    
+    /// Limpiar todas las variables de diálogo
+    pub fn clear_dialogue_variables(&mut self) {
+        self.dialogue_ui.manager.variables.clear();
+        println!("[PLAY SESSION] Variables de diálogo limpiadas");
+    }
+    
+    /// Seleccionar opción de diálogo
+    pub fn select_dialogue_option(&mut self, choice_index: usize) {
+        if let Some(ref mut ui) = self.dialogue_ui {
+            ui.select_option(choice_index);
+        }
+        println!("[PLAY SESSION] Opción de diálogo seleccionada: {}", choice_index);
+    }
+    
+    /// Verificar si hay opciones de diálogo disponibles
+    pub fn has_dialogue_options(&self) -> bool {
+        self.dialogue_ui.manager.has_options()
+    }
+    
+    /// Obtener número de opciones disponibles
+    pub fn get_option_count(&self) -> usize {
+        self.dialogue_ui.manager.options.len()
+    }
+    
+    /// Obtener texto de opción por índice
+    pub fn get_option_text(&self, index: usize) -> Option<String> {
+        self.dialogue_ui.manager.options.get(index).map(|o| o.text.clone())
+    }
+    
+    /// Ejecutar evento al seleccionar opción
+    pub fn execute_dialogue_option(&mut self, choice_index: usize) {
+        if let Some(ref mut ui) = self.dialogue_ui {
+            let selected = ui.manager.options.get(choice_index);
+            if let Some(choice) = selected {
+                // Ejecutar evento si existe
+                if let Some(event_id) = &choice.event_id {
+                    println!("[PLAY SESSION] Ejecutando evento: {}", event_id);
+                }
+                
+                // Cambiar variable si existe
+                if let Some(variable_key) = &choice.variable_key {
+                    if let Some(variable_value) = &choice.variable_value {
+                        self.dialogue_variable(variable_key, variable_value.clone());
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl Default for PlaySession {
@@ -565,5 +683,137 @@ mod tests {
         assert!(!session.is_active());
         assert_eq!(session.get_delta(), 0.0);
         assert_eq!(session.get_player_movement(), (0.0, 0.0));
+    }
+
+    #[test]
+    fn test_play_session_audio_manager_integration() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        // Verificar que audio_manager está integrado
+        let audio_mgr = session.audio_manager();
+        assert!(audio_mgr.is_some());
+        
+        // Verificar que dialogue_ui está integrado
+        let dialogue_ui = session.dialogue_ui();
+        assert!(dialogue_ui.is_some());
+    }
+
+    #[test]
+    fn test_play_session_audio_manager_mut() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        
+        // Verificar que podemos acceder mutante al audio_manager
+        let audio_mgr = session.audio_manager_mut();
+        assert!(audio_mgr.is_some());
+    }
+
+    #[test]
+    fn test_play_session_dialogue_ui_integration() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        // Verificar que dialogue_ui está integrado
+        let dialogue_ui = session.dialogue_ui();
+        assert!(dialogue_ui.is_some());
+        
+        // Verificar que dialogue_ui está inicializado
+        assert_eq!(dialogue_ui.state, crate::dialogue_ui::DialogueState::Hidden);
+    }
+
+    #[test]
+    fn test_play_session_show_dialogue() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        
+        // Mostrar diálogo
+        session.show_dialogue("Personaje1".to_string(), "¡Hola!".to_string());
+        
+        // Verificar que el diálogo fue mostrado
+        assert_eq!(session.dialogue_ui().state, crate::dialogue_ui::DialogueState::Showing);
+    }
+
+    #[test]
+    fn test_play_session_hide_dialogue() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        
+        // Mostrar y ocultar diálogo
+        session.show_dialogue("Personaje1".to_string(), "¡Hola!".to_string());
+        session.hide_dialogue();
+        
+        // Verificar que el diálogo fue ocultado
+        assert_eq!(session.dialogue_ui().state, crate::dialogue_ui::DialogueState::Hidden);
+    }
+
+    #[test]
+    fn test_play_session_show_entity_dialogue() {
+        let entities = vec![
+            Entity::with_name("player1".to_string(), (0.0, 0.0), "Jugador".to_string()),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        
+        // Mostrar diálogo de entidad
+        let entity = &entities[0];
+        session.show_entity_dialogue(entity, "¡Hola!".to_string());
+        
+        // Verificar que el diálogo fue mostrado
+        assert_eq!(session.dialogue_ui().state, crate::dialogue_ui::DialogueState::Showing);
+    }
+
+    #[test]
+    fn test_play_session_dialogue_variables() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        
+        // Establecer variable
+        let value = session.dialogue_variable("has_sword".to_string(), "true".to_string());
+        
+        // Verificar que la variable fue establecida
+        assert_eq!(value, Some("true".to_string()));
+        
+        // Obtener variable
+        let retrieved = session.get_dialogue_variable("has_sword");
+        assert_eq!(retrieved, Some("true".to_string()));
+    }
+
+    #[test]
+    fn test_play_session_dialogue_has_active() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        // Verificar que no hay diálogo activo inicialmente
+        assert!(!session.has_active_dialogue());
+        
+        // Mostrar diálogo y verificar que está activo
+        session.show_dialogue("Personaje1".to_string(), "¡Hola!".to_string());
+        assert!(session.has_active_dialogue());
+        
+        // Ocultar diálogo y verificar que no está activo
+        session.hide_dialogue();
+        assert!(!session.has_active_dialogue());
     }
 }

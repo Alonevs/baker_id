@@ -385,4 +385,26 @@ impl Workbook {
     pub fn total_columns(&self) -> usize {
         self.sheets.iter().map(|s| s.column_count()).max().unwrap_or(0)
     }
+    
+    /// Importar Bitacora desde Excel
+    pub fn import_bitacora(
+        &mut self,
+        path: &str,
+    ) -> Result<Vec<crate::bitacora_manager::BitacoraEntry>, String> {
+        // Verificar archivo existe
+        if !Path::new(path).exists() {
+            return Err(format!("Archivo no encontrado: {}", path));
+        }
+        
+        // Crear workbook desde archivo (simulado)
+        // En producción usar librería real de Excel
+        let mut entries = Vec::new();
+        
+        // Simular lectura de archivo Excel
+        // En realidad necesitaríamos una librería como calamine para leer .xlsx
+        println!("[EXCEL] Importando Bitacora desde: {}", path);
+        
+        // Devolver entries vacíos (en producción leer del archivo)
+        Ok(entries)
+    }
 }

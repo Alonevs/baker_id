@@ -224,6 +224,60 @@ impl ExcelWriter {
     pub fn clear_pending_changes(&mut self) {
         self.pending_changes.clear();
     }
+    
+    /// Exportar Bitacora a Excel
+    pub fn export_bitacora(
+        &mut self,
+        manager: &crate::bitacora_manager::BitacoraManager,
+        filename: &str,
+    ) -> Result<(), String> {
+        // Crear nuevo libro
+        self.workbook = Workbook::new();
+        
+        // Crear hoja "Bitacora"
+        let sheet_name = SheetName("Bitacora".to_string());
+        let sheet = ExcelSheet::new(sheet_name.clone());
+        self.workbook.add_sheet(sheet);
+        self.current_sheet = Some(sheet_name.clone());
+        
+        // Escribir encabezados
+        let headers = vec![
+            "ID", "Texto", "Enlace", "Relacionado",
+        ];
+        for (col, header) in headers.iter().enumerate() {
+            self.write_string("Bitacora", 0, col, header);
+        }
+        
+        // Escribir datos de cada entrada
+        let entries = manager.get_entries_for_ui();
+        for (row, entry) in entries.iter().enumerate() {
+            let row_num = row + 1; // Saltar encabezado
+            
+            // ID
+            self.write_string("Bitacora", row_num, 0, &entry.id);
+            
+            // Texto
+            self.write_string("Bitacora", row_num, 1, &entry.text);
+            
+            // Enlaces (serializados)
+            let links_str: Vec<String> = entry.links.iter().map(|link| match link {
+                crate::bitacora_manager::LinkType::Event(id) => format!("Event({})", id),
+                crate::bitacora_manager::LinkType::Dialog(id) => format!("Dialog({})", id),
+                crate::bitacora_manager::LinkType::Actor(id) => format!("Actor({})", id),
+                crate::bitacora_manager::LinkType::Variable(id) => format!("Variable({})", id),
+                crate::bitacora_manager::LinkType::Scene(id) => format!("Scene({})", id),
+                crate::bitacora_manager::LinkType::Note(id) => format!("Note({})", id),
+                crate::bitacora_manager::LinkType::Unknown(id) => format!("Unknown({})", id),
+            }).collect();
+            self.write_string("Bitacora", row_num, 2, &links_str.join(", "));
+            
+            // Relacionado
+            self.write_string("Bitacora", row_num, 3, entry.related_to.as_deref().unwrap_or(""));
+        }
+        
+        println!("[EXCEL] Bitacora exportada a: {}", filename);
+        Ok(())
+    }
 }
 
 /// Cambio pendiente

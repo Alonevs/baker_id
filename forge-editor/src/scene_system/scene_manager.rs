@@ -227,6 +227,8 @@ pub struct SceneManager {
     pub scene_history: Vec<String>,
     /// Escenas guardadas
     pub saved_scenes: HashMap<String, SceneData>,
+    /// UIManager integrado
+    pub ui_manager: crate::ui_system::UiManager,
 }
 
 impl Default for SceneManager {
@@ -247,6 +249,10 @@ impl SceneManager {
             current_transition: None,
             transition_progress: 0.0,
             scene_history: Vec::new(),
+            saved_scenes: HashMap::new(),
+            ui_manager: crate::ui_system::UiManager::new(),
+        }
+    }
             saved_scenes: HashMap::new(),
         }
     }
@@ -436,5 +442,15 @@ impl SceneManager {
     /// Obtiene progreso de transición
     pub fn get_transition_progress(&self) -> f32 {
         self.transition_progress
+    }
+    
+    /// Obtiene referencia al UIManager
+    pub fn ui_manager(&self) -> &crate::ui_system::UiManager {
+        &self.ui_manager
+    }
+    
+    /// Obtiene referencia mutante al UIManager
+    pub fn ui_manager_mut(&mut self) -> &mut crate::ui_system::UiManager {
+        &mut self.ui_manager
     }
 }

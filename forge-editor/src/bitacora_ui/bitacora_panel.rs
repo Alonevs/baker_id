@@ -80,6 +80,8 @@ pub struct BitacoraPanel {
     pub selected_date_range: Option<BitacoraDateRange>,
     pub created_at: Instant,
     pub last_updated: Instant,
+    /// Referencia opcional al BitacoraManager para sincronización
+    pub manager: Option<crate::bitacora_manager::BitacoraManager>,
 }
 
 impl BitacoraPanel {
@@ -100,6 +102,30 @@ impl BitacoraPanel {
             selected_date_range: None,
             created_at: Instant::now(),
             last_updated: Instant::now(),
+            manager: None,
+        }
+    }
+    
+    /// Crear panel con BitacoraManager
+    pub fn with_manager(manager: crate::bitacora_manager::BitacoraManager) -> Self {
+        let mut panel = Self::new();
+        panel.synchronize_with_manager(&manager);
+        panel.manager = Some(manager);
+        panel
+    }
+    
+    /// Sincronizar con BitacoraManager
+    pub fn synchronize_with_manager(&mut self, manager: &crate::bitacora_manager::BitacoraManager) {
+        // Sincronizar lista de entradas
+        self.entries_list = manager.get_entries_for_ui().iter().cloned().collect();
+        self.last_updated = Instant::now();
+        self.page = 0;
+    }
+    
+    /// Actualizar panel desde BitacoraManager
+    pub fn update_from_manager(&mut self) {
+        if let Some(ref manager) = self.manager {
+            self.synchronize_with_manager(manager);
         }
     }
     
