@@ -6,6 +6,8 @@ use crate::timeline_integration::TimelineIntegration;
 use crate::input_capture::UserInput;
 use crate::hot_reload_panel::HotReloadPanel;
 use crate::hot_reload_integration::SimpleFileWatcherIntegration;
+use crate::explorer_panel_integration::ExplorerPanelIntegration;
+use crate::toolbar::ToolbarWidget;
 use eframe::egui;
 use eframe::App;
 
@@ -20,6 +22,8 @@ pub struct ForgeEditorApp {
     pub hot_reload_panel: HotReloadPanel,
     pub hot_reload_manager: crate::hot_reload::HotReloadManager,
     pub file_watcher_integration: Option<SimpleFileWatcherIntegration>,
+    pub explorer_panel_integration: ExplorerPanelIntegration,
+    pub toolbar_widget: ToolbarWidget,
 }
 
 impl Default for ForgeEditorApp {
@@ -34,6 +38,8 @@ impl Default for ForgeEditorApp {
             hot_reload_panel: HotReloadPanel::new(),
             hot_reload_manager: crate::hot_reload::HotReloadManager::new(),
             file_watcher_integration: None,
+            explorer_panel_integration: ExplorerPanelIntegration::new(),
+            toolbar_widget: ToolbarWidget::new(),
         }
     }
 }
@@ -49,6 +55,13 @@ impl ForgeEditorApp {
             100
         ));
         app.file_watcher_integration.as_mut().unwrap().start();
+        
+        // Inicializar Toolbar
+        app.toolbar_widget.toolbar.select();
+        
+        // Configurar Explorer Panel con proyecto actual
+        app.explorer_panel_integration.explorer.panel.current_project_path = 
+            Some(std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
         
         app
     }
@@ -89,11 +102,18 @@ impl ForgeEditorApp {
                 integration.check();
             }
         }
+        
+        // Actualizar Explorer Panel y Toolbar
+        self.explorer_panel_integration.update();
+        self.toolbar_widget.toolbar.select();
     }
 }
 
 impl App for ForgeEditorApp {
     fn update(&mut self, ctx: &egui::Context, _ui: &mut eframe::Frame) {
+        // Renderizar Toolbar superior
+        self.toolbar_widget.render(ctx);
+        
         egui::CentralPanel::default().show(ctx, |ui| {
             // Toolbar superior
             ui.horizontal(|ui| {
@@ -133,6 +153,9 @@ impl App for ForgeEditorApp {
             
             // Hot Reload Panel
             self.hot_reload_panel.ui(ctx, &mut self.hot_reload_manager);
+            
+            // Explorer Panel (debajo de todo)
+            self.explorer_panel_integration.ui(ctx);
         });
     }
 }

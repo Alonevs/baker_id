@@ -180,13 +180,43 @@ impl ToolbarWidget {
         Self::default()
     }
 
-    /// Renderizar Toolbar (placeholder)
-    pub fn render(&self) {
-        // Implementación de renderizado egui
-        println!("ToolbarWidget: {:?} tools, current: {:?}", 
-            self.toolbar.get_tools().len(), 
-            self.toolbar.get_current_tool()
-        );
+    /// Renderizar Toolbar con egui
+    pub fn render(&self, ctx: &egui::Context) {
+        egui::TopBottomPanel::top("toolbar_panel").show(ctx, |ui| {
+            ui.heading("Toolbar");
+            
+            // Renderizar herramientas
+            ui.horizontal(|ui| {
+                // Botones de herramientas
+                let tools = self.toolbar.get_tools();
+                let current = self.toolbar.get_current_tool();
+                
+                for tool in tools {
+                    let button_text = match tool {
+                        ToolType::Select => "📋 Select",
+                        ToolType::Move => "🔄 Move",
+                        ToolType::Scale => "⚡ Scale",
+                        ToolType::Rotate => "🔃 Rotate",
+                        ToolType::Paint => "🎨 Paint",
+                        ToolType::PhysicsBrush => "⚛️ Physics",
+                        ToolType::TileMap => "🧱 TileMap",
+                        ToolType::Audio => "🎵 Audio",
+                        ToolType::Script => "💻 Script",
+                    };
+                    
+                    let is_active = tool == current;
+                    
+                    if ui.selectable_label(is_active, button_text).clicked() {
+                        self.toolbar.set_current_tool(tool);
+                    }
+                }
+            });
+            
+            ui.separator();
+            
+            // Información de estado
+            ui.label(format!("Current Tool: {:?}", current));
+        });
     }
 
     /// Obtener posición del Toolbar
