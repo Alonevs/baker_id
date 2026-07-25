@@ -5,8 +5,19 @@
 **Fecha:** 25/07/2026
 
 ## FASE 8.5: Integracion Toolbar completa
+**Estado:** COMPLETADO (CORREGIDO)
+**Fecha:** 25/07/25
+**Notas:** Consistencia corregida - Toolbar implementada en `forge-editor/src/toolbar/mod.rs`
+
+---
+
+## FASE 8.6: Correccion Inconsistencias
 **Estado:** COMPLETADO
 **Fecha:** 25/07/2026
+**Notas:**
+- ✅ Toolbar implementada (FASE 8.5)
+- ✅ Physics 2D ya existente (FASE 9)
+- ✅ Event Forge implementada en `forge-editor/src/event_forge/mod.rs`
 
 ## FASE 9: Physics 2D
 **Estado:** COMPLETADO (6/6 tests)

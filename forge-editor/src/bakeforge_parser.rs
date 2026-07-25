@@ -321,10 +321,16 @@ impl Lexer {
     }
     
     fn chars(&mut self) -> std::str::Chars {
+        if self.pos >= self.source.len() {
+            return "".chars();
+        }
         self.source[self.pos..].chars()
     }
     
     fn advance(&mut self) {
+        if self.pos >= self.source.len() {
+            return;
+        }
         if let Some(ch) = self.chars().next() {
             if ch == '\n' {
                 self.line += 1; self.col = 1;
@@ -364,7 +370,8 @@ impl Parser {
     }
     
     fn parse_statement(&mut self) -> Result<ASTNode, CompileError> {
-        match self.tokens.get(self.pos) {
+        let token = self.tokens.get(self.pos).cloned();
+        match token {
             Some(Token::KeywordIf) => self.parse_if_statement(),
             Some(Token::KeywordWhile) => self.parse_while_statement(),
             Some(Token::KeywordFor) => self.parse_for_statement(),
@@ -469,6 +476,7 @@ impl Parser {
         let name = self.expect_identifier()?;
         self.expect_token(Token::Assign)?;
         let value = self.parse_expression()?;
+        self.expect_token(Token::Semicolon)?;
         
         Ok(ASTNode::VariableDeclaration { name, value: Box::new(value), data_type: None })
     }
@@ -476,6 +484,7 @@ impl Parser {
     fn parse_print_statement(&mut self) -> Result<ASTNode, CompileError> {
         self.advance();
         let value = self.parse_expression()?;
+        self.expect_token(Token::Semicolon)?;
         Ok(ASTNode::Print { value: Box::new(value) })
     }
     
