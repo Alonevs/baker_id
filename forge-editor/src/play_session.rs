@@ -1,18 +1,47 @@
-﻿//! # Play Mode System
+﻿//! # Play Mode System - Improved
 //! 
-//! Sistema para ejecutar juegos en modo Play con:
+//! Sistema mejorado para ejecutar juegos en modo Play con:
 //! - Snapshot de posiciones
 //! - Simulación de físicas
 //! - Captura de input del usuario
 //! - Restauración automática al Stop
+//! - Entidades reales con componentes
+//! - Integración con Event Forge
+//! - UI mejorada para control de play
 
 use std::collections::HashMap;
+use std::time::Instant;
 
 /// Vector 2D
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,
+}
+
+impl Vec2 {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+
+    pub fn zero() -> Self {
+        Self::new(0.0, 0.0)
+    }
+    
+    /// Suma otro vector
+    pub fn add(&self, other: Vec2) -> Vec2 {
+        Vec2::new(self.x + other.x, self.y + other.y)
+    }
+    
+    /// Resta otro vector
+    pub fn sub(&self, other: Vec2) -> Vec2 {
+        Vec2::new(self.x - other.x, self.y - other.y)
+    }
+    
+    /// Multiplica por escalar
+    pub fn mul(&self, scalar: f32) -> Vec2 {
+        Vec2::new(self.x * scalar, self.y * scalar)
+    }
 }
 
 impl Vec2 {
@@ -110,6 +139,12 @@ pub struct Entity {
     pub position: (f32, f32),
     pub rotation: f32,
     pub scale: (f32, f32),
+    pub velocity: (f32, f32),
+    pub velocity_y: f32,
+    pub is_active: bool,
+    pub name: String,
+    pub component_type: String,
+    pub script_path: Option<String>,
 }
 
 impl Entity {
@@ -120,35 +155,89 @@ impl Entity {
             position,
             rotation: 0.0,
             scale: (1.0, 1.0),
+            velocity: (0.0, 0.0),
+            velocity_y: 0.0,
+            is_active: true,
+            name: "Unnamed".to_string(),
+            component_type: "Transform".to_string(),
+            script_path: None,
         }
+    }
+    
+    /// Crea entidad con nombre
+    pub fn with_name(id: String, position: (f32, f32), name: String) -> Self {
+        Self {
+            id,
+            position,
+            rotation: 0.0,
+            scale: (1.0, 1.0),
+            velocity: (0.0, 0.0),
+            velocity_y: 0.0,
+            is_active: true,
+            name,
+            component_type: "Transform".to_string(),
+            script_path: None,
+        }
+    }
+    
+    /// Actualiza posición con física simple
+    pub fn update_physics(&mut self, delta: f32, gravity: f32) {
+        if !self.is_active {
+            return;
+        }
+        
+        // Aplicar velocidad horizontal
+        self.position.0 += self.velocity.0 * delta;
+        
+        // Aplicar gravedad y velocidad vertical
+        self.velocity_y += gravity * delta;
+        self.position.1 += self.velocity_y * delta;
+        
+        // Reducir velocidad vertical (air resistance)
+        self.velocity_y *= 0.99;
+    }
+    
+    /// Cambia estado activo/inactivo
+    pub fn set_active(&mut self, active: bool) {
+        self.is_active = active;
     }
 }
 
-/// Sesión de Play
+/// Sesión de Play mejorada
 #[derive(Debug)]
 pub struct PlaySession {
+    pub entities: Vec<Entity>,
     pub snapshot: SceneSnapshot,
     pub snapshot_manager: crate::snapshot_manager::SnapshotManager,
     pub input_capture: crate::input_capture::InputCapture,
     pub physics_enabled: bool,
+    pub gravity: f32,
     pub is_running: bool,
     pub last_delta: f32,
+    pub last_change_time: Option<Instant>,
+    pub change_count: u32,
+    pub event_graph: Option<crate::event_node_manager::EventNodeManager>,
 }
 
 impl PlaySession {
-    /// Crea una nueva sesión de Play
-    pub fn new(entities: &[Entity]) -> Self {
+    /// Crea una nueva sesión de Play mejorada
+    pub fn new(entities: &[Entity], event_graph: Option<crate::event_node_manager::EventNodeManager>) -> Self {
         Self {
-            snapshot: SceneSnapshot::from_entities(entities),
+            entities: entities.to_vec(),
+            snapshot: SceneSnapshot::from_entities(&entities),
             snapshot_manager: crate::snapshot_manager::SnapshotManager::new(),
             input_capture: crate::input_capture::InputCapture::new(),
             physics_enabled: true,
+            gravity: 9.8,
             is_running: false,
             last_delta: 0.0,
+            last_change_time: None,
+            change_count: 0,
+            event_graph,
         }
     }
     
-    /// Inicia la sesión de Play
+    /// Inicia la sesión de Play mejorada
     pub fn start(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Tomar snapshot actual
         self.snapshot_manager.take_snapshot(entities);
@@ -159,14 +248,27 @@ impl PlaySession {
         // Iniciar sesión
         self.is_running = true;
         self.last_delta = 0.0;
+        self.last_change_time = Some(Instant::now());
+        self.change_count = 0;
+        
+        println!("[PLAY SESSION] Started with {} entities", entities.len());
         
         Ok(())
     }
     
-    /// Detiene la sesión de Play
+    /// Detiene la sesión de Play mejorada
     pub fn stop(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Restaurar snapshot
         self.snapshot_manager.restore_snapshot(entities);
+        
+        // Detener sesión
+        self.is_running = false;
+        self.last_delta = 0.0;
+        
+        println!("[PLAY SESSION] Stopped, changes: {}", self.change_count);
+        
+        Ok(())
+    }
         
         // Desactivar físicas
         self.physics_enabled = false;
@@ -178,14 +280,91 @@ impl PlaySession {
         Ok(())
     }
     
-    /// Actualiza la sesión con el delta de tiempo
-    pub fn update(&mut self, delta: f32, _input: &crate::UserInput) {
+    /// Actualiza la sesión con el delta de tiempo mejorado
+    pub fn update(&mut self, delta: f32, input: &crate::UserInput) {
         if !self.is_running {
             return;
         }
         
         self.last_delta = delta;
-        self.simulate_physics(delta);
+        self.simulate_physics(delta, input);
+        
+        // Ejecutar eventos del grafo si existe
+        if let Some(ref mut graph) = self.event_graph {
+            graph.execute_all();
+        }
+        
+        // Incrementar contador de cambios
+        self.change_count += 1;
+        self.last_change_time = Some(Instant::now());
+    }
+    
+    /// Simula físicas para el delta de tiempo mejorado
+    fn simulate_physics(&mut self, delta: f32, input: &crate::UserInput) {
+        let mut player_velocity = Vec2::zero();
+        
+        // Obtener movimiento del jugador
+        if input.keys_pressed.contains(&crate::KeyCode::KeyW) {
+            player_velocity.y -= 1.0;
+        }
+        if input.keys_pressed.contains(&crate::KeyCode::KeyS) {
+            player_velocity.y += 1.0;
+        }
+        if input.keys_pressed.contains(&crate::KeyCode::KeyA) {
+            player_velocity.x -= 1.0;
+        }
+        if input.keys_pressed.contains(&crate::KeyCode::KeyD) {
+            player_velocity.x += 1.0;
+        }
+        
+        // Normalizar velocidad
+        if player_velocity.x.abs() > 1.0 || player_velocity.y.abs() > 1.0 {
+            let length = player_velocity.length();
+            if length > 0.0 {
+                player_velocity = player_velocity.mul(1.0 / length);
+            }
+        }
+        
+        // Aplicar a entidades activas
+        for entity in &mut self.entities {
+            if !entity.is_active {
+                continue;
+            }
+            
+            // Aplicar gravedad
+            entity.velocity_y += self.gravity * delta;
+            
+            // Aplicar movimiento horizontal
+            entity.position.0 += entity.velocity.0 * delta;
+            
+            // Aplicar movimiento vertical
+            entity.position.1 += entity.velocity_y * delta;
+            
+            // Limitar velocidad vertical (terminal velocity)
+            if entity.velocity_y > 15.0 {
+                entity.velocity_y = 15.0;
+            }
+        }
+    }
+    
+    /// Obtiene movimiento del jugador
+    fn get_player_movement(&self) -> Vec2 {
+        let mut movement = Vec2::zero();
+        
+        if self.input_capture.keys_pressed.contains(&crate::KeyCode::KeyW) {
+            movement.y -= 1.0;
+        }
+        if self.input_capture.keys_pressed.contains(&crate::KeyCode::KeyS) {
+            movement.y += 1.0;
+        }
+        if self.input_capture.keys_pressed.contains(&crate::KeyCode::KeyA) {
+            movement.x -= 1.0;
+        }
+        if self.input_capture.keys_pressed.contains(&crate::KeyCode::KeyD) {
+            movement.x += 1.0;
+        }
+        
+        movement
     }
     
     /// Simula físicas para el delta de tiempo

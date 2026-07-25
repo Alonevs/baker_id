@@ -12,6 +12,7 @@ use crate::event_forge::EventForgeWidget;
 use crate::property_panel::PropertyPanel;
 use crate::export_import_panel::ExportImportPanel;
 use crate::preview_panel::PreviewPanel;
+use crate::drag_drop_integration::{DragDropSystem, DragDropData};
 use eframe::egui;
 use eframe::App;
 
@@ -32,6 +33,7 @@ pub struct ForgeEditorApp {
     pub property_panel: PropertyPanel,
     pub export_import_panel: ExportImportPanel,
     pub preview_panel: PreviewPanel,
+    pub drag_drop_system: DragDropSystem,
 }
 
 impl Default for ForgeEditorApp {
@@ -52,6 +54,7 @@ impl Default for ForgeEditorApp {
             property_panel: PropertyPanel::new(),
             export_import_panel: ExportImportPanel::new(),
             preview_panel: PreviewPanel::new(),
+            drag_drop_system: DragDropSystem::new(),
         }
     }
 }
@@ -83,6 +86,9 @@ impl ForgeEditorApp {
         // Configurar Preview Panel con assets del directorio actual
         let current_dir = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
         app.preview_panel.scan_directory(&current_dir);
+        
+        // Configurar Drag & Drop System
+        app.drag_drop_system = DragDropSystem::new();
         
         app
     }
@@ -137,6 +143,30 @@ impl ForgeEditorApp {
         
         // Actualizar Toolbar
         self.toolbar_widget.toolbar.select();
+        
+        // Manejar Drag & Drop
+        self.handle_drag_drop(delta);
+    }
+    
+    /// Maneja Drag & Drop de archivos
+    fn handle_drag_drop(&mut self, delta: f32) {
+        // Inicializar sistema de Drag & Drop si es necesario
+        if self.drag_drop_system.drag_data.is_none() {
+            return;
+        }
+        
+        // Verificar si el mouse fue soltado
+        if egui::epaint::PointerButton::Middle.released() {
+            // Procesar drop en la ruta del proyecto
+            let viewport_path = self.get_viewport_drop_path();
+            self.drag_drop_system.end_drag(viewport_path);
+        }
+    }
+    
+    /// Obtiene la ruta de drop en el viewport
+    fn get_viewport_drop_path(&self) -> Option<std::path::PathBuf> {
+        // Usar la ruta del proyecto actual como destino
+        self.explorer_panel_integration.current_project_path.clone()
     }
     
     /// Conecta Explorer Panel con Preview Panel

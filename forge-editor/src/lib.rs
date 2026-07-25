@@ -38,6 +38,8 @@ pub mod export_manager;
 pub mod hot_reload;
 pub mod hot_reload_panel;
 pub mod hot_reload_integration;
+pub mod improved_hot_reload;
+pub mod drag_drop_integration;
 pub mod bakeforge_parser;
 
 pub use hot_reload::ChangeType;
@@ -53,8 +55,10 @@ pub mod project_manager;
 pub mod property_editor_ui;
 pub mod explorer_panel;
 pub mod explorer_panel_integration;
+pub mod explorer_context_menu;
 
 pub use explorer_panel_integration::ExplorerPanelIntegration;
+pub use explorer_context_menu::{ExplorerContextMenu, ExplorerContextAction};
 pub mod property_panel;
 pub mod script_executor;
 pub mod script_optimizer;
