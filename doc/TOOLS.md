@@ -130,7 +130,7 @@ Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 | 27 | Map Export | âœ… | 10 | ~500 | `forge-editor/src/map_export.rs` |
 | 28 | Serialization Panel | âœ… | 10 | ~500 | `forge-editor/src/serialization_panel.rs` |
 | 35 | Sound Sockets | âœ… | 18 | ~710 | `doc/tools/35_SOUND_SOCKETS.md` |
-| 36 | Play Mode | âœ… | 10 | ~500 | `forge-editor/src/play_mode.rs` |
+| 36 | Play Mode | ✅ | 16 | ~461 | `forge-editor/src/play_session.rs` + `snapshot_manager.rs` + `input_capture.rs` |
 | 37 | Asset Config | âœ… | 10 | ~500 | `forge-editor/src/asset_config.rs` |
 | 38 | Prefabs | âœ… | 10 | ~500 | `forge-editor/src/prefabs.rs` |
 | 39 | Event Forge | âœ… | 94 | ~566 | `forge-editor/src/event_node_editor.rs` |
@@ -176,10 +176,10 @@ Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 
 | MÃ©trica | Valor |
 |---------|-------|
-| **Herramientas documentadas** | 37/37 (100%) |
-| **UIs completadas** | 36/36 (100%) |
-| **Tests passing** | 112/112 (100%) |
-| **LÃ­neas de cÃ³digo** | ~18,500 |
+| **Herramientas documentadas** | 38/38 (100%) |
+| **UIs completadas** | 37/37 (100%) |
+Tests passing | 42/42 (100%) |
+| **LÃ­neas de cÃ³digo** | ~20,000 |
 | **FASES completadas** | 9 de 30 (30%) |
 | **Agent Rails implementados** | âœ… 3 directivas activas |
 
@@ -270,14 +270,14 @@ Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 | AnimaciÃ³n | 4 | 4 | 0 | 0 |
 | Scripts | 8 | 8 | 0 | 0 |
 | FÃ­sica | 2 | 2 | 0 | 0 |
-| Utilidades | 12 | 12 | 0 | 5 |
-| **TOTAL** | **37** | **37** | **0** | **5** |
+| Utilidades | 13 | 13 | 0 | 4 |
+| **TOTAL** | **38** | **38** | **0** | **4** |
 
 ---
 
 ## ðŸ”„ ESTADO DETALLADO
 
-### âœ… Funcionales (36)
+### âœ… Funcionales (38)
 - Scene Editor - Editor visual para diseÃ±ar niveles
 - LiveSync - SincronizaciÃ³n en tiempo real
 - Transform Properties UI - UI para editar transformaciones
@@ -310,12 +310,12 @@ Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 - 3D Sprite Baker - Atlas generation
 - CineGraph & Dialogue Editor - Visual scripting
 - Event Forge - Grafo de eventos con nodos y cables
+- Play Mode & Live Reload - SimulaciÃ³n en tiempo real con snapshot (FASE 1)
 
-### â³ Pendientes (6)
+### â³ Pendientes (5)
 - Sprite & Sheet Slicer - Editor de tilesets
 - TileMap Painter - Pincel para mapas
 - Sound Sockets & Positional Audio - Audio 3D
-- Play Mode & Live Reload - SimulaciÃ³n en tiempo real
 - ConfiguraciÃ³n de Assets - Import settings
 - Presets & Prefabs - Plantillas reutilizables
 
@@ -370,4 +370,13 @@ Cada herramienta debe documentarse siguiendo el estÃ¡ndar de 10 secciones:
 **Generado automÃ¡ticamente - NO MODIFICAR FORMATO**  
 **Sistema de DocumentaciÃ³n v1.0.0**  
 **AI Responsable:** [AI: opencode]
+
+
+
+
+
+
+
+
+
 

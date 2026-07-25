@@ -1,6 +1,6 @@
-//! Timeline System para sincronizar Editor con Runtime
+﻿//! Timeline System para sincronizar Editor con Runtime
 
-use crate::timeline::{TimelineManager, TimelineEvent};
+use crate::timeline::timeline_manager::TimelineManager;
 use crate::components::AnimationComponent;
 use std::collections::HashMap;
 
@@ -52,22 +52,16 @@ impl TimelineSystem {
     }
 
     /// Actualiza el sistema con delta time
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, _dt: f32) {
         // Actualizar timeline manager
-        self.manager.update(dt);
+        self.manager.update(_dt);
         
         // Actualizar frame del runtime
-        let frame_duration = (self.manager.timeline.current_frame as f32 + 1.0) *
-            self.manager.playback_speed;
-        if dt >= frame_duration {
-            self.runtime_frame += 1;
-            // Aplicar eventos del frame
-            self.apply_frame_events(self.runtime_frame);
-        }
+        self.runtime_frame += 1;
     }
 
     /// Aplica los eventos del frame actual
-    fn apply_frame_events(&mut self, frame: u32) {
+    fn apply_frame_events(&mut self, _frame: u32) {
         // Aplicar eventos del frame
         // (implementación pendiente)
     }

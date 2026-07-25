@@ -50,3 +50,4 @@ docs/*.md
 
 # Gemini IDE settings
 .gemini/
+!README.md

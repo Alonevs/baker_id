@@ -1,4 +1,4 @@
-//! Runtime de audio
+﻿//! Runtime de audio
 
 use std::collections::HashMap;
 
@@ -79,7 +79,7 @@ impl AudioSystem {
     /// Actualizar audio posicional
     pub fn update_positional(&mut self, position: (f32, f32, f32), rotation: (f32, f32)) {
         self.positional.position = position;
-        self.positional.rotation = rotation;
+        self.positional.rotation = rotation.0;
     }
 
     /// Calcular volumen basado en distancia
@@ -140,8 +140,9 @@ impl AudioManager {
         // Actualizar streams activos
         for channel in self.audio_system.channels.values_mut() {
             if channel.state == AudioState::Playing {
-                // Lógica de reproducción en loop o one-shot
+                // LÃ³gica de reproducciÃ³n en loop o one-shot
             }
         }
     }
 }
+

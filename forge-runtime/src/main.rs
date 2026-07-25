@@ -1,41 +1,11 @@
-//! # Forge Runtime Main
+﻿//! # Forge Runtime
 //! 
-//! Runtime principal con Toolbar y Play Mode.
-
-use crate::toolbar::{Toolbar, ToolbarButtons};
-use crate::play_mode::{PlayMode, PlayModeState, Entity};
+//! Runtime de renderizado 2D para Forge Editor.
 
 fn main() {
-    println!("Forge Runtime iniciado");
-    
-    // Crear Toolbar
-    let mut toolbar = Toolbar::new();
-    
-    // Crear Play Mode
-    let mut play_mode = PlayMode::new();
-    
-    // Crear algunas entidades de prueba
-    let entities = vec![
-        Entity::new("player_1".to_string(), (100.0, 200.0)),
-        Entity::new("enemy_1".to_string(), (300.0, 200.0)),
-        Entity::new("platform_1".to_string(), (150.0, 300.0)),
-    ];
-    
-    println!("{} entidades creadas", entities.len());
-    
-    // Iniciar Play Mode
-    play_mode.start();
-    println!("Play Mode iniciado");
-    
-    // Simular update
-    for i in 1..=10 {
-        play_mode.update(0.016); // ~60 FPS
-        println!("Frame {}: delta = {}", i, play_mode.get_delta());
-    }
-    
-    // Detener Play Mode
-    play_mode.stop();
-    println!("Play Mode detenido");
-    
-    println!("Runtime finalizado");
+    println!("Forge Runtime 2D");
+    println!("Versión: 1.0.0");
+    println!("Estado: Listo para integración con Forge Editor");
+    println!();
+    println!("Ejecuta 'cargo run --package forge-editor' para usar el editor completo");
 }

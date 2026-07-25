@@ -1,7 +1,7 @@
-//! Timeline y Sequencer del juego
+﻿//! Timeline y Sequencer del juego
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
 
 /// Evento en la timeline
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -25,7 +25,7 @@ impl Default for TimelineEvent {
     }
 }
 
-/// Línea de tiempo del juego
+/// LÃ­nea de tiempo del juego
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Timeline {
     pub events: Vec<TimelineEvent>,
@@ -71,3 +71,6 @@ impl Timeline {
         self.is_playing = false;
     }
 }
+
+
+

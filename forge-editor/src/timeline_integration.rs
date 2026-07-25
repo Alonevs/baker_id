@@ -1,6 +1,6 @@
 ﻿//! Timeline Integration - Conexión entre editor y runtime
 
-use crate::timeline::TimelineSystem;
+use crate::timeline::timeline_system::TimelineSystem;
 use crate::components::AnimationComponent;
 
 #[derive(Debug, Clone, Default)]
@@ -94,3 +94,4 @@ impl TimelineIntegration {
         Self::new()
     }
 }
+

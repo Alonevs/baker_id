@@ -1,6 +1,6 @@
-//! Sistema de Eventos y Nodos Lógicos
+﻿//! Sistema de Eventos y Nodos LÃ³gicos
 
-use crate::components::Component;
+use crate::entities::Component;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -115,3 +115,4 @@ impl EventSystem {
         self.active_node_id = None;
     }
 }
+

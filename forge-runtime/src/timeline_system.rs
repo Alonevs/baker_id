@@ -2,6 +2,4 @@
 //! 
 //! Sistema de timeline para animaciones y eventos.
 
-pub mod timeline;
-
-pub use timeline::TimelineSystem;
+pub use crate::timeline::timeline_system::TimelineSystem;
