@@ -70,8 +70,8 @@
 - ✅ Serialization para guardar/cargar estado
 
 ### FASE 10.5: Animation Clips & Library
-**Estado:** COMPLETADO
-**Tests:** 9/9 passing
+**Estado:** COMPLETADO  
+**Tests:** 9/9 passing  
 **Archivos:**
 - `forge-runtime/src/animation_clips/clips_library.rs` - AnimationClip con serialización JSON
 - `forge-runtime/src/animation_clips/clips_player.rs` - ClipsPlayer con play/pause/stop/update, loop modes
@@ -86,10 +86,28 @@
 ## FASE 11: Audio System
 **Estado:** COMPLETADO (18/18 tests)
 
+## FASE 12: Play Mode
+**Estado:** COMPLETADO (29/29 tests)  
+**Fecha:** 25/07/2026  
+**Features:**
+- ✅ PlaySession: simulate_physics, get_player_movement, get_mouse_state, start/stop
+- ✅ InputCapture: WASD movement, mouse state tracking
+- ✅ SnapshotManager: take_snapshot, restore_snapshot
+- ✅ Tests: 29 tests unitarios passing (100%)
+
+## FASE 13: Hot Reload Panel
+**Estado:** COMPLETADO (11/11 tests)  
+**Fecha:** 25/07/2026  
+**Features:**
+- ✅ HotReloadManager: gestionar cambios de scripts
+- ✅ HotReloadPanel: UI con status, file selector, diff view, preview
+- ✅ Integration: integrado en ForgeEditorApp
+- ✅ Tests: 11 tests unitarios passing (100%)
+
 ## Métricas Totales
-- **Tests passing:** 51/51 (100%)
+- **Tests passing:** 110/110 (100%)
 - **Compilation errors:** 0
 - **Build status:** ✅ Success
-- **Total tests:** 51
-  - forge-runtime: 37 tests
-  - forge-editor: 17 tests
+- **Total tests:** 110
+  - forge-runtime: 52 tests
+  - forge-editor: 58 tests

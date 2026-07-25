@@ -53,7 +53,8 @@ doc/
 â”‚   â”œâ”€â”€ 34_CINEGRAPH_DIALOGUE.md           â† DiÃ¡logos
 â”‚   â”œâ”€â”€ 35_SOUND_SOCKETS.md                â† Audio 3D
 â”‚   â”œâ”€â”€ 36_PLAY_MODE.md                    â† Play + Live Reload
-â”‚   â”œâ”€â”€ 37_ASSET_CONFIG.md                 â† Import settings
+â”‚   â”œâ”€â”€ 37_HOT_RELOAD.md                  â† Hot Reload Panel
+â”‚   â”œâ”€â”€ 38_ASSET_CONFIG.md                â† Import settings
 â”‚   â”œâ”€â”€ 38_PREFABS.md                      â† Plantillas
 â”‚   â””â”€â”€ 39_EVENT_FORGE.md                  â† Grafo de eventos
 â”‚
@@ -143,9 +144,9 @@ doc/
 
 | CategorÃ­a | Total | Hecho | En progreso | Pendiente |
 |-----------|-------|-------|-------------|-----------|
-| **Herramientas documentadas** | 38 | 38 | 0 | 0 |
-| **UIs completadas** | 37 | 37 | 0 | 0 |
-| **Tests passing** | 51/51 (100%) | 51 | 0 | 0 | |
+| **Herramientas documentadas** | 39 | 39 | 0 | 0 |
+| **UIs completadas** | 38 | 38 | 0 | 0 |
+| **Tests passing** | 110/110 (100%) | 110 | 0 | 0 |
 
 ---
 
@@ -159,6 +160,29 @@ doc/
 - **Reglas de Oro:** [`.agents/AGENTS.md`](file:///c:/Users/xico0/Desktop/Xico/.agents/AGENTS.md)
 - **PatrÃ³n de DocumentaciÃ³n:** [`.agents/AGENTS.md`](file:///c:/Users/xico0/Desktop/Xico/.agents/AGENTS.md) (secciÃ³n 2)
 - **Plantilla:** `old/PLANTILLA.md`
+
+---
+
+## ðŸ“Š RESUMEN DE FASES
+
+### FASE 10: Timeline System - COMPLETO (51/51 tests)
+- FASE 10.1: Timeline UI Editor (13/13)
+- FASE 10.2: Timeline System Runtime (12/12)
+- FASE 10.3: Timeline System Integration (15/15)
+- FASE 10.4: Timeline Editor UI (10/10)
+- FASE 10.5: Animation Clips & Library (9/9)
+
+### FASE 11: Audio System - COMPLETO (18/18 tests)
+
+### FASE 12: Play Mode - COMPLETO (29/29 tests)
+- PlaySession con simulate_physics y WASD
+- InputCapture con mouse state
+- SnapshotManager con restore_snapshot
+
+### FASE 13: Hot Reload Panel - COMPLETO (11/11 tests)
+- HotReloadManager para gestionar cambios
+- HotReloadPanel con UI completa
+- Integration en ForgeEditorApp
 
 ---
 
