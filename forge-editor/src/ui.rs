@@ -4,6 +4,7 @@ use crate::play_session::{PlaySession, Entity};
 use crate::snapshot_manager::SnapshotManager;
 use crate::timeline_integration::TimelineIntegration;
 use crate::input_capture::UserInput;
+use crate::hot_reload_panel::HotReloadPanel;
 use eframe::egui;
 use eframe::App;
 
@@ -15,6 +16,7 @@ pub struct ForgeEditorApp {
     pub snapshot_manager: SnapshotManager,
     pub user_input: UserInput,
     pub is_playing: bool,
+    pub hot_reload_panel: HotReloadPanel,
 }
 
 impl Default for ForgeEditorApp {
@@ -26,6 +28,7 @@ impl Default for ForgeEditorApp {
             snapshot_manager: SnapshotManager::new(),
             user_input: UserInput::default(),
             is_playing: false,
+            hot_reload_panel: HotReloadPanel::new(),
         }
     }
 }
@@ -33,6 +36,18 @@ impl Default for ForgeEditorApp {
 impl ForgeEditorApp {
     pub fn new(_cc: &eframe::CreationContext) -> Self {
         Self::default()
+    }
+    
+    pub fn new_with_hot_reload(_cc: &eframe::CreationContext) -> Self {
+        Self {
+            logs: Vec::new(),
+            timeline_integration: None,
+            play_session: None,
+            snapshot_manager: SnapshotManager::new(),
+            user_input: UserInput::default(),
+            is_playing: false,
+            hot_reload_panel: HotReloadPanel::new(),
+        }
     }
     
     pub fn log(&mut self, message: String) {
@@ -100,6 +115,11 @@ impl App for ForgeEditorApp {
                     ui.label(log.clone());
                 }
             });
+            
+            ui.separator();
+            
+            // Hot Reload Panel
+            self.hot_reload_panel.ui(ctx);
         });
     }
 }

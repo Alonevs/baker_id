@@ -2,6 +2,7 @@
 
 use crate::ui::ForgeEditorApp;
 use crate::play_session::Entity;
+use crate::hot_reload_panel::HotReloadPanel;
 
 pub fn test_editor_log() {
     let mut app = ForgeEditorApp {
@@ -11,6 +12,7 @@ pub fn test_editor_log() {
         snapshot_manager: crate::snapshot_manager::SnapshotManager::new(),
         user_input: crate::input_capture::UserInput::default(),
         is_playing: false,
+        hot_reload_panel: HotReloadPanel::new(),
     };
     app.log("Test log message".to_string());
     assert_eq!(app.logs.len(), 1);

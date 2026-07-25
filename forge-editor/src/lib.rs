@@ -36,6 +36,8 @@ pub mod export_import_panel;
 pub mod export_manager;
 pub mod hot_reload;
 pub mod hot_reload_panel;
+
+pub use hot_reload::ChangeType;
 pub mod import_manager;
 pub mod keyframe;
 pub mod map_export;
@@ -74,7 +76,6 @@ pub use import_manager::ImportManager;
 pub use property_panel::PropertyPanel;
 pub use property_panel::EntityId;
 pub use live_sync_manager::SyncEvent;
-pub use hot_reload::ChangeType;
 pub use delta_sync::DeltaEncoder;
 
 
