@@ -76,7 +76,7 @@
 **Siguiente agente:**
 1. Leer PROGRESO2.md para contexto completo
 2. Verificar `cargo test --workspace`
-3. Continuar con `doc/tools/36_PLAY_MODE.md` y fix warnings
+3. Continuar con `doc/tools/36_PLAY_MODE.md` (implementar PlaySession, SnapshotManager, InputCapture)
 
 ---
 
@@ -98,3 +98,19 @@
 1. Restaurar desde `git checkout HEAD -- doc/PROGRESO.md`
 2. Verificar `doc/PROGRESO2.md` existe (continuidad del historial)
 3. Continuar trabajo desde PROGRESO2.md
+
+---
+
+## 📊 ESTADO ACTUAL (25/07/2026)
+
+**Métricas:**
+- ✅ **Tests**: 24/24 PASSING (100%)
+- ✅ **Timeouts**: 0/24 RESUELTOS
+- ✅ **Warnings**: 0 en código del proyecto (solo quick-xml v0.20.0 externo)
+- ✅ **Lineas de código**: ~38,578
+- ✅ **Anti-stubs**: 0 encontrados
+
+**Progreso documentado:**
+- ✅ FASE 9 Physics 2D (6/6 tests)
+- ✅ FASE 11 Audio (18/18 tests)
+- ✅ `doc/tools/36_PLAY_MODE.md` (161 líneas documentadas)
