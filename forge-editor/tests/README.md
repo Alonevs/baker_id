@@ -44,7 +44,8 @@ tests/
 │   └── input_capture.rs     # 18 tests
 ├── integration/
 │   ├── event_play.rs        # 18 tests
-│   └── play_input.rs        # 14 tests
+│   ├── play_input.rs        # 14 tests
+│   └── systems_integration.rs # 12 tests (nuevos)
 └── e2e/
     ├── basic_play.rs        # 13 tests
     └── event_execution.rs   # 13 tests
@@ -57,15 +58,16 @@ tests/
 - ✅ **event_nodes.rs**: Tests de nodos de eventos, contexto de runtime
 - ✅ **input_capture.rs**: Tests de captura de teclado y mouse
 
-### **Tests de Integración** (32 tests)
+### **Tests de Integración** (50 tests)
 - ✅ **event_play.rs**: Tests entre Event Forge y Play Session
 - ✅ **play_input.rs**: Tests entre InputCapture y PlaySession
+- ✅ **systems_integration.rs**: Tests de integración de 6 sistemas core (12 tests nuevos)
 
 ### **Tests E2E** (26 tests)
 - ✅ **basic_play.rs**: Flujo completo de play
 - ✅ **event_execution.rs**: Ejecución de eventos
 
-**Total: 105 tests**
+**Total: 127 tests**
 
 ## 🎯 **TIPOS DE TESTS**
 
@@ -79,6 +81,7 @@ tests/
 - Comunicación entre módulos
 - Event Forge ↔ Play Session
 - InputCapture ↔ PlaySession
+- 6 Sistemas Core Integrados (nuevos)
 
 ### **E2E Tests**
 - Flujos completos
@@ -112,6 +115,7 @@ cargo tarpaulin --report-html  # Generar reporte de cobertura
 - [x] Tests de callbacks
 - [x] Tests de timers
 - [x] Tests de limpieza y reset
+- [x] Tests de integración de 6 sistemas core (nuevos)
 
 ## 🚀 **BEST PRACTICES**
 

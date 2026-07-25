@@ -228,7 +228,7 @@ pub struct SceneManager {
     /// Escenas guardadas
     pub saved_scenes: HashMap<String, SceneData>,
     /// UIManager integrado
-    pub ui_manager: crate::ui_system::UiManager,
+    pub ui_manager: crate::ui_system::UIManager,
 }
 
 impl Default for SceneManager {
@@ -250,10 +250,7 @@ impl SceneManager {
             transition_progress: 0.0,
             scene_history: Vec::new(),
             saved_scenes: HashMap::new(),
-            ui_manager: crate::ui_system::UiManager::new(),
-        }
-    }
-            saved_scenes: HashMap::new(),
+            ui_manager: crate::ui_system::UIManager::new(),
         }
     }
 
@@ -445,12 +442,12 @@ impl SceneManager {
     }
     
     /// Obtiene referencia al UIManager
-    pub fn ui_manager(&self) -> &crate::ui_system::UiManager {
+    pub fn ui_manager(&self) -> &crate::ui_system::UIManager {
         &self.ui_manager
     }
     
     /// Obtiene referencia mutante al UIManager
-    pub fn ui_manager_mut(&mut self) -> &mut crate::ui_system::UiManager {
+    pub fn ui_manager_mut(&mut self) -> &mut crate::ui_system::UIManager {
         &mut self.ui_manager
     }
 }
