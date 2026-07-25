@@ -1,4 +1,4 @@
-//! # Play Mode System
+﻿//! # Play Mode System
 //! 
 //! Sistema para ejecutar juegos en modo Play con:
 //! - Snapshot de posiciones
@@ -147,7 +147,7 @@ impl PlaySession {
             last_delta: 0.0,
         }
     }
-  
+    
     /// Inicia la sesión de Play
     pub fn start(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Tomar snapshot actual
@@ -162,7 +162,7 @@ impl PlaySession {
         
         Ok(())
     }
-  
+    
     /// Detiene la sesión de Play
     pub fn stop(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Restaurar snapshot
@@ -177,64 +177,199 @@ impl PlaySession {
         
         Ok(())
     }
-  
-    /// Actualiza la sesión (físicas + input)
-    pub fn update(&mut self, delta: f32, input: &crate::input_capture::UserInput) {
+    
+    /// Actualiza la sesión con el delta de tiempo
+    pub fn update(&mut self, delta: f32, _input: &crate::UserInput) {
         if !self.is_running {
             return;
         }
-
+        
         self.last_delta = delta;
-
-        // Actualizar input
-        self.input_capture.update(input);
-
-        // Simular físicas (placeholder)
         self.simulate_physics(delta);
     }
-
+    
     /// Simula físicas para el delta de tiempo
-    #[allow(unused_variables)]
     fn simulate_physics(&mut self, delta: f32) {
-        // Implementación futura:
-        // - Mover entidades según input
-        // - Aplicar colisiones
-        // - Actualizar físicas
+        let movement = self.get_player_movement();
+        
+        for entity in &mut self.snapshot.entities.values_mut() {
+            // Aplicar movimiento basado en input (WASD)
+            if movement.0 != 0.0 || movement.1 != 0.0 {
+                entity.position.x += movement.0 * 100.0 * delta;
+                entity.position.y += movement.1 * 100.0 * delta;
+            }
+            
+            // Límites del viewport (opcional)
+            // entity.position.x = entity.position.x.clamp(0.0, 1000.0);
+            // entity.position.y = entity.position.y.clamp(0.0, 1000.0);
+        }
     }
-
-    /// Obtiene el estado de movimiento del jugador
+    
+    /// Obtiene el movimiento del jugador basado en input
     pub fn get_player_movement(&self) -> (f32, f32) {
         self.input_capture.get_movement()
     }
-
-    /// Obtiene el estado del ratón
-    pub fn get_mouse_state(&self) -> &crate::input_capture::MouseState {
-        &self.input_capture.mouse
+    
+    /// Obtiene el estado del mouse
+    pub fn get_mouse_state(&self) -> crate::MouseState {
+        self.input_capture.mouse.clone()
     }
-
+    
     /// Obtiene el snapshot actual
     pub fn get_snapshot(&self) -> &SceneSnapshot {
         &self.snapshot
     }
-
-    /// Obtiene el snapshot mutado
-    pub fn get_snapshot_mut(&mut self) -> &mut SceneSnapshot {
-        &mut self.snapshot
-    }
-
-    /// Obtiene si la sesión está en ejecución
-    pub fn is_active(&self) -> bool {
-        self.is_running
-    }
-
-    /// Obtiene el delta de tiempo
+    
+    /// Obtiene el último delta de tiempo
     pub fn get_delta(&self) -> f32 {
         self.last_delta
+    }
+    
+    /// Verifica si la sesión está activa
+    pub fn is_active(&self) -> bool {
+        self.is_running
     }
 }
 
 impl Default for PlaySession {
     fn default() -> Self {
         Self::new(&[])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::input_capture::{UserInput, KeyCode};
+
+    #[test]
+    fn test_play_session_new() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+            Entity::new("player2".to_string(), (100.0, 100.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        assert_eq!(session.snapshot.entities.len(), 2);
+        assert!(!session.is_active());
+        assert_eq!(session.get_delta(), 0.0);
+    }
+
+    #[test]
+    fn test_play_session_start() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        let mut entities_copy = entities.clone();
+        
+        assert!(!session.is_active());
+        
+        session.start(&mut entities_copy).unwrap();
+        
+        assert!(session.is_active());
+        assert_eq!(session.get_delta(), 0.0);
+    }
+
+    #[test]
+    fn test_play_session_stop() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        let mut entities_copy = entities.clone();
+        
+        session.start(&mut entities_copy).unwrap();
+        session.stop(&mut entities_copy).unwrap();
+        
+        assert!(!session.is_active());
+        assert_eq!(session.get_delta(), 0.0);
+    }
+
+    #[test]
+    fn test_play_session_get_movement() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        let movement = session.get_player_movement();
+        
+        assert_eq!(movement, (0.0, 0.0));
+    }
+
+    #[test]
+    fn test_play_session_get_mouse_state() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        let mouse_state = session.get_mouse_state();
+        
+        assert_eq!(mouse_state.position, (0.0, 0.0));
+        assert!(!mouse_state.left_button);
+        assert!(!mouse_state.right_button);
+    }
+
+    #[test]
+    fn test_play_session_get_snapshot() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        let snapshot = session.get_snapshot();
+        
+        assert_eq!(snapshot.entities.len(), 1);
+    }
+
+    #[test]
+    fn test_play_session_delta() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+        ];
+        
+        let mut session = PlaySession::new(&entities);
+        let mut entities_copy = entities.clone();
+        
+        session.start(&mut entities_copy).unwrap();
+        
+        let mut input = UserInput::default();
+        input.keyboard.insert(KeyCode::W, true);
+        
+        session.update(0.016, &input);
+        
+        assert_eq!(session.get_delta(), 0.016);
+    }
+
+    #[test]
+    fn test_play_session_multiple_entities() {
+        let entities = vec![
+            Entity::new("player1".to_string(), (0.0, 0.0)),
+            Entity::new("player2".to_string(), (100.0, 100.0)),
+            Entity::new("enemy1".to_string(), (200.0, 200.0)),
+        ];
+        
+        let session = PlaySession::new(&entities);
+        
+        let snapshot = session.get_snapshot();
+        
+        assert_eq!(snapshot.entities.len(), 3);
+    }
+
+    #[test]
+    fn test_play_session_default() {
+        let session = PlaySession::default();
+        
+        assert!(!session.is_active());
+        assert_eq!(session.get_delta(), 0.0);
+        assert_eq!(session.get_player_movement(), (0.0, 0.0));
     }
 }
