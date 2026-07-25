@@ -75,8 +75,8 @@
 
 **Siguiente agente:**
 1. Leer PROGRESO2.md para contexto completo
-2. Verificar `cargo test --workspace`
-3. Integrar Play Mode en Toolbar (botón Play/Stop)
+2. Integrar Play Mode en Toolbar (botón Play/Stop)
+3. Conectar con Viewport y simular físicas
 
 ---
 
@@ -119,3 +119,5 @@
   - `snapshot_manager.rs` (80 líneas) - SnapshotManager con historial
   - `input_capture.rs` (210 líneas) - InputCapture, KeyCode, MouseState
   - Re-exportados en `lib.rs`
+- ✅ **README.md** (408 líneas) - Documentación completa del proyecto
+- ⏳ **Integración Toolbar**: Pendiente (botón Play/Stop)
