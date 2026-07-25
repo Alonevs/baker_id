@@ -43,6 +43,7 @@ pub mod hot_reload_integration;
 pub mod improved_hot_reload;
 pub mod drag_drop_integration;
 pub mod bakeforge_parser;
+pub mod scene_system;
 
 pub use hot_reload::ChangeType;
 pub use hot_reload_integration::SimpleFileWatcherIntegration;
@@ -89,6 +90,7 @@ pub use ui::ForgeEditorApp;
 pub use export_manager::ExportManager;
 pub use import_manager::ImportManager;
 pub use export_import_panel::ExportImportPanel;
+pub use scene_system::SceneManager;
 pub mod preview_panel;
 pub use preview_panel::PreviewPanel;
 pub use preview_panel::AssetInfo;
