@@ -44,6 +44,23 @@ pub mod improved_hot_reload;
 pub mod drag_drop_integration;
 pub mod bakeforge_parser;
 pub mod scene_system;
+pub mod collision_system;
+pub mod audio_system;
+pub mod toolbar;
+pub mod bitacora_ui;
+pub mod excel_integration;
+pub mod dialogue_ui;
+
+pub use dialogue_ui::{
+    DialogueManager,
+    DialogueUI,
+    OptionsManager,
+    DialogueAnimationSystem,
+    DialogueLineType as DialogueLine,
+    DialogueChoice,
+    DialogueVariable,
+    DialogueContext,
+};
 
 pub use hot_reload::ChangeType;
 pub use hot_reload_integration::SimpleFileWatcherIntegration;
@@ -90,7 +107,67 @@ pub use ui::ForgeEditorApp;
 pub use export_manager::ExportManager;
 pub use import_manager::ImportManager;
 pub use export_import_panel::ExportImportPanel;
-pub use scene_system::SceneManager;
+pub use scene_system::{SceneManager, SceneGraph};
+pub use collision_system::{CollisionSystem, PhysicsCollisionSystem, CollisionType, AABB, CircleCollider};
+pub use audio_system::{
+    AudioManager,
+    SfxManager,
+    MusicManager,
+    AudioMixer,
+    SfxId,
+    MusicTrackId,
+    AudioEvent,
+    PlaySessionAudioExt,
+};
+pub mod ui_system;
+pub use ui_system::{
+    UiLayerId,
+    UiComponentId,
+    UiComponentType,
+    UiComponentState,
+    UiPos,
+    UiSize,
+    UiColor,
+    UiFont,
+    UiTextAlign,
+    UiVerticalAlign,
+    Button,
+    Panel,
+    Text,
+    Slider,
+    UIManager,
+    PlaySessionUiExt,
+};
+pub use bitacora_ui::{
+    BitacoraPanel,
+    Notification,
+    NotificationType,
+    NavigationDirection,
+    BitacoraDateRange,
+    BitacoraCategory,
+    BitacoraSeverity,
+    BitacoraEntry,
+    BitacoraFilter,
+    SearchResults,
+};
+pub use excel_integration::{
+    Workbook,
+    ExcelSheet,
+    Cell,
+    Row,
+    CellValue,
+    CellType,
+    CellStyle,
+    CellRange,
+    SheetName,
+    DataType,
+    Column,
+    ExcelWriter,
+    SheetManager,
+    DataValidator,
+    ValidationRule,
+    ValidationError,
+};
 pub mod preview_panel;
 pub use preview_panel::PreviewPanel;
 pub use preview_panel::AssetInfo;

@@ -167,9 +167,9 @@ impl CollisionSystem {
                     let collision_info = CollisionInfo::new(
                         CollisionType::AABB,
                         self.entities[j].entity_id.clone(),
-                    .0,
-                    (0.0, 0.0),
-                    (0.0, 0.0),
+                        0.0,
+                        (0.0, 0.0),
+                        (0.0, 0.0),
                     );
                     
                     self.frame_collisions.push(collision_info);

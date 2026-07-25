@@ -141,12 +141,15 @@ impl Toolbar {
         let tools = self.tools.read().unwrap();
         let current = self.current_tool;
         
+        let tools_str: String = tools.iter().map(|t| format!("\"{:?}\"", t)).collect::<Vec<_>>().join(", ");
+        
         format!(
             r#"{{
   "current_tool": "{:?}",
-  "tools": [$(tools.iter().map(|t| format!("\"{:?}\"", t)).collect::<Vec<_>>().join(", "))$]
+  "tools": [{}]
 }}"#,
             current,
+            tools_str
         )
     }
 
