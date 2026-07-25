@@ -9,6 +9,7 @@ use crate::hot_reload_integration::SimpleFileWatcherIntegration;
 use crate::explorer_panel_integration::ExplorerPanelIntegration;
 use crate::toolbar::ToolbarWidget;
 use crate::event_forge::EventForgeWidget;
+use crate::property_panel::PropertyPanel;
 use eframe::egui;
 use eframe::App;
 
@@ -26,6 +27,7 @@ pub struct ForgeEditorApp {
     pub explorer_panel_integration: ExplorerPanelIntegration,
     pub toolbar_widget: ToolbarWidget,
     pub event_forge_widget: EventForgeWidget,
+    pub property_panel: PropertyPanel,
 }
 
 impl Default for ForgeEditorApp {
@@ -43,6 +45,7 @@ impl Default for ForgeEditorApp {
             explorer_panel_integration: ExplorerPanelIntegration::new(),
             toolbar_widget: ToolbarWidget::new(),
             event_forge_widget: EventForgeWidget::new(),
+            property_panel: PropertyPanel::new(),
         }
     }
 }
@@ -124,6 +127,8 @@ impl App for ForgeEditorApp {
         
         // Renderizar Event Forge
         self.render_event_forge(ctx);
+        
+        // Property Panel renderizado internamente en su método ui()
         
         egui::CentralPanel::default().show(ctx, |ui| {
             // Toolbar superior

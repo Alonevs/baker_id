@@ -14,15 +14,127 @@ impl Default for EntityId {
 }
 
 #[derive(Debug, Clone)]
-pub struct PropertyPanel;
+pub struct PropertyPanel {
+    pub selected_entity_id: Option<EntityId>,
+    pub transform_properties: TransformProperties,
+    pub component_properties: ComponentProperties,
+    pub script_properties: ScriptProperties,
+}
+
+impl Default for PropertyPanel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl PropertyPanel {
     pub fn new() -> Self {
-        Self
+        Self {
+            selected_entity_id: None,
+            transform_properties: TransformProperties::default(),
+            component_properties: ComponentProperties::default(),
+            script_properties: ScriptProperties::default(),
+        }
     }
     
-    pub fn show(&self, _ctx: &egui::Context, ui: &mut egui::Ui, _entity_id: &EntityId) {
-        ui.label("Property Panel");
+    /// Configura panel con entidad seleccionada
+    pub fn set_entity(&mut self, entity_id: EntityId) {
+        self.selected_entity_id = Some(entity_id);
+    }
+    
+    /// Obtiene entidad seleccionada
+    pub fn get_selected_entity(&self) -> Option<EntityId> {
+        self.selected_entity_id
+    }
+    
+    /// UI completa del Property Panel
+    pub fn ui(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        egui::SidePanel::right("property_panel").show(ctx, |ui| {
+            ui.heading("Property Panel");
+            
+            // Seleccionar entidad
+            ui.label("Select Entity:");
+            ui.horizontal(|ui| {
+                if ui.add(egui::TextEdit::singleline("entity_1").desired_width(150.0)).clicked() {
+                    self.set_entity(EntityId(1));
+                }
+                if ui.button("Apply").clicked() {
+                    self.set_entity(EntityId(1));
+                }
+            });
+            
+            ui.separator();
+            
+            // Transform Properties
+            ui.label("Transform Properties");
+            ui.horizontal(|ui| {
+                ui.label("X:");
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.0.to_string()))
+                    .on_text_changed(|new_pos| {
+                        self.transform_properties.0 = new_pos.parse().unwrap_or(0.0);
+                    });
+            });
+            ui.horizontal(|ui| {
+                ui.label("Y:");
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.1.to_string()))
+                    .on_text_changed(|new_pos| {
+                        self.transform_properties.1 = new_pos.parse().unwrap_or(0.0);
+                    });
+            });
+            ui.horizontal(|ui| {
+                ui.label("Rotation:");
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.rotation.to_string()))
+                    .on_text_changed(|new_pos| {
+                        self.transform_properties.rotation = new_pos.parse().unwrap_or(0.0);
+                    });
+            });
+            ui.horizontal(|ui| {
+                ui.label("Scale:");
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.scale.to_string()))
+                    .on_text_changed(|new_pos| {
+                        self.transform_properties.scale = new_pos.parse().unwrap_or(1.0);
+                    });
+            });
+            
+            ui.separator();
+            
+            // Component Properties
+            ui.label("Component Properties");
+            ui.horizontal(|ui| {
+                ui.label("Type:");
+                ui.add(egui::TextEdit::singleline(&mut self.component_properties.component_type));
+            });
+            ui.label("Additional Properties:");
+            ui.add(egui::TextEdit::multiline(&mut self.component_properties.properties.to_string()))
+                .desired_width(200.0);
+            
+            ui.separator();
+            
+            // Script Properties
+            ui.label("Script Properties");
+            ui.horizontal(|ui| {
+                ui.label("Path:");
+                ui.add(egui::TextEdit::singleline(&mut self.script_properties.script_path));
+            });
+            ui.label("Parameters:");
+            ui.add(egui::TextEdit::multiline(&mut self.script_properties.parameters.to_string()))
+                .desired_width(200.0);
+            
+            ui.separator();
+            
+            // Botones de acción
+            ui.horizontal(|ui| {
+                if ui.button("🔄 Reset Transform").clicked() {
+                    self.transform_properties = TransformProperties::default();
+                }
+                if ui.button("💾 Save Properties").clicked() {
+                    ui.label("✅ Saved");
+                }
+                if ui.button("🗑️ Clear").clicked() {
+                    self.selected_entity_id = None;
+                }
+            });
+        });
     }
 }
 
