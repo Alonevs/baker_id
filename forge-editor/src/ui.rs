@@ -10,6 +10,7 @@ use crate::explorer_panel_integration::ExplorerPanelIntegration;
 use crate::toolbar::ToolbarWidget;
 use crate::event_forge::EventForgeWidget;
 use crate::property_panel::PropertyPanel;
+use crate::export_import_panel::ExportImportPanel;
 use eframe::egui;
 use eframe::App;
 
@@ -28,6 +29,7 @@ pub struct ForgeEditorApp {
     pub toolbar_widget: ToolbarWidget,
     pub event_forge_widget: EventForgeWidget,
     pub property_panel: PropertyPanel,
+    pub export_import_panel: ExportImportPanel,
 }
 
 impl Default for ForgeEditorApp {
@@ -46,6 +48,7 @@ impl Default for ForgeEditorApp {
             toolbar_widget: ToolbarWidget::new(),
             event_forge_widget: EventForgeWidget::new(),
             property_panel: PropertyPanel::new(),
+            export_import_panel: ExportImportPanel::new(),
         }
     }
 }
@@ -68,6 +71,11 @@ impl ForgeEditorApp {
         // Configurar Explorer Panel con proyecto actual
         app.explorer_panel_integration.explorer.panel.current_project_path = 
             Some(std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
+        
+        // Configurar Export/Import Panel con ruta actual
+        app.export_import_panel.export_path = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("project_export.json"));
+        app.export_import_panel.import_path = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("project_import.json"));
+        app.export_import_panel.update_summary();
         
         app
     }
@@ -127,6 +135,11 @@ impl App for ForgeEditorApp {
         
         // Renderizar Event Forge
         self.render_event_forge(ctx);
+        
+        // Renderizar Export/Import Panel
+        self.export_import_panel.ui(ctx, &mut egui::CentralPanel::default().show(ctx, |ui| {
+            ui.label("Viewport");
+        }));
         
         // Property Panel renderizado internamente en su método ui()
         

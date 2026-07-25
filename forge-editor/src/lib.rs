@@ -81,6 +81,7 @@ pub use timeline_integration::TimelineIntegration;
 pub use ui::ForgeEditorApp;
 pub use export_manager::ExportManager;
 pub use import_manager::ImportManager;
+pub use export_import_panel::ExportImportPanel;
 pub use property_panel::{PropertyPanel, EntityId};
 pub use live_sync_manager::SyncEvent;
 pub use delta_sync::DeltaEncoder;
