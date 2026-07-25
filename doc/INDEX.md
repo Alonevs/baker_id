@@ -1,6 +1,6 @@
 # 📚 DOCUMENTACIÓN - ESTRUCTURA FINAL
 
-**Versión:** 1.2.0  
+**Versión:** 1.3.0  
 **Fecha:** 2026-07-25  
 **AI:** [AI: opencode]
 

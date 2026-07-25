@@ -104,6 +104,39 @@
 - ✅ Integration: integrado en ForgeEditorApp
 - ✅ Tests: 11 tests unitarios passing (100%)
 
+## FASE 38: File Watcher + Hot Reload Integración Real
+**Estado:** COMPLETADO (5/5 tests)  
+**Fecha:** 25/07/2026  
+**Features:**
+- ✅ SimpleFileWatcherIntegration: check_for_changes, scan_directory
+- ✅ HotReloadManager: pending_changes, register_change, process_pending_changes
+- ✅ FileWatcher: detect added/modified/removed, debounce 100ms
+- ✅ ScriptExecutor: execute_script, get_stats, clear
+- ✅ HotReloadPanel: UI con status, file selector, diff view, preview, actions
+- ✅ Integration: SimpleFileWatcherIntegration en ForgeEditorApp.update()
+- ✅ Tests: 5 tests unitarios passing (100%)
+
+**Implementación:**
+- `forge-editor/src/hot_reload_integration.rs`: SimpleFileWatcherIntegration con scan_directory
+- `forge-editor/src/hot_reload.rs`: HotReloadManager con ChangeType y PendingChange
+- `forge-editor/src/ui.rs`: Integración de SimpleFileWatcherIntegration en ForgeEditorApp
+
+## FASE 39: Script Executor Real con Parser
+**Estado:** EN PROGRESO  
+**Fecha:** 25/07/2026  
+**Features:**
+- ✅ ScriptExecutor: execute_from_source, execute_node, execute_block
+- ✅ Contexto de ejecución: variables, scopes, funciones
+- ✅ Operadores aritméticos y lógicos
+- ✅ Condicionales y bucles
+- ✅ Arrays y objetos
+- ⏳ Parser real para scripts .bf (en desarrollo)
+- ⏳ Lexer para tokenización (en desarrollo)
+
+**Implementación:**
+- `forge-editor/src/script_executor.rs`: Executor completo con AST
+- `forge-editor/src/hot_reload.rs`: Integración con ScriptExecutor
+
 ## Métricas Totales
 - **Tests passing:** 110/110 (100%)
 - **Compilation errors:** 0
