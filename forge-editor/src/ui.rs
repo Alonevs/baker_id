@@ -129,9 +129,60 @@ impl ForgeEditorApp {
             }
         }
         
-        // Actualizar Explorer Panel y Toolbar
+        // Actualizar Explorer Panel
         self.explorer_panel_integration.update();
+        
+        // Conectar Explorer con Preview
+        self.update_preview_from_explorer();
+        
+        // Actualizar Toolbar
         self.toolbar_widget.toolbar.select();
+    }
+    
+    /// Conecta Explorer Panel con Preview Panel
+    pub fn update_preview_from_explorer(&mut self) {
+        if let Some(path) = self.explorer_panel_integration.get_selected_path() {
+            // Agregar asset al preview panel
+            let asset_type = crate::preview_panel::AssetInfo::detect_type(&path);
+            let asset = crate::preview_panel::AssetInfo::new(
+                path.file_name().and_then(|n| n.to_str()).unwrap_or("Unknown").to_string(),
+                path,
+                asset_type
+            );
+            self.preview_panel.add_asset(asset);
+            
+            // Seleccionar el último asset agregado
+            if let Some(last_asset) = self.preview_panel.available_assets.last() {
+                let index = self.preview_panel.available_assets.len() - 1;
+                self.preview_panel.select_asset(index);
+            }
+            
+            self.log(format!("📁 Preview set: {}", path.display()));
+        }
+    }
+    
+    /// Conecta Property Panel con Explorer Panel
+    pub fn update_explorer_from_property(&mut self) {
+        // Si hay entidad seleccionada en Property Panel, mostrar en Explorer
+        if let Some(_) = self.property_panel.get_selected_entity() {
+            // Actualizar Explorer para mostrar entidad
+            self.explorer_panel_integration.update();
+        }
+    }
+    
+    /// Actualiza todos los panels integrados
+    pub fn update_all_panels(&mut self, delta: f32) {
+        // Actualizar Explorer Panel
+        self.explorer_panel_integration.update();
+        
+        // Actualizar Toolbar
+        self.toolbar_widget.toolbar.select();
+        
+        // Actualizar Preview desde Explorer
+        self.update_preview_from_explorer();
+        
+        // Actualizar Explorer desde Property
+        self.update_explorer_from_property();
     }
 }
 
@@ -140,23 +191,29 @@ impl App for ForgeEditorApp {
         // Renderizar Toolbar superior
         self.toolbar_widget.render(ctx);
         
-        // Renderizar Event Forge
+        // Renderizar Export/Import Panel (panel izquierdo)
+        self.export_import_panel.ui(ctx, &mut egui::SidePanel::left("export_import_panel")
+            .min_width(250.0).show(ctx, |ui| {
+                ui.heading("Export / Import");
+            }));
+        
+        // Renderizar Preview Panel (panel derecho)
+        self.preview_panel.ui(ctx, &mut egui::SidePanel::right("preview_panel")
+            .min_width(300.0).show(ctx, |ui| {
+                ui.heading("Preview Panel");
+            }));
+        
+        // Renderizar Event Forge (panel superior derecho)
         self.render_event_forge(ctx);
         
-        // Renderizar Export/Import Panel
-        self.export_import_panel.ui(ctx, &mut egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("Viewport");
-        }));
-        
-        // Renderizar Preview Panel
-        self.preview_panel.ui(ctx, &mut egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("Viewport");
-        }));
-        
-        // Property Panel renderizado internamente en su método ui()
+        // Explorer Panel (panel inferior izquierdo)
+        self.explorer_panel_integration.ui(ctx, &mut egui::SidePanel::bottom("explorer_panel")
+            .min_height(150.0).show(ctx, |ui| {
+                ui.heading("Explorer Panel");
+            }));
         
         egui::CentralPanel::default().show(ctx, |ui| {
-            // Toolbar superior
+            // Play Control superior
             ui.horizontal(|ui| {
                 // Botón Play
                 if ui.button("▶ Play").clicked() {
@@ -195,8 +252,8 @@ impl App for ForgeEditorApp {
             // Hot Reload Panel
             self.hot_reload_panel.ui(ctx, &mut self.hot_reload_manager);
             
-            // Explorer Panel (debajo de todo)
-            self.explorer_panel_integration.ui(ctx);
+            // Property Panel (panel derecho)
+            self.property_panel.ui(ctx, ui);
         });
     }
 }
