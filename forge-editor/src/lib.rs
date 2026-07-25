@@ -32,6 +32,7 @@ pub mod event_nodes;
 pub mod event_nodes_ui;
 pub mod event_node_editor;
 pub mod event_node_manager;
+pub mod event_forge;
 pub mod export_import_panel;
 pub mod export_manager;
 pub mod hot_reload;

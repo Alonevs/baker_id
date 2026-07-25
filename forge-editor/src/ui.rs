@@ -8,6 +8,7 @@ use crate::hot_reload_panel::HotReloadPanel;
 use crate::hot_reload_integration::SimpleFileWatcherIntegration;
 use crate::explorer_panel_integration::ExplorerPanelIntegration;
 use crate::toolbar::ToolbarWidget;
+use crate::event_forge::EventForgeWidget;
 use eframe::egui;
 use eframe::App;
 
@@ -24,6 +25,7 @@ pub struct ForgeEditorApp {
     pub file_watcher_integration: Option<SimpleFileWatcherIntegration>,
     pub explorer_panel_integration: ExplorerPanelIntegration,
     pub toolbar_widget: ToolbarWidget,
+    pub event_forge_widget: EventForgeWidget,
 }
 
 impl Default for ForgeEditorApp {
@@ -40,6 +42,7 @@ impl Default for ForgeEditorApp {
             file_watcher_integration: None,
             explorer_panel_integration: ExplorerPanelIntegration::new(),
             toolbar_widget: ToolbarWidget::new(),
+            event_forge_widget: EventForgeWidget::new(),
         }
     }
 }
@@ -64,6 +67,11 @@ impl ForgeEditorApp {
             Some(std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
         
         app
+    }
+    
+    /// Renderiza el widget de Event Forge
+    pub fn render_event_forge(&mut self, ctx: &egui::Context) {
+        self.event_forge_widget.render(ctx);
     }
     
     pub fn log(&mut self, message: String) {
@@ -113,6 +121,9 @@ impl App for ForgeEditorApp {
     fn update(&mut self, ctx: &egui::Context, _ui: &mut eframe::Frame) {
         // Renderizar Toolbar superior
         self.toolbar_widget.render(ctx);
+        
+        // Renderizar Event Forge
+        self.render_event_forge(ctx);
         
         egui::CentralPanel::default().show(ctx, |ui| {
             // Toolbar superior

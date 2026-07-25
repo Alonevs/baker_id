@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::RwLock;
 use serde::{Serialize, Deserialize};
+use eframe::egui;
 
 /// Resultado de ejecución de evento
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -317,6 +318,9 @@ pub struct EventForgeWidget {
     pub manager: EventNodeManager,
     pub width: f32,
     pub height: f32,
+    pub selected_node: Option<u32>,
+    pub drag_start: Option<(f32, f32)>,
+    pub is_dragging: bool,
 }
 
 impl Default for EventForgeWidget {
@@ -331,21 +335,235 @@ impl EventForgeWidget {
             manager: EventNodeManager::new(),
             width: 800.0,
             height: 600.0,
+            selected_node: None,
+            drag_start: None,
+            is_dragging: false,
         }
     }
 
-    pub fn render(&self) {
-        println!("EventForgeWidget: {} nodes, {} connections", 
-            self.manager.graph.nodes.len(),
-            self.manager.graph.connections.len()
-        );
+    /// Renderiza el widget con egui
+    pub fn render(&mut self, ctx: &egui::Context) {
+        egui::TopBottomPanel::bottom("event_forge_panel").show(ctx, |ui| {
+            ui.heading("Event Forge - Node Graph");
+            
+            // Botones de control
+            ui.horizontal(|ui| {
+                if ui.button("➕ Add Node").clicked() {
+                    self.add_node();
+                }
+                
+                if ui.button("🗑️ Clear All").clicked() {
+                    self.manager.graph.nodes.clear();
+                    self.manager.graph.connections.clear();
+                    self.selected_node = None;
+                }
+                
+                if ui.button("💾 Save Graph").clicked() {
+                    if let Err(e) = self.manager.save_json("event_graph.json") {
+                        ui.label(format!("Error: {}", e));
+                    } else {
+                        ui.label("✅ Saved");
+                    }
+                }
+                
+                if ui.button("📂 Load Graph").clicked() {
+                    match EventGraph::load_json("event_graph.json") {
+                        Ok(graph) => {
+                            self.manager.graph = graph;
+                            self.selected_node = None;
+                        }
+                        Err(e) => {
+                            ui.label(format!("Error: {}", e));
+                        }
+                    }
+                }
+            });
+            
+            ui.separator();
+            
+            // Canvas para el grafo
+            egui::ScrollArea::both().show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label(format!("Nodes: {}", self.manager.graph.nodes.len()));
+                        ui.label(format!("Connections: {}", self.manager.graph.connections.len()));
+                        
+                        if let Some(node_id) = self.selected_node {
+                            if let Some(node) = self.manager.get_node(node_id) {
+                                ui.label(format!("Selected: {:?} (id: {})", node.node_type, node.id));
+                                ui.label(format!("Position: ({}, {})", node.position.0, node.position.1));
+                                ui.label(format!("Executions: {}", node.execution_count));
+                            }
+                        }
+                    });
+                    
+                    // Canvas de renderizado
+                    let mut response = ui.allocate_response(
+                        egui::vec2(ui.available_width() - 200.0, ui.available_height()),
+                        egui::Sense::click(),
+                    );
+                    
+                    let rect = response.rect;
+                    
+                    // Dibujar conexiones primero (debajo de los nodos)
+                    self.draw_connections(ctx, rect);
+                    
+                    // Dibujar nodos
+                    self.draw_nodes(ctx, rect, ui);
+                    
+                    // Manejar clics para seleccionar nodos
+                    if let Some(pos) = ui.input(|i| i.pointer.hover_pos()) {
+                        let (x, y) = (pos.x - rect.min.x, pos.y - rect.min.y);
+                        
+                        // Verificar si se hizo clic en un nodo
+                        let mut clicked_node = false;
+                        for (_, node) in &self.manager.graph.nodes {
+                            let node_rect = egui::Rect::from_min_size(
+                                egui::vec2(node.position.0 - 50.0, node.position.1 - 50.0),
+                                egui::vec2(100.0, 100.0)
+                            );
+                            
+                            if node_rect.contains(pos) {
+                                self.selected_node = Some(node.id);
+                                clicked_node = true;
+                                break;
+                            }
+                        }
+                        
+                        // Si no se clickeó un nodo, deseleccionar
+                        if !clicked_node {
+                            self.selected_node = None;
+                        }
+                    }
+                });
+            });
+        });
+    }
+    
+    /// Dibuja las conexiones entre nodos
+    fn draw_connections(&self, ctx: &egui::Context, rect: egui::Rect) {
+        let scale = 0.8;
+        
+        for conn in &self.manager.graph.connections {
+            let start = self.get_socket_position(&conn.from, scale);
+            let end = self.get_socket_position(&conn.to, scale);
+            
+            // Dibujar línea de conexión con egui
+            let mut line = egui::Shape::line_segment([
+                egui::pos2(start.x, start.y),
+                egui::pos2(end.x, end.y)
+            ]);
+            line.stroke = egui::Color32::from_rgb(100, 100, 200);
+            line.stroke.width = 2.0;
+            
+            // Dibujar nodos de conexión
+            let start_node = self.manager.graph.nodes.get(&conn.from.node_id);
+            let end_node = self.manager.graph.nodes.get(&conn.to.node_id);
+            
+            if let (Some(start_node), Some(end_node)) = (start_node, end_node) {
+                // Nodo de salida
+                let start_pos = egui::pos2(start_node.position.0, start_node.position.1);
+                let start_circle = egui::Shape::circle(
+                    egui::pos2(start_node.position.0 + 100.0, start_node.position.1 + 50.0),
+                    6.0
+                );
+                start_circle.stroke = egui::Color32::YELLOW;
+                start_circle.stroke.width = 2.0;
+                
+                // Nodo de entrada
+                let end_pos = egui::pos2(end_node.position.0, end_node.position.1);
+                let end_circle = egui::Shape::circle(
+                    egui::pos2(end_node.position.0 - 100.0, end_node.position.1 + 50.0),
+                    6.0
+                );
+                end_circle.stroke = egui::Color32::YELLOW;
+                end_circle.stroke.width = 2.0;
+            }
+            
+            ctx.add(shape::StrokeShape::new(line));
+            ctx.add(shape::StrokeShape::new(start_circle));
+            ctx.add(shape::StrokeShape::new(end_circle));
+        }
+    }
+    
+    /// Dibuja los nodos
+    fn draw_nodes(&self, ctx: &egui::Context, rect: egui::Rect, ui: &mut egui::Ui) {
+        for (_, node) in &self.manager.graph.nodes {
+            let x = node.position.0;
+            let y = node.position.1;
+            
+            // Crear nodo UI
+            let node_label = match node.node_type {
+                NodeType::TriggerZone => "🎯 Trigger Zone",
+                NodeType::Dialogue => "💬 Dialogue",
+                NodeType::Conditional => "🔀 Conditional",
+                NodeType::Cinematic => "🎬 Cinematic",
+                NodeType::Action => "⚡ Action",
+            };
+            
+            let mut node_ui = egui::Frame::none()
+                .fill(egui::Color32::from_rgb(50, 50, 80))
+                .stroke(egui::Stroke::new(2.0, egui::Color32::DARK_BLUE));
+            
+            if Some(node.id) == self.selected_node {
+                node_ui = node_ui.fill(egui::Color32::from_rgb(80, 100, 150));
+            }
+            
+            egui::Area::new(format!("node_{}", node.id))
+                .fixed_pos(egui::pos2(x - 60.0, y - 30.0))
+                .anchor(egui::AnchorCorner::CENTER)
+                .show(ui, |ui| {
+                    node_ui.show(ui, |ui| {
+                        ui.add_space(5.0);
+                        ui.label(node_label);
+                        ui.add_space(5.0);
+                        ui.label(format!("ID: {}", node.id));
+                        ui.label(format!("Exec: {}", node.execution_count));
+                    });
+                });
+        }
+    }
+    
+    /// Obtiene la posición del socket
+    fn get_socket_position(&self, socket: &SocketId, scale: f32) -> egui::pos2 {
+        let node = self.manager.graph.nodes.get(&socket.node_id);
+        if let Some(node) = node {
+            let x = node.position.0;
+            let y = node.position.1;
+            
+            if socket.is_output {
+                egui::pos2(x + 50.0 * scale, y + 25.0 * scale)
+            } else {
+                egui::pos2(x - 50.0 * scale, y + 25.0 * scale)
+            }
+        } else {
+            egui::pos2(0.0, 0.0)
+        }
     }
 
     pub fn add_node(&mut self) {
+        let node_type = match self.selected_node {
+            Some(_) => {
+                // Si hay nodo seleccionado, crear del mismo tipo
+                if let Some(node) = self.manager.get_node(self.selected_node.unwrap()) {
+                    node.node_type
+                } else {
+                    NodeType::TriggerZone
+                }
+            }
+            None => NodeType::TriggerZone,
+        };
+        
         let node = Node::new(
             self.manager.graph.nodes.len() as u32 + 1,
-            NodeType::TriggerZone,
+            node_type,
+        );
+        // Posición aleatoria en el canvas
+        node.position = (
+            (self.width / 2.0 - 50.0) + ((self.manager.graph.nodes.len() as f32 * 100.0) % 200.0),
+            (self.height / 2.0 - 50.0) + ((self.manager.graph.nodes.len() as f32 * 100.0) % 200.0)
         );
         self.manager.add_node(node);
+        self.selected_node = None;
     }
 }
