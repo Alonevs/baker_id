@@ -146,7 +146,7 @@ doc/
 |-----------|-------|-------|-------------|-----------|
 | **Herramientas documentadas** | 39 | 39 | 0 | 0 |
 | **UIs completadas** | 38 | 38 | 0 | 0 |
-| **Tests passing** | 110/110 (100%) | 110 | 0 | 0 |
+| **Tests passing** | 115/115 (100%) | 115 | 0 | 0 |
 
 ---
 
@@ -179,7 +179,7 @@ doc/
 - InputCapture con mouse state
 - SnapshotManager con restore_snapshot
 
-### FASE 13: Hot Reload Panel - COMPLETO (11/11 tests)
+### FASE 13: Hot Reload Panel - COMPLETO (5/5 tests)
 - HotReloadManager para gestionar cambios
 - HotReloadPanel con UI completa
 - Integration en ForgeEditorApp
