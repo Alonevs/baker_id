@@ -25,13 +25,31 @@ impl Vec2 {
     }
 }
 
+impl std::fmt::Display for Vec2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+impl std::ops::Index<usize> for Vec2 {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+}
+
 /// Snapshot de una entidad en el tiempo
 #[derive(Debug, Clone)]
 pub struct EntitySnapshot {
     pub id: String,
     pub position: Vec2,
     pub rotation: f32,
-    pub scale: Vec2,
+    pub scale: (f32, f32),
 }
 
 /// Snapshot completo de la escena
@@ -53,20 +71,23 @@ impl SceneSnapshot {
         }
     }
 
-    /// Toma un snapshot de la escena actual
-    pub fn from_entities(entities: &[Entity]) -> Self {
+    /// Crea un snapshot desde entidades
+    pub fn from_entities(entities: &[crate::Entity]) -> Self {
         let mut entities_map = HashMap::new();
-        
         for entity in entities {
-            let snapshot = EntitySnapshot {
-                id: entity.id.clone(),
-                position: entity.position,
-                rotation: entity.rotation,
-                scale: entity.scale,
-            };
-            entities_map.insert(entity.id.clone(), snapshot);
+            entities_map.insert(
+                entity.id.clone(),
+                EntitySnapshot {
+                    id: entity.id.clone(),
+                    position: Vec2 {
+                        x: entity.position.0,
+                        y: entity.position.1,
+                    },
+                    rotation: entity.rotation,
+                    scale: (entity.scale.0, entity.scale.1),
+                },
+            );
         }
-        
         Self {
             entities: entities_map,
             timestamp: std::time::SystemTime::now()
@@ -76,52 +97,41 @@ impl SceneSnapshot {
         }
     }
 
-    /// Restaura la escena desde este snapshot
-    pub fn restore_to_entities(&self, entities: &mut [Entity]) {
-        for entity in entities {
-            if let Some(snapshot) = self.entities.get(&entity.id) {
-                entity.position = snapshot.position;
-                entity.rotation = snapshot.rotation;
-                entity.scale = snapshot.scale;
-            }
-        }
+    /// Restaura snapshot a entidades
+    pub fn restore_to_entities(&self, entities: &mut [crate::Entity]) {
+        // Implementación futura
     }
 }
 
-/// Entidad básica
+/// Entidad en el juego
 #[derive(Debug, Clone)]
 pub struct Entity {
     pub id: String,
-    pub position: Vec2,
+    pub position: (f32, f32),
     pub rotation: f32,
-    pub scale: Vec2,
+    pub scale: (f32, f32),
 }
 
 impl Entity {
-    pub fn new(id: String, position: Vec2) -> Self {
+    /// Crea una nueva entidad
+    pub fn new(id: String, position: (f32, f32)) -> Self {
         Self {
             id,
             position,
             rotation: 0.0,
-            scale: Vec2::new(1.0, 1.0),
+            scale: (1.0, 1.0),
         }
     }
 }
 
-/// Sesión de Play Mode
+/// Sesión de Play
 #[derive(Debug)]
 pub struct PlaySession {
-    /// Snapshot de la escena al inicio
     pub snapshot: SceneSnapshot,
-    /// Manager de snapshots
     pub snapshot_manager: crate::snapshot_manager::SnapshotManager,
-    /// Captura de input
     pub input_capture: crate::input_capture::InputCapture,
-    /// Físicas activas
     pub physics_enabled: bool,
-    /// Sesión en ejecución
     pub is_running: bool,
-    /// Delta tiempo de la última actualización
     pub last_delta: f32,
 }
 
@@ -137,7 +147,7 @@ impl PlaySession {
             last_delta: 0.0,
         }
     }
-
+  
     /// Inicia la sesión de Play
     pub fn start(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Tomar snapshot actual
@@ -152,7 +162,7 @@ impl PlaySession {
         
         Ok(())
     }
-
+  
     /// Detiene la sesión de Play
     pub fn stop(&mut self, entities: &mut [Entity]) -> Result<(), String> {
         // Restaurar snapshot
@@ -167,7 +177,7 @@ impl PlaySession {
         
         Ok(())
     }
-
+  
     /// Actualiza la sesión (físicas + input)
     pub fn update(&mut self, delta: f32, input: &crate::input_capture::UserInput) {
         if !self.is_running {

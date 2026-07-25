@@ -1,9 +1,9 @@
 ﻿//! UI Tests - Pruebas de interfaz de usuario
 
 use crate::ui::ForgeEditorApp;
+use crate::play_session::Entity;
 
 pub fn test_editor_log() {
-    // Create a minimal app instance directly
     let mut app = ForgeEditorApp {
         logs: Vec::new(),
         timeline_integration: None,
@@ -17,8 +17,10 @@ pub fn test_editor_log() {
     assert_eq!(app.logs[0], "Test log message");
 }
 
-pub fn test_drag_operation() {
-    let _drag_op = crate::ui::DragOperation::None;
-    let _drag_op2 = crate::ui::DragOperation::Move;
-    let _drag_op3 = crate::ui::DragOperation::Resize;
+pub fn test_play_session() {
+    let entities = vec![
+        Entity::new("entity1".to_string(), (100.0, 100.0)),
+    ];
+    let session = crate::play_session::PlaySession::new(&entities);
+    assert!(!session.is_active());
 }

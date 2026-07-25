@@ -7,14 +7,6 @@ use crate::input_capture::UserInput;
 use eframe::egui;
 use eframe::App;
 
-/// DragOperation para UI
-#[derive(Debug, Clone, PartialEq)]
-pub enum DragOperation {
-    None,
-    Move,
-    Resize,
-}
-
 /// App principal del editor
 pub struct ForgeEditorApp {
     pub logs: Vec<String>,
@@ -95,8 +87,12 @@ impl App for ForgeEditorApp {
             
             ui.separator();
             
-            // Contenido principal
-            ui.label("Forge Editor - Content Area");
+            // Viewport de renderizado
+            ui.label("Viewport - Renderizado en tiempo real");
+            ui.label(format!("Entidades: {}", self.get_entities().map(|e| e.len()).unwrap_or(0)));
+            ui.label(format!("Estado: {}", if self.is_playing { "▶ Playing" } else { "⏹ Stopped" }));
+            
+            ui.separator();
             
             // Log
             egui::ScrollArea::vertical().show(ui, |ui| {
