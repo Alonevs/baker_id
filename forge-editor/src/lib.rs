@@ -48,6 +48,14 @@ pub mod property_editor_ui;
 pub mod property_panel;
 pub mod script_executor;
 pub mod script_optimizer;
+pub mod play_session;
+pub mod snapshot_manager;
+pub mod input_capture;
+
+// Re-exportar tipos para uso externo
+pub use play_session::{Entity, EntitySnapshot, SceneSnapshot, Vec2, PlaySession};
+pub use snapshot_manager::SnapshotManager;
+pub use input_capture::{InputCapture, KeyCode, MouseState, UserInput};
 pub mod script_optimizer_panel;
 pub mod script_serialization;
 pub mod script_viewer;

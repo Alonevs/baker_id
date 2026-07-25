@@ -76,7 +76,7 @@
 **Siguiente agente:**
 1. Leer PROGRESO2.md para contexto completo
 2. Verificar `cargo test --workspace`
-3. Continuar con `doc/tools/36_PLAY_MODE.md` (implementar PlaySession, SnapshotManager, InputCapture)
+3. Integrar Play Mode en Toolbar (botón Play/Stop)
 
 ---
 
@@ -107,10 +107,15 @@
 - ✅ **Tests**: 24/24 PASSING (100%)
 - ✅ **Timeouts**: 0/24 RESUELTOS
 - ✅ **Warnings**: 0 en código del proyecto (solo quick-xml v0.20.0 externo)
-- ✅ **Lineas de código**: ~38,578
+- ✅ **Líneas de código**: ~38,578
 - ✅ **Anti-stubs**: 0 encontrados
 
 **Progreso documentado:**
 - ✅ FASE 9 Physics 2D (6/6 tests)
 - ✅ FASE 11 Audio (18/18 tests)
 - ✅ `doc/tools/36_PLAY_MODE.md` (161 líneas documentadas)
+- ✅ **Play Mode Implementado**:
+  - `play_session.rs` (131 líneas) - PlaySession, Entity, Vec2
+  - `snapshot_manager.rs` (80 líneas) - SnapshotManager con historial
+  - `input_capture.rs` (210 líneas) - InputCapture, KeyCode, MouseState
+  - Re-exportados en `lib.rs`
