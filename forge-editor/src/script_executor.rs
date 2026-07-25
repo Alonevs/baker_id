@@ -531,10 +531,8 @@ impl ScriptExecutor {
                 Ok(ValueType::Bool(!self.to_bool(&operand)))
             }
             crate::compile_system::UnaryOperator::BitwiseNot => {
-                match operand {
-                    ValueType::Int(i) => Ok(ValueType::Int(!i)),
-                    _ => Err(CompileError::type_mismatch(1, 1, "Operador ~ inválido".to_string())),
-                }
+                // No implementado en el parser actual
+                Err(CompileError::semantic_error(1, 1, "Operador de negación de bits no soportado".to_string()))
             }
         }
     }
@@ -653,8 +651,7 @@ impl ScriptExecutor {
 
     /// Ejecuta un script desde código fuente
     pub fn execute_from_source(&mut self, _source: &str) -> Result<ValueType, CompileError> {
-        // Aquí se integraría con el compilador para obtener el AST
-        // Por ahora, ejecutamos un ejemplo básico
+        // Simulación de ejecución
         let start_time = std::time::Instant::now();
         let result = self.execute_node(&ASTNode::Block {
             statements: vec![

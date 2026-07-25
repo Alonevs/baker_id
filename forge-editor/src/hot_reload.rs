@@ -32,7 +32,6 @@ pub struct HotReloadManager {
     pub pending_changes: Vec<PendingChange>,
     pub is_hot_reload_enabled: bool,
     pub file_watcher: Option<FileWatcher>,
-    pub change_callback: Option<Box<dyn Fn(String, ChangeType, Option<String>) + Send + Sync>>,
 }
 
 pub struct FileWatcher {
@@ -56,7 +55,6 @@ impl HotReloadManager {
             pending_changes: Vec::new(),
             is_hot_reload_enabled: true,
             file_watcher: None,
-            change_callback: None,
         }
     }
     
@@ -65,19 +63,6 @@ impl HotReloadManager {
             self.file_watcher = Some(FileWatcher::new(dir, 100));
         }
         self
-    }
-    
-    pub fn set_change_callback<F>(&mut self, callback: F) 
-    where 
-        F: Fn(String, ChangeType, Option<String>) + Send + Sync + 'static
-    {
-        self.change_callback = Some(Box::new(callback));
-    }
-    
-    pub fn notify_change(&self, file_path: String, change_type: ChangeType) {
-        if let Some(ref callback) = self.change_callback {
-            callback(file_path, change_type, None);
-        }
     }
     
     pub fn enable(&mut self) {
@@ -169,7 +154,6 @@ impl Clone for HotReloadManager {
             pending_changes: Vec::new(),
             is_hot_reload_enabled: self.is_hot_reload_enabled,
             file_watcher: None,
-            change_callback: None,
         }
     }
 }
