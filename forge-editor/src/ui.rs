@@ -17,6 +17,7 @@ pub struct ForgeEditorApp {
     pub user_input: UserInput,
     pub is_playing: bool,
     pub hot_reload_panel: HotReloadPanel,
+    pub hot_reload_manager: crate::hot_reload::HotReloadManager,
 }
 
 impl Default for ForgeEditorApp {
@@ -29,6 +30,7 @@ impl Default for ForgeEditorApp {
             user_input: UserInput::default(),
             is_playing: false,
             hot_reload_panel: HotReloadPanel::new(),
+            hot_reload_manager: crate::hot_reload::HotReloadManager::new(),
         }
     }
 }
@@ -36,18 +38,6 @@ impl Default for ForgeEditorApp {
 impl ForgeEditorApp {
     pub fn new(_cc: &eframe::CreationContext) -> Self {
         Self::default()
-    }
-    
-    pub fn new_with_hot_reload(_cc: &eframe::CreationContext) -> Self {
-        Self {
-            logs: Vec::new(),
-            timeline_integration: None,
-            play_session: None,
-            snapshot_manager: SnapshotManager::new(),
-            user_input: UserInput::default(),
-            is_playing: false,
-            hot_reload_panel: HotReloadPanel::new(),
-        }
     }
     
     pub fn log(&mut self, message: String) {
@@ -76,6 +66,9 @@ impl ForgeEditorApp {
         if let Some(ref mut session) = self.play_session {
             session.update(delta, &self.user_input);
         }
+        
+        // Actualizar hot reload con file watcher
+        self.hot_reload_manager.update(delta);
     }
 }
 
@@ -119,7 +112,7 @@ impl App for ForgeEditorApp {
             ui.separator();
             
             // Hot Reload Panel
-            self.hot_reload_panel.ui(ctx);
+            self.hot_reload_panel.ui(ctx, &mut self.hot_reload_manager);
         });
     }
 }
