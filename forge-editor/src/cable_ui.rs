@@ -74,28 +74,6 @@ impl CableSystemUI {
         }
     }
 
-    /// Dibuja un nodo
-    fn draw_node(&self, ui: &mut egui::Ui, bounds: egui::Rect, node: &EventNode) {
-        let pos = self.get_node_position(bounds, &node.id).unwrap();
-        let size = egui::Vec2::new(80.0, 40.0);
-
-        let response = ui.allocate_rect(
-            egui::Rect::from_min_size(pos, size),
-            egui::Sense::click()
-        );
-
-        if response.hovered() {
-            ui.painter().rect_filled(
-                response.rect.shrink(2.0),
-                egui::Rounding::same(5),
-                egui::Color32::from_rgb(240, 240, 240),
-            );
-        }
-
-        ui.add_space(5.0);
-        ui.label(&node.id);
-    }
-
     /// Obtiene la posición de un nodo
     fn get_node_position(&self, _bounds: egui::Rect, node_id: &str) -> Option<egui::Pos2> {
         if let Some(node) = self.manager.get_node(node_id) {
@@ -164,13 +142,13 @@ impl CableSystemUI {
         if response.hovered() {
             ui.painter().rect_filled(
                 response.rect.shrink(2.0),
-                egui::Rounding::same(5),
+                egui::CornerRadius::same(5),
                 egui::Color32::from_rgb(200, 220, 255),
             );
         } else {
             ui.painter().rect_filled(
                 response.rect.shrink(2.0),
-                egui::Rounding::same(5),
+                egui::CornerRadius::same(5),
                 egui::Color32::from_rgb(240, 240, 240),
             );
         }

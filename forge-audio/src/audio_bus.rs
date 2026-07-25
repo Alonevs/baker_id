@@ -130,21 +130,6 @@ impl AudioBusSystem {
         }
     }
 
-    fn create_master_bus() -> String {
-        let id = "master_bus".to_string();
-        let bus = AudioBus::new(
-            id.clone(),
-            "Master Bus".to_string(),
-            BusType::Master,
-        );
-        let mut temp = Self {
-            buses: HashMap::new(),
-            master_bus: String::new(),
-        };
-        AudioBusSystem::add_internal_bus(&mut temp, id.clone(), bus);
-        id
-    }
-
     fn add_internal_bus(system: &mut Self, id: String, bus: AudioBus) {
         system.buses.insert(id, bus);
     }

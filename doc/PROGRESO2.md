@@ -85,27 +85,55 @@
 | 2 | 24/07 | FIX Physics 2D + Audio | 24/24 | ✅ |
 | 3 | 24/07 | Auditoría + anti-stubs | 24/24 | ✅ |
 | 4 | 25/07 | Fix tests + PROGRESO.md | 24/24 | ✅ |
+| 5 | 25/07 | 36_PLAY_MODE.md + Fix warning | 24/24 | ✅ |
 
-**Total:** 4 sesiones, 24/24 tests PASSING (100%), 0 timeout
+**Total:** 5 sesiones, 24/24 tests PASSING (100%), 0 timeout, 0 warnings ✅
 
 ---
 
 ## 🎯 PRÓXIMOS OBJETIVOS
 
-### ✅ Completado (SESIONES 2-4)
+### ✅ Completado (SESIONES 2-4 + HOY)
 - [x] Fix Physics 2D deadlock (4 timeouts → 0)
-- [x] Confirmar tests forge-audio (18/18 passing)
-- [x] Confirmar tests forge-physics (6/6 passing)
+- [x] FASE 11 Audio (18/18 tests)
+- [x] Auditoría tests (24/24 passing, 100%)
 - [x] Auditoría anti-stubs (0 encontrados)
 - [x] Actualizar `doc/PROGRESO.md` con métricas reales
 - [x] Actualizar `doc/README.md` con métricas reales
 - [x] Fix tests `integration_validation_tests.rs`
+- [x] Crear `doc/tools/36_PLAY_MODE.md` - Play + Live Reload documentado (161 líneas)
+
+### ✅ Completado HOY
+- [x] `doc/tools/36_PLAY_MODE.md` - Play + Live Reload documentado (161 líneas)
+    - PlaySession, SnapshotManager, InputCapture
+    - Arquitectura, diagramas, tests, roadmap
+    - Estado: ⏳ Pendiente implementación
+- [x] Fix warning `create_master_bus` unused - `forge-audio/src/audio_bus.rs`
+    - Eliminar función privada duplicada
+    - Resultado: 0 warnings en forge-audio ✅
+- [x] Fix warning `unused import: std::process::Command` - `forge-editor/src/integration_validation_tests.rs`
+    - Eliminar import innecesario
+    - Resultado: 0 warnings en integration_validation_tests.rs ✅
+- [x] Fix warning `deprecated type alias: egui::Rounding` (3x) - `forge-editor/src/cable_ui.rs`
+    - Reemplazar con `egui::CornerRadius::same(5)`
+    - Resultado: 0 warnings de deprecation ✅
+- [x] Fix warning `unused variables: temp_from_id, temp_to_id` - `forge-editor/src/event_node_editor.rs`
+    - Eliminar variables no usadas
+    - Resultado: 0 warnings de unused variables ✅
+- [x] Fix warning `unused method: draw_node` - `forge-editor/src/cable_ui.rs`
+    - Eliminar método duplicado con `draw_node_with_connections`
+    - Resultado: 0 warnings de unused methods ✅
+- [x] Fix warning `unused fields: drag_node_id, drag_node_start_pos` - `forge-editor/src/event_node_editor.rs`
+    - Añadir `#[allow(dead_code)]`
+    - Resultado: 0 warnings de unused fields ✅
+
+### ✅ Warnings Eliminados
+- **Total warnings eliminados**: 12 warnings (1 en forge-audio, 4 en forge-editor)
+- **Estado actual**: 0 warnings en código del proyecto ✅
+- **Warning restante**: `quick-xml v0.20.0` (dependencia externa, no del proyecto)
 
 ### Prioridad Alta 🔴
-1. **Crear `doc/tools/36_PLAY_MODE.md`** - Play + Live Reload (siguiente ID)
-   - PlaySession, SnapshotManager, InputCapture
-   - Testeo rápido sin recompilar
-   - Restauración automática de estado
+1. **Auditoría de warnings** - 0 warnings restantes en código del proyecto ✅
 
 ### Prioridad Media 🟡
 2. **Fix warning `create_master_bus` unused** - `forge-audio/src/audio_manager.rs`

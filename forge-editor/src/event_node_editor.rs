@@ -21,7 +21,9 @@ pub struct EventNodeEditor {
     #[allow(dead_code)]
     execution_count: u32,
     drag_connection: Option<(String, egui::Pos2)>,
+    #[allow(dead_code)]
     drag_node_id: Option<String>,
+    #[allow(dead_code)]
     drag_node_start_pos: Option<egui::Pos2>,
     connection_error: Option<String>,
 }
@@ -402,12 +404,6 @@ impl EventNodeEditor {
         
         // Validar conexión antes de crearla
         let mut connection_valid = false;
-        let _connection_from_id: Option<String> = None;
-        let _connection_to_id: Option<String> = None;
-        let mut temp_from_id: Option<String> = None;
-        let mut temp_to_id: Option<String> = None;
-        
-        // Guardar end_connection antes de usarlo
         let end_connection_opt = end_connection.clone();
         
         // Validar fuera del bucle para evitar conflictos de préstamo
@@ -415,8 +411,6 @@ impl EventNodeEditor {
             if mouse_released {
                 if let Some((from_id, _)) = self.drag_connection.take() {
                     if let Some(to_id) = end_connection_opt.clone() {
-                        temp_from_id = Some(from_id.clone());
-                        temp_to_id = Some(to_id.clone());
                         // Validación 1: No conectar un nodo consigo mismo
                         if from_id != to_id {
                             // Validación 2: Verificar que el nodo destino existe
