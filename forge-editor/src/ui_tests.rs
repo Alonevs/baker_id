@@ -7,6 +7,10 @@ pub fn test_editor_log() {
     let mut app = ForgeEditorApp {
         logs: Vec::new(),
         timeline_integration: None,
+        play_session: None,
+        snapshot_manager: crate::snapshot_manager::SnapshotManager::new(),
+        user_input: crate::input_capture::UserInput::default(),
+        is_playing: false,
     };
     app.log("Test log message".to_string());
     assert_eq!(app.logs.len(), 1);
@@ -18,4 +22,3 @@ pub fn test_drag_operation() {
     let _drag_op2 = crate::ui::DragOperation::Move;
     let _drag_op3 = crate::ui::DragOperation::Resize;
 }
-
