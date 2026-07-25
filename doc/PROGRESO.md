@@ -60,6 +60,22 @@
 
 ---
 
-**Siguiente agente:** Continuar con `doc/tools/36_PLAY_MODE.md` y fix warnings
+---
+
+## ⚠️ NOTA IMPORTANTE PARA AGENTES
+
+**Este archivo (PROGRESO.md) es el HANDOFF LOG PRINCIPAL corto (≤50 líneas).**
+
+**La documentación detallada y el historial completo se encuentra en:**
+- [`doc/PROGRESO2.md`](file:///c:/Users/xico0/Desktop/Xico/doc/PROGRESO2.md) ← **CONTINUACIÓN DETALLADA**
+
+**Regla:** Si PROGRESO.md supera 1500-2000 líneas, dividir en:
+- `PROGRESO.md` - Handoff log corto (últimas sesiones, ≤50 líneas)
+- `PROGRESO2.md`, `PROGRESO3.md`, etc. - Historial detallado y documentación completa
+
+**Siguiente agente:**
+1. Leer PROGRESO2.md para contexto completo
+2. Verificar `cargo test --workspace`
+3. Continuar con `doc/tools/36_PLAY_MODE.md` y fix warnings
 | 2 | opencode | 24/07/2026 | FIX Physics 2D deadlock (4→0 timeouts), FASE 11 Audio (18/18), refactorizar lib.rs (2092→200), migrar timeline a components/, physics/, dialogue/, event_system/, render/ | 24/24 |
 | 3 | opencode | 24/07/2026 | Auditoría tests (24/24 passing), anti-stubs (0 encontrados), cargo fix (12 warnings), actualizar README.md con métricas reales | 24/24 |
