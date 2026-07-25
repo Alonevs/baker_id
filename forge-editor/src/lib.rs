@@ -51,6 +51,7 @@ pub mod script_optimizer;
 pub mod play_session;
 pub mod snapshot_manager;
 pub mod input_capture;
+pub mod timeline_integration_tests;
 
 // Re-exportar tipos para uso externo
 pub use play_session::{Entity, EntitySnapshot, SceneSnapshot, Vec2, PlaySession};

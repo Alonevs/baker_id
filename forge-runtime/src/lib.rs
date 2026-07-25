@@ -9,6 +9,7 @@ pub mod physics;
 pub mod audio;
 pub mod timeline;
 pub mod timeline_system;
+pub mod timeline_integration_tests;
 pub mod event_system;
 pub mod dialogue;
 pub mod play_mode;

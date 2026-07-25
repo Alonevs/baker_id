@@ -46,32 +46,32 @@ impl TimelineIntegration {
     pub fn stop_playback(&mut self) {
         self.editor_state.is_playing = false;
         self.timeline_manager.set_playing(false);
-        self.timeline_manager.manager.reset();
+        self.timeline_manager.reset();
     }
     
     pub fn update(&mut self, dt: f32) {
         self.editor_state.current_frame += 1;
         self.timeline_manager.update(dt);
     }
-    
+
     pub fn set_frame(&mut self, frame: u32) {
         self.editor_state.current_frame = frame;
-        self.timeline_manager.manager.set_frame(frame);
+        self.timeline_manager.set_frame(frame);
     }
     
     pub fn next_frame(&mut self) {
         self.editor_state.current_frame += 1;
-        self.timeline_manager.manager.next_frame();
+        self.timeline_manager.next_frame();
     }
     
     pub fn prev_frame(&mut self) {
         self.editor_state.current_frame = self.editor_state.current_frame.saturating_sub(1);
-        self.timeline_manager.manager.prev_frame();
+        self.timeline_manager.prev_frame();
     }
     
     pub fn set_playback_speed(&mut self, speed: f32) {
         self.editor_state.playback_speed = speed;
-        self.timeline_manager.manager.playback_speed = speed;
+        self.timeline_manager.set_playback_speed(speed);
     }
     
     pub fn is_playing(&self) -> bool {

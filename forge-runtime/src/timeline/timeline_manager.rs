@@ -14,6 +14,17 @@ pub struct AnimationComponent {
     pub current_frame: u32,
 }
 
+impl AnimationComponent {
+    pub fn new(name: String, duration: f32, loop_count: u32) -> Self {
+        Self {
+            name,
+            duration,
+            loop_count,
+            current_frame: 0,
+        }
+    }
+}
+
 /// Manager de Timeline que conecta el editor con el runtime
 #[derive(Debug, Clone)]
 pub struct TimelineManager {

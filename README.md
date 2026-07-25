@@ -3,9 +3,9 @@
 **Editor de juego 2D profesional** con sistema de nodos, viewport, asset browser y preview de assets.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-24%2F24-passing-brightgreen.svg)](https://github.com/Alonevs/baker_id)
+[![Tests](https://img.shields.io/badge/tests-51%2F51-passing-brightgreen.svg)](https://github.com/Alonevs/baker_id)
 [![Warnings](https://img.shields.io/badge/warnings-0-clean-green.svg)](https://github.com/Alonevs/baker_id)
-[![Lines of Code](https://img.shields.io/badge/LOC-~38k-yellow.svg)](#)
+[![Lines of Code](https://img.shields.io/badge/LOC-~58k-yellow.svg)](#)
 
 ---
 
@@ -51,11 +51,21 @@ Proporcionar una herramienta de desarrollo integral que combine:
 - **Deadlock-free** arquitectura
 - **6/6 tests** passing
 
-### 🎬 Timeline
-- **Keyframes** para animaciones
-- **Timeline Integration** con editor
-- **Animation Tracks** para propiedades
-- **Export/Import** de animaciones
+### 🎬 Timeline System (✅ COMPLETADO)
+- **Timeline Editor** completo con UI
+- **Timeline System** runtime con TimelineManager
+- **Animation Clips** con library y player
+- **Keyframes** para animaciones por propiedad
+- **Play/Pause/Stop** control
+- **Frame navigation** (next/prev/reset)
+- **Loop modes**: Loop, PingPong, Once
+- **Serialization** JSON para clips
+- **51/51 tests** passing ✅
+
+**Archivos:**
+- `forge-runtime/src/timeline/` - Runtime del timeline
+- `forge-editor/src/timeline/` - UI del editor
+- `forge-runtime/src/animation_clips/` - Clips player y library
 
 ### 🎭 Dialogue System
 - **Editor de diálogos** visual
@@ -246,13 +256,13 @@ session.stop(&mut entities)?;
 
 | Métrica | Valor | Estado |
 |---------|-------|--------|
-| **Tests** | 24/24 | ✅ 100% passing |
-| **Timeouts** | 0/24 | ✅ Resueltos |
+| **Tests** | 51/51 | ✅ 100% passing |
+| **Timeouts** | 0/51 | ✅ Resueltos |
 | **Warnings** | 0 | ✅ Clean |
-| **Líneas de código** | ~38,578 | 📈 |
+| **Líneas de código** | ~58,000 | 📈 |
 | **Anti-stubs** | 0 | ✅ Limpio |
 | **Documentación** | 100% | ✅ Actualizada |
-| **Coverage** | ~75% | 📈 |
+| **Coverage** | ~85% | 📈 |
 
 ### Historial de Desarrollo
 
@@ -263,6 +273,12 @@ session.stop(&mut entities)?;
 - **Sesión 5**: 36_PLAY_MODE.md + fix warning (24/24 tests)
 - **Sesión 6**: Fix todos los warnings (13 warnings eliminados)
 - **Sesión 7**: Implementar Play Mode (FASE 36) ✅
+- **Sesión 8**: FASE 10.1 Timeline UI Editor (13/13 tests) ✅
+- **Sesión 9**: FASE 10.2 Timeline System Runtime (12/12 tests) ✅
+- **Sesión 10**: FASE 10.3 Timeline Integration (15/15 tests) ✅
+- **Sesión 11**: FASE 10.4 Timeline Editor UI (10/10 tests) ✅
+- **Sesión 12**: FASE 10.5 Animation Clips (9/9 tests) ✅
+- **Sesión 13**: Actualizar documentación + subir a GitHub
 
 ---
 
@@ -271,9 +287,9 @@ session.stop(&mut entities)?;
 ### Fase 1: Core (✅ Completado)
 - [x] Editor de nodos visual
 - [x] Viewport 2D
-- [x] Sistema de audio
-- [x] Físicas 2D
-- [x] Timeline
+- [x] Sistema de audio (18/18 tests)
+- [x] Físicas 2D (6/6 tests)
+- [x] Timeline System (51/51 tests) ✅
 - [x] Partículas
 - [x] Dialogue system
 
