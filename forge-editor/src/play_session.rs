@@ -216,7 +216,7 @@ pub struct PlaySession {
     pub last_delta: f32,
     pub last_change_time: Option<Instant>,
     pub change_count: u32,
-    pub event_integration: Option<crate::event_play_integration::EventPlayIntegration>,
+    pub event_integration: Option<Box<crate::event_play_integration::EventPlayIntegration>>,
 }
 
 impl PlaySession {
@@ -411,7 +411,7 @@ impl PlaySession {
         let integration = EventPlayIntegration::new();
         integration.init_with_play_session(self.clone());
         
-        self.event_integration = Some(integration);
+        self.event_integration = Some(Box::new(integration));
         println!("[PLAY SESSION] Event integration initialized with {} nodes", 
             event_manager.nodes.len());
     }

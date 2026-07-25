@@ -17,7 +17,7 @@ pub struct EventPlayIntegration {
     /// Manager de nodos de eventos
     pub event_manager: EventNodeManager,
     /// Sesión de play
-    pub play_session: Option<PlaySession>,
+    pub play_session: Option<Box<PlaySession>>,
     /// Entidades activas en play
     pub active_entities: Vec<Entity>,
     /// Variables compartidas
@@ -55,7 +55,7 @@ impl EventPlayIntegration {
 
     /// Inicializa la integración con play session
     pub fn init_with_play_session(&mut self, play_session: PlaySession) {
-        self.play_session = Some(play_session);
+        self.play_session = Some(Box::new(play_session));
         self.is_active = true;
         self.event_manager.init_runtime();
         println!("[EVENT-PLAY INTEGRATION] Initialized with play session");
