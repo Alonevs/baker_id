@@ -1,6 +1,7 @@
 ﻿//! AnimationComponent con interpolación de keyframes
 
 use std::collections::HashMap;
+use std::str::FromStr;
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -8,6 +9,19 @@ pub enum LoopMode {
     Loop,
     PingPong,
     Once,
+}
+
+impl FromStr for LoopMode {
+    type Err = String;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "loop" => Ok(LoopMode::Loop),
+            "pingpong" | "ping_pong" => Ok(LoopMode::PingPong),
+            "once" => Ok(LoopMode::Once),
+            _ => Err(format!("Invalid loop mode: {}", s)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
