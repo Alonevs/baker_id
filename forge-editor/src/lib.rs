@@ -32,6 +32,8 @@ pub mod event_nodes;
 pub mod event_nodes_ui;
 pub mod event_node_editor;
 pub mod event_node_manager;
+pub mod event_play_integration;
+pub mod event_play_integration_example;
 pub mod event_forge;
 pub mod export_import_panel;
 pub mod export_manager;
@@ -59,6 +61,7 @@ pub mod explorer_context_menu;
 
 pub use explorer_panel_integration::ExplorerPanelIntegration;
 pub use explorer_context_menu::{ExplorerContextMenu, ExplorerContextAction};
+pub use event_play_integration::EventPlayIntegration;
 pub mod property_panel;
 pub mod script_executor;
 pub mod script_optimizer;

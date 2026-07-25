@@ -216,12 +216,12 @@ pub struct PlaySession {
     pub last_delta: f32,
     pub last_change_time: Option<Instant>,
     pub change_count: u32,
-    pub event_graph: Option<crate::event_node_manager::EventNodeManager>,
+    pub event_integration: Option<crate::event_play_integration::EventPlayIntegration>,
 }
 
 impl PlaySession {
     /// Crea una nueva sesión de Play mejorada
-    pub fn new(entities: &[Entity], event_graph: Option<crate::event_node_manager::EventNodeManager>) -> Self {
+    pub fn new(entities: &[Entity], event_integration: Option<crate::event_play_integration::EventPlayIntegration>) -> Self {
         Self {
             entities: entities.to_vec(),
             snapshot: SceneSnapshot::from_entities(&entities),
@@ -233,7 +233,7 @@ impl PlaySession {
             last_delta: 0.0,
             last_change_time: None,
             change_count: 0,
-            event_graph,
+            event_integration,
         }
     }
     
@@ -251,6 +251,11 @@ impl PlaySession {
         self.last_change_time = Some(Instant::now());
         self.change_count = 0;
         
+        // Inicializar integración de eventos si existe
+        if let Some(ref mut integration) = self.event_integration {
+            integration.start();
+        }
+        
         println!("[PLAY SESSION] Started with {} entities", entities.len());
         
         Ok(())
@@ -265,17 +270,12 @@ impl PlaySession {
         self.is_running = false;
         self.last_delta = 0.0;
         
+        // Detener integración de eventos si existe
+        if let Some(ref mut integration) = self.event_integration {
+            integration.stop();
+        }
+        
         println!("[PLAY SESSION] Stopped, changes: {}", self.change_count);
-        
-        Ok(())
-    }
-        
-        // Desactivar físicas
-        self.physics_enabled = false;
-        
-        // Detener sesión
-        self.is_running = false;
-        self.last_delta = 0.0;
         
         Ok(())
     }
@@ -289,9 +289,9 @@ impl PlaySession {
         self.last_delta = delta;
         self.simulate_physics(delta, input);
         
-        // Ejecutar eventos del grafo si existe
-        if let Some(ref mut graph) = self.event_graph {
-            graph.execute_all();
+        // Ejecutar eventos de la integración si existe
+        if let Some(ref mut integration) = self.event_integration {
+            integration.update(delta);
         }
         
         // Incrementar contador de cambios
@@ -403,6 +403,18 @@ impl PlaySession {
     pub fn get_delta(&self) -> f32 {
         self.last_delta
     }
+
+    /// Inicializa integración de eventos con EventNodeManager
+    pub fn init_event_integration(&mut self, event_manager: crate::event_node_manager::EventNodeManager) {
+        use crate::event_play_integration::EventPlayIntegration;
+        
+        let integration = EventPlayIntegration::new();
+        integration.init_with_play_session(self.clone());
+        
+        self.event_integration = Some(integration);
+        println!("[PLAY SESSION] Event integration initialized with {} nodes", 
+            event_manager.nodes.len());
+    }
     
     /// Verifica si la sesión está activa
     pub fn is_active(&self) -> bool {
@@ -415,6 +427,9 @@ impl Default for PlaySession {
         Self::new(&[])
     }
 }
+
+/// Alias para compatibilidad con código existente
+pub type EventGraph = crate::event_node_manager::EventNodeManager;
 
 #[cfg(test)]
 mod tests {
