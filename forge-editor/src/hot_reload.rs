@@ -99,4 +99,8 @@ impl HotReloadManager {
     pub fn get_panel_mut(&mut self) -> &mut crate::hot_reload_panel::HotReloadPanel {
         &mut self.hot_reload_panel
     }
+    
+    pub fn update(&mut self, _dt: f32) {
+        // Stub update method
+    }
 }
