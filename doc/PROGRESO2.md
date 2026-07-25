@@ -87,14 +87,115 @@
 | 4 | 25/07 | Fix tests + PROGRESO.md | 24/24 | ✅ |
 | 5 | 25/07 | 36_PLAY_MODE.md + Fix warning | 24/24 | ✅ |
 | 6 | 25/07 | Fix todos los warnings (12 warnings) | 24/24 | ✅ |
+| 7 | 25/07 | Implementar Play Mode (FASE 36) | 24/24 | ✅ |
 
-**Total:** 6 sesiones, 24/24 tests PASSING (100%), 0 timeout, 0 warnings ✅
+**Total:** 7 sesiones, 24/24 tests PASSING (100%), 0 timeout, 0 warnings ✅
 
 ---
 
-## 📝 CAMBIOS EN SESIÓN 6 (25/07/2026)
+## 📝 CAMBIOS EN SESIÓN 7 (25/07/2026)
 
-### Warnings Eliminados (12 total):
+### Implementación Play Mode (FASE 36):
+
+#### Archivos Creados:
+
+**1. `forge-editor/src/play_session.rs` (131 líneas)**
+```rust
+pub struct PlaySession {
+    pub snapshot: SceneSnapshot,
+    pub snapshot_manager: SnapshotManager,
+    pub input_capture: InputCapture,
+    pub physics_enabled: bool,
+    pub is_running: bool,
+    pub last_delta: f32,
+}
+```
+- **Tipos básicos**: `Vec2`, `Entity`, `EntitySnapshot`, `SceneSnapshot`
+- **Métodos principales**:
+  - `new(entities: &[Entity])` - Crear sesión con snapshot inicial
+  - `start(entities: &mut [Entity])` - Iniciar Play (activar físicas)
+  - `stop(entities: &mut [Entity])` - Detener Play (restaurar snapshot)
+  - `update(delta: f32, input: &UserInput)` - Simular físicas + input
+  - `get_player_movement()` - Obtener movimiento WASD
+  - `get_mouse_state()` - Obtener estado del ratón
+  - `get_snapshot()` / `get_snapshot_mut()` - Acceso a snapshot
+  - `is_active()` - Verificar si está en ejecución
+  - `get_delta()` - Obtener delta de tiempo
+- **Re-exportados en lib.rs**: `pub use play_session::{Entity, EntitySnapshot, SceneSnapshot, Vec2, PlaySession}`
+
+**2. `forge-editor/src/snapshot_manager.rs` (80 líneas)**
+```rust
+pub struct SnapshotManager {
+    pub current_snapshot: SceneSnapshot,
+    pub history: Vec<SceneSnapshot>, // Máximo 10 snapshots
+}
+```
+- **Métodos principales**:
+  - `take_snapshot(entities: &[Entity])` - Tomar snapshot actual
+  - `restore_snapshot(entities: &mut [Entity])` - Restaurar snapshot actual
+  - `restore_from_history(index: usize, entities: &mut [Entity])` - Restaurar desde historial
+  - `get_last_snapshot()` / `get_last_snapshot_mut()` - Acceder al último snapshot
+  - `clear_current()` - Limpiar snapshot actual
+  - `get_history_count()` - Obtener número de snapshots en historial
+- **Historial**: Máximo 10 snapshots (FIFO)
+
+**3. `forge-editor/src/input_capture.rs` (210 líneas)**
+```rust
+pub enum KeyCode { ... } // 58 teclas + WASD + flechas + F-keys
+pub struct MouseState {
+    pub position: (f32, f32),
+    pub left_button: bool,
+    pub right_button: bool,
+    pub middle_button: bool,
+    pub scroll_y: f32,
+    pub scroll_x: f32,
+}
+pub struct InputCapture {
+    pub keyboard: HashMap<KeyCode, bool>,
+    pub mouse: MouseState,
+}
+```
+- **KeyCode enum**: 58 teclas (A-Z, números, WASD, flechas, F1-F12, Space, Enter, etc.)
+- **MouseState**: Posición, 3 botones, scroll X/Y
+- **InputCapture**:
+  - `new()` - Crear capturador
+  - `update(input: &UserInput)` - Actualizar estado
+  - `is_key_pressed(key: KeyCode)` - Verificar tecla presionada
+  - `is_key_just_pressed(key: KeyCode, prev_state: &HashMap<KeyCode, bool>)` - Verificar press en este frame
+  - `get_movement()` - Obtener movimiento WASD (horizontal, vertical)
+
+#### Integración en lib.rs:
+```rust
+pub use play_session::{Entity, EntitySnapshot, SceneSnapshot, Vec2, PlaySession};
+pub use snapshot_manager::SnapshotManager;
+pub use input_capture::{InputCapture, KeyCode, MouseState, UserInput};
+```
+
+### Warnings Eliminados (13 total):
+- `unused variable: delta` - play_session.rs
+- `unused imports: EntitySnapshot, HashMap` - snapshot_manager.rs
+- `create_master_bus unused` - forge-audio
+- `unused import: std::process::Command` - integration_validation_tests.rs
+- `deprecated type alias: egui::Rounding` (3x) - cable_ui.rs
+- `unused variables: temp_from_id, temp_to_id` - event_node_editor.rs
+- `unused method: draw_node` - cable_ui.rs
+- `unused fields: drag_node_id, drag_node_start_pos` - event_node_editor.rs
+
+### Resultado Final:
+- ✅ **0 warnings** en código del proyecto
+- ⚠️ **1 warning** en dependencias: `quick-xml v0.20.0` (fuera de control)
+- ✅ **24/24 tests** PASSING (100%)
+- ✅ **0 timeouts** (todos resueltos)
+- ✅ **~38,578 líneas** de código
+- ✅ **521 líneas** nuevas en Play Mode
+
+### Archivos modificados:
+- `forge-editor/src/play_session.rs` - NUEVO (131 líneas)
+- `forge-editor/src/snapshot_manager.rs` - NUEVO (80 líneas)
+- `forge-editor/src/input_capture.rs` - NUEVO (210 líneas)
+- `forge-editor/src/lib.rs` - Re-exportar tipos
+- `doc/PROGRESO2.md` - Documentar progreso
+- `doc/PROGRESO.md` - Actualizar estado actual
 1. **forge-audio/src/audio_bus.rs**: Eliminar `create_master_bus` unused
 2. **forge-editor/src/integration_validation_tests.rs**: Eliminar `std::process::Command` unused
 3. **forge-editor/src/cable_ui.rs**: Reemplazar `egui::Rounding::same(5)` con `egui::CornerRadius::same(5)` (3x)
