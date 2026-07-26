@@ -1,13 +1,14 @@
 use crate::physics::{PhysicsBody, CollisionShape, CollisionResult};
 use crate::math::Vector2;
 
-pub struct IsometricCollisionSystem {
+/// Sistema de colisiones genérico (funciona con cualquier tipo de cámara)
+pub struct CollisionSystem {
     bodies: Vec<PhysicsBody>,
 }
 
-impl IsometricCollisionSystem {
+impl CollisionSystem {
     pub fn new() -> Self {
-        IsometricCollisionSystem {
+        CollisionSystem {
             bodies: Vec::new(),
         }
     }
@@ -32,7 +33,7 @@ impl IsometricCollisionSystem {
     }
 
     fn check_collision(&self, body1: &PhysicsBody, body2: &PhysicsBody) -> CollisionResult {
-        let distance = self.calculate_isometric_distance(
+        let distance = self.calculate_distance(
             &body1.position, 
             &body2.position
         );
@@ -48,18 +49,12 @@ impl IsometricCollisionSystem {
         }
     }
 
-    fn calculate_isometric_distance(&self, pos1: &Vec2, pos2: &Vec2) -> f32 {
-        // Convert isometric coordinates to cartesian for collision detection
-        let iso_to_cartesian = |x: f32, y: f32| -> Vec2 {
-            Vec2::new(
-                (x - y) * 20.0,  // Scale factor for isometric projection
-                (x + y) * 10.0   // Vertical scale
-            )
-        };
+    /// Calcula distancia entre dos posiciones (funciona en cualquier sistema de coordenadas)
+    fn calculate_distance(&self, pos1: &Vec2, pos2: &Vec2) -> f32 {
+        // Distancia euclidiana estándar (funciona en cartesianas, isométricas, etc.)
+        let dx = pos1.x - pos2.x;
+        let dy = pos1.y - pos2.y;
         
-        let cart1 = iso_to_cartesian(pos1.x, pos1.y);
-        let cart2 = iso_to_cartesian(pos2.x, pos2.y);
-        
-        ((cart1.x - cart2.x).powi(2) + (cart1.y - cart2.y).powi(2)).sqrt()
+        (dx.powi(2) + dy.powi(2)).sqrt()
     }
 }

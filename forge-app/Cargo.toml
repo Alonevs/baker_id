@@ -1,0 +1,19 @@
+[package]
+name = "forge-app"
+version = "1.0.0"
+edition = "2021"
+description = "Forge SDK - Application Entry Point"
+
+[[bin]]
+name = "forge"
+path = "src/main.rs"
+
+[dependencies]
+egui = { workspace = true }
+eframe = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+forge-runtime = { path = "../forge-runtime" }
+forge-types = { path = "../forge-types" }
+forge-sprite-baker = { path = "../forge-sprite-baker" }
+forge-render = { path = "../forge-render" }

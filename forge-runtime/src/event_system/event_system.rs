@@ -1,6 +1,6 @@
 ﻿//! Sistema de Eventos y Nodos LÃ³gicos
 
-use crate::entities::Component;
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

@@ -1,0 +1,12 @@
+{
+    "name": "background_music",
+    "duration": 300.0,
+    "path": "audio/background.mp3",
+    "channels": 2,
+    "sample_rate": 44100,
+    "format": "stereo",
+    "loop": true,
+    "volume": 1.0,
+    "fade_in": 2.0,
+    "fade_out": 2.0
+}

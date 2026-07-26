@@ -137,7 +137,7 @@ impl ClipsPlayer {
         eprintln!("AFTER FRAME: frame={}, duration={}, mode={:?}", 
             self.state.current_frame, self.state.duration, self.state.loop_mode);
 
-        // Manejo de loop
+        // Manejo de loop mode
         if self.state.current_frame >= self.state.duration {
             eprintln!("LOOP HANDLING: frame={}, duration={}, mode={:?}", 
                 self.state.current_frame, self.state.duration, self.state.loop_mode);

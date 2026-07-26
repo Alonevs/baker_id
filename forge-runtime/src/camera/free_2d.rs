@@ -91,6 +91,7 @@ mod tests {
         let mut camera = Camera::new();
         camera.config.screen_width = 800.0;
         camera.config.screen_height = 600.0;
+        camera.position = Vec2::new(400.0, 300.0);
         
         let entity_pos = Vec2::new(400.0, 300.0);
         let distance = get_distance_from_center(entity_pos, &camera);

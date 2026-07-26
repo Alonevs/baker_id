@@ -19,7 +19,7 @@ pub fn get_angle_to_target(camera_pos: Vec2, target_pos: Vec2) -> f32 {
     let dx = target_pos.x - camera_pos.x;
     let dy = target_pos.y - camera_pos.y;
     
-    dx.atan2(dy)
+    dy.atan2(dx)
 }
 
 /// Obtiene la distancia entre dos posiciones

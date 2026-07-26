@@ -1,6 +1,6 @@
 use crate::sprite_manager::SpriteManager;
 use crate::animation_system::AnimationSystem;
-use crate::physics::isometric_collision::IsometricCollisionSystem;
+use crate::physics::collision::CollisionSystem;
 use crate::physics::physics::{PhysicsConfig, PhysicsBody};
 use crate::player_controller::PlayerController;
 use crate::level_manager::Level;
@@ -31,7 +31,7 @@ impl Default for CameraMode {
 pub struct GameEngine {
     sprite_manager: SpriteManager,
     animation_system: AnimationSystem,
-    physics_system: IsometricCollisionSystem,
+    physics_system: CollisionSystem,
     player_controller: PlayerController,
     level: Level,
     tile_system: TileSystem,
@@ -48,7 +48,7 @@ impl GameEngine {
         // Create systems
         let sprite_manager = SpriteManager::new();
         let animation_system = AnimationSystem::new(sprite_manager.clone());
-        let physics_system = IsometricCollisionSystem::new();
+        let physics_system = CollisionSystem::new();
         let level = Level::new("level1".to_string(), &LevelData::load("assets/levels/level1.json").unwrap());
         let tile_system = TileSystem::new(level.clone(), sprite_manager.clone());
         let camera = Camera::new();

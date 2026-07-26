@@ -1,0 +1,36 @@
+{
+    "name": "player_controller",
+    "language": "lua",
+    "code": [[
+-- Player controller script
+function init(player)
+    player.speed = 200
+    player.health = 100
+end
+
+function update(player, dt)
+    -- Handle input
+    if input.is_key_pressed("w") then
+        player.velocity.y = -player.speed
+    elseif input.is_key_pressed("s") then
+        player.velocity.y = player.speed
+    elseif input.is_key_pressed("a") then
+        player.velocity.x = -player.speed
+    elseif input.is_key_pressed("d") then
+        player.velocity.x = player.speed
+    else
+        player.velocity = Vec2::new(0, 0)
+    end
+end
+
+function on_death(player)
+    player:set_state("dead")
+end
+]],
+    "is_compiled": false,
+    "dependencies": ["input_system", "vec2_math"],
+    "metadata": {
+        "version": "1.0.0",
+        "author": "developer"
+    }
+}

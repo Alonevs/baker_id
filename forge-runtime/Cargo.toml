@@ -11,3 +11,4 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true }
 forge-types = { path = "../forge-types" }
+egui = { workspace = true }

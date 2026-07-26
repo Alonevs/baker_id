@@ -13,7 +13,6 @@ authors = ["Forge Team"]
 
 [workspace]
 members = [
-      "forge-editor",
       "forge-scene",
       "forge-physics",
       "forge-animation",
@@ -24,15 +23,18 @@ members = [
       "forge-runtime",
       "forge-audio",
       "forge-types",
+      "forge-sprite-baker",
+      "forge-render",
+      "forge-app",
 ]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 uuid = { version = "1.0", features = ["v4", "serde"] }
-eframe = { version = "0.33.3", default-features = false, features = ["wgpu"] }
+eframe = { version = "0.33.3", default-features = true }
 egui = "0.33.3"
-wgpu = { version = "27.0.1", features = ["dx12"] }
+wgpu = { version = "27.0.1" }
 thiserror = "2.0"
 notify = "6.1"
 toml = "0.8"

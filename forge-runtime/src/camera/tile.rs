@@ -126,20 +126,14 @@ mod tests {
         let tile_size = 20.0;
         
         // Punto en el centro del tile (debería estar dentro)
-        let center_pos = get_tile_vertices(tile_pos, tile_size, &camera)[0];
+        let vertices = get_tile_vertices(tile_pos.clone(), tile_size, &camera);
+        let center_pos = vertices[0].clone();
         let center_pos = Vec2::new(center_pos.x + 5.0, center_pos.y + 5.0);
         
         let inside = is_point_in_tile(center_pos, tile_pos, tile_size, &camera);
         
         assert!(inside, "Punto en el centro debería estar dentro del tile");
     }
-}
-
-/// Test
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::math::Vec2;
 
     #[test]
     fn test_isometric_projection() {
@@ -148,7 +142,7 @@ mod tests {
         camera.config.screen_height = 600.0;
         
         let world_pos = Vec2::new(0.0, 0.0);
-        let screen_pos = isometric_project(world_pos, &camera);
+        let screen_pos = project_isometric(world_pos, &camera);
         
         assert!(screen_pos.x > 0.0);
         assert!(screen_pos.y > 0.0);

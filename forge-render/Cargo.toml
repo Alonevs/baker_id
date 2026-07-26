@@ -1,0 +1,15 @@
+[package]
+name = "forge-render"
+version = "1.0.0"
+edition = "2021"
+description = "Render Backend - Renderizado 2D para el SDK"
+
+[dependencies]
+egui = { workspace = true }
+image = "0.24"
+png = "0.17"
+serde = { workspace = true }
+serde_json = { workspace = true }
+forge-runtime = { path = "../forge-runtime" }
+forge-types = { path = "../forge-types" }
+forge-sprite-baker = { path = "../forge-sprite-baker" }
