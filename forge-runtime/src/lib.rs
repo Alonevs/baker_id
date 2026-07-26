@@ -17,6 +17,8 @@ pub mod components;
 pub mod animation;
 pub mod animation_clips;
 pub mod viewport;
+pub mod camera;
+pub mod math;
 
 pub use physics::*;
 pub use timeline::timeline_manager::TimelineManager;
@@ -25,3 +27,5 @@ pub use dialogue::{Dialogue, DialogueSystem};
 pub use components::AnimationComponent;
 pub use forge_types::GameType;
 pub use viewport::viewport::{Viewport, ViewportConfig};
+pub use camera::*;
+pub use math::*;

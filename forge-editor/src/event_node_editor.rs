@@ -306,13 +306,13 @@ impl EventNodeEditor {
                 rect, 
                 6.0, 
                 Color32::from_rgb(30, 30, 30), 
-                egui::Stroke::new(stroke_width, stroke_color), 
-                egui::StrokeKind::Outside
+                egui::epaint::Stroke::new(stroke_width, stroke_color), 
+                egui::epaint::StrokeKind::Outside
             );
             
             // Encabezado pintado con el tipo de nodo
             let header_rect = egui::Rect::from_min_size(node.position, Vec2::new(150.0, 20.0));
-            painter.rect_filled(header_rect, egui::CornerRadius { nw: 6, ne: 6, sw: 0, se: 0 }, node_type_color);
+            painter.rect_filled(header_rect, egui::epaint::Rounding::same(6.0), node_type_color);
             
             // Texto del título (Tipo)
             let title_pos = node.position + Vec2::new(8.0, 4.0);
@@ -451,7 +451,7 @@ impl EventNodeEditor {
     fn draw_edge(&self, painter: &egui::Painter, from: egui::Pos2, to: egui::Pos2, color: Color32) {
         let control_point_1 = from + Vec2::new(50.0, 0.0);
         let control_point_2 = to - Vec2::new(50.0, 0.0);
-        let shape = egui::epaint::CubicBezierShape::from_points_stroke(
+        let shape = egui::shape::CubicBezierShape::from_points_stroke(
             [from, control_point_1, control_point_2, to],
             false,
             Color32::TRANSPARENT,

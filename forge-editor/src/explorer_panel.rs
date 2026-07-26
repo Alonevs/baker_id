@@ -405,7 +405,7 @@ impl ExplorerPanelWidget {
     /// Renderiza el Explorer Panel
     pub fn render(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("explorer_panel").show(ctx, |ui| {
-            ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Truncate);
+            ui.style_mut().wrap_mode = Some(egui::epaint::TextWrapMode::Truncate);
             
             // Título
             ui.heading("Explorer");

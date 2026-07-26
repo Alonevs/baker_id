@@ -276,7 +276,7 @@ impl EaseFunction {
             t
         } else {
             let c4 = (2.0 * std::f32::consts::PI) / 3.0;
-            -1.0 * 1.0f32.powf(10.0 * t) * std::f32::sin((t - 0.05) * c4)
+            -1.0 * 1.0f32.powf(10.0 * t) * f32::sin((t - 0.05) * c4)
         }
     }
     
@@ -285,7 +285,7 @@ impl EaseFunction {
             t
         } else {
             let c4 = (2.0 * std::f32::consts::PI) / 3.0;
-            1.0 * 1.0f32.powf(10.0 * (t - 1.0)) * std::f32::sin((t - 1.0) * c4) + 1.0
+            1.0 * 1.0f32.powf(10.0 * (t - 1.0)) * f32::sin((t - 1.0) * c4) + 1.0
         }
     }
     
