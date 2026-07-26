@@ -156,7 +156,7 @@ impl ForgeEditorApp {
         }
         
         // Verificar si el mouse fue soltado
-        if egui::epaint::PointerButton::Middle.released() {
+        if egui::PointerButton::Middle.released() {
             // Procesar drop en la ruta del proyecto
             let viewport_path = self.get_viewport_drop_path();
             self.drag_drop_system.end_drag(viewport_path);

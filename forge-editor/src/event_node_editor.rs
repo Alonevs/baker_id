@@ -451,11 +451,11 @@ impl EventNodeEditor {
     fn draw_edge(&self, painter: &egui::Painter, from: egui::Pos2, to: egui::Pos2, color: Color32) {
         let control_point_1 = from + Vec2::new(50.0, 0.0);
         let control_point_2 = to - Vec2::new(50.0, 0.0);
-        let shape = egui::shape::CubicBezierShape::from_points_stroke(
+        let shape = egui::epaint::shape::CubicBezierShape::from_points_stroke(
             [from, control_point_1, control_point_2, to],
             false,
             Color32::TRANSPARENT,
-            egui::epaint::Stroke::new(2.0_f32, color),
+            egui::Stroke::new(2.0_f32, color),
         );
         painter.add(shape);
     }

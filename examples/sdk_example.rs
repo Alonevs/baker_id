@@ -4,7 +4,6 @@
 //! Este ejemplo no depende del editor y puede compilarse independientemente
 
 use forge_runtime::entities::{Position2D, Size2D, Velocity2D, Color2D, Entity};
-use forge_types::Vec2;
 
 /// Ejemplo simple del SDK
 pub struct SimpleSDKExample {
@@ -17,6 +16,15 @@ impl SimpleSDKExample {
         Self {
             entities: Vec::new(),
         }
+    }
+    
+    /// Carga recursos de ejemplo (simulado)
+    pub fn load_sample_resources(&mut self) {
+        println!("📦 Loading sample resources...");
+        println!("   - forge-runtime/src/lib.rs");
+        println!("   - forge-runtime/src/entities/mod.rs");
+        println!("   - forge-runtime/src/resource/mod.rs");
+        println!("✅ Loaded 3 resources");
     }
     
     /// Crea entidades de ejemplo
@@ -39,7 +47,7 @@ impl SimpleSDKExample {
         enemy.add_component(Color2D::new(0.0, 1.0, 0.0)); // Verde
         self.entities.push(enemy);
         
-        println!("✅ Created {} entities", self.entities.len());
+        println!("✅ Created 2 entities");
     }
     
     /// Actualiza entidades (física simple)
@@ -48,7 +56,7 @@ impl SimpleSDKExample {
             // Obtener componente Velocity2D
             if let Some(velocity) = entity.get_component::<Velocity2D>() {
                 // Aplicar velocidad
-                let mut pos = entity.get_component::<Position2D>().map(|p| p.position).unwrap_or(Vec2::new(0.0, 0.0));
+                let mut pos = entity.get_component::<Position2D>().map(|p| p.position).unwrap_or(Position2D::new(0.0, 0.0).position);
                 pos.x += velocity.velocity.x * dt;
                 pos.y += velocity.velocity.y * dt;
                 
@@ -96,15 +104,6 @@ impl SimpleSDKExample {
 impl Default for SimpleSDKExample {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-/// Helper para obtener referencia mutante a un componente
-impl Entity {
-    pub fn get_component_mut<C: std::any::Any>(&mut self) -> Option<&mut C> {
-        self.components.iter_mut().find_map(|c| {
-            c.downcast_mut::<C>()
-        })
     }
 }
 

@@ -159,6 +159,13 @@ impl Entity {
             c.downcast_ref::<C>()
         })
     }
+    
+    /// Obtiene un componente mutable por tipo
+    pub fn get_component_mut<C: std::any::Any>(&mut self) -> Option<&mut C> {
+        self.components.iter_mut().find_map(|c| {
+            c.downcast_mut::<C>()
+        })
+    }
 }
 
 impl Default for Entity {
