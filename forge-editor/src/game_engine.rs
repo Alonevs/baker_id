@@ -12,6 +12,22 @@ use crate::dialogue_manager::DialogueManager;
 use crate::input::Input;
 use crate::math::Vector2;
 
+/// Soporte para cambiar entre diferentes tipos de cámara
+pub enum CameraMode {
+    Isometric,        // Vista diagonal 45° (Downwell, Into the Breach)
+    SideScroller,     // Vista lateral (Metal Slug, plataformas)
+    TopDown,          // Vista de pájaro (Zelda, Hotline Miami)
+    Free2D,           // Vista libre con zoom (Naves, Shoot 'em up)
+    Raycaster,        // Vista primera persona (Doom, Wolfenstein 3D)
+    Static,           // Plano fijo (Novela visual, cinemáticas)
+}
+
+impl Default for CameraMode {
+    fn default() -> Self {
+        Self::Isometric
+    }
+}
+
 pub struct GameEngine {
     sprite_manager: SpriteManager,
     animation_system: AnimationSystem,
@@ -20,6 +36,7 @@ pub struct GameEngine {
     level: Level,
     tile_system: TileSystem,
     camera: Camera,
+    camera_mode: CameraMode,
     dialogue_system: DialogueSystem,
     dialogue_ui: DialogueUI,
     dialogue_manager: DialogueManager,
@@ -52,10 +69,60 @@ impl GameEngine {
             level,
             tile_system,
             camera,
+            camera_mode: CameraMode::Isometric,
             dialogue_system,
             dialogue_ui,
             dialogue_manager,
             input: Input::new(),
+        }
+    }
+
+    /// Cambia el tipo de cámara actual
+    pub fn set_camera_mode(&mut self, mode: CameraMode) {
+        self.camera_mode = mode;
+        match mode {
+            CameraMode::Isometric => {
+                self.camera.set_camera_type(CameraType::Isometric);
+            }
+            CameraMode::SideScroller => {
+                self.camera.set_camera_type(CameraType::SideScroller);
+            }
+            CameraMode::TopDown => {
+                self.camera.set_camera_type(CameraType::TopDown);
+            }
+            CameraMode::Free2D => {
+                self.camera.set_camera_type(CameraType::Free2D);
+            }
+            CameraMode::Raycaster => {
+                self.camera.set_camera_type(CameraType::Raycaster);
+            }
+            CameraMode::Static => {
+                self.camera.set_camera_type(CameraType::Static);
+            }
+        }
+    }
+
+    /// Obtiene el tipo de cámara actual como string
+    pub fn get_camera_mode_name(&self) -> &'static str {
+        match self.camera_mode {
+            CameraMode::Isometric => "Isométrica",
+            CameraMode::SideScroller => "Side-Scroller",
+            CameraMode::TopDown => "Top-Down",
+            CameraMode::Free2D => "Free-2D",
+            CameraMode::Raycaster => "Raycaster",
+            CameraMode::Static => "Estática",
+        }
+    }
+
+    /// Cambia el tipo de cámara con tecla
+    pub fn toggle_camera_mode(&mut self, key: &str) {
+        match self.camera_mode {
+            CameraMode::Isometric => self.set_camera_mode(CameraMode::SideScroller),
+            CameraMode::SideScroller => self.set_camera_mode(CameraMode::TopDown),
+            CameraMode::TopDown => self.set_camera_mode(CameraMode::Free2D),
+            CameraMode::Free2D => self.set_camera_mode(CameraMode::Raycaster),
+            CameraMode::Raycaster => self.set_camera_mode(CameraMode::Static),
+            CameraMode::Static => self.set_camera_mode(CameraMode::Isometric),
         }
     }
 
@@ -66,20 +133,37 @@ impl GameEngine {
             self.input.poll_events();
             let dt = self.input.get_delta_time();
 
-            // Update camera to follow player
-            self.camera.follow_player(&self.player_controller.position);
-            self.camera.update(dt);
+            // Cambiar tipo de cámara con tecla 'C'
+            if self.input.is_key_pressed('C') {
+                self.toggle_camera_mode("C");
+                println!("📷 Cámara cambiada a: {}", self.get_camera_mode_name());
+            }
 
-            // Update physics and check collisions
+            // Actualizar cámara según tipo
+            match self.camera_mode {
+                CameraMode::Isometric | CameraMode::SideScroller | CameraMode::TopDown | CameraMode::Free2D => {
+                    // Seguir al jugador
+                    self.camera.follow_player(&self.player_controller.position);
+                    self.camera.update(dt);
+                }
+                CameraMode::Raycaster => {
+                    // Cámara estática en primera persona
+                    self.camera.update(dt);
+                }
+                CameraMode::Static => {
+                    // Cámara fija
+                    self.camera.update(dt);
+                }
+            }
+
+            // Actualizar physics y check collisions
             let collisions = self.physics_system.check_collisions();
             self.player_controller.update(dt, &self.input, &collisions);
 
-            // Update visible tiles
-            let cam_x = self.camera.position.x;
-            let cam_y = self.camera.position.y;
-            self.tile_system.update_visible_tiles(cam_x, cam_y, 10.0);
+            // Actualizar visible tiles según tipo de cámara
+            self.tile_system.update_visible_tiles(&self.camera);
 
-            // Update dialogue manager
+            // Actualizar dialogue manager
             self.dialogue_manager.handle_dialogue_input(self.input.get_key());
 
             // Render
@@ -91,13 +175,17 @@ impl GameEngine {
     }
 
     fn render(&mut self) {
-        // Draw tiles
-        self.tile_system.draw_tiles(self.camera.position.x, self.camera.position.y);
-
-        // Draw player
+        // Render según tipo de cámara
+        self.tile_system.draw_tiles(&self.camera);
         self.player_controller.draw(time);
 
         // Draw dialogue UI
         self.dialogue_ui.draw();
+    }
+
+    fn render_raycaster(&mut self) {
+        // Render estilo Doom/Wolfenstein 3D
+        // Implementación futura
+        println!("👁️ Render Raycaster (modo 3D)");
     }
 }

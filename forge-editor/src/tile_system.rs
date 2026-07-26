@@ -1,6 +1,7 @@
 use crate::level_manager::{Level, Tile};
 use crate::sprite_manager::SpriteManager;
 use crate::math::Vector2;
+use forge_runtime::camera::Camera;
 
 pub struct TileSystem {
     level: Level,
@@ -25,7 +26,12 @@ impl TileSystem {
         self.level.get_platform_at(x, y)
     }
 
-    pub fn update_visible_tiles(&mut self, camera_x: f32, camera_y: f32, view_distance: f32) {
+    /// Actualiza los tiles visibles según la cámara
+    pub fn update_visible_tiles(&mut self, camera: &Camera) {
+        let camera_x = camera.position.x;
+        let camera_y = camera.position.y;
+        let view_distance = 100.0; // Aumentado para mejor rendimiento
+
         let visible_x_start = (camera_x - view_distance) as i32;
         let visible_x_end = (camera_x + view_distance) as i32;
         let visible_y_start = (camera_y - view_distance) as i32;
@@ -38,13 +44,46 @@ impl TileSystem {
             .collect();
     }
 
-    pub fn draw_tiles(&self, camera_x: f32, camera_y: f32) {
+    /// Dibuja los tiles visibles según el tipo de cámara
+    pub fn draw_tiles(&self, camera: &Camera) {
+        match camera.camera_type {
+            forge_runtime::camera::CameraType::Isometric => {
+                self.draw_isometric_tiles(camera);
+            }
+            forge_runtime::camera::CameraType::TopDown |
+            forge_runtime::camera::CameraType::SideScroller |
+            forge_runtime::camera::CameraType::Free2D => {
+                self.draw_2d_tiles(camera);
+            }
+            _ => {
+                // Fallback a isométrico
+                self.draw_isometric_tiles(camera);
+            }
+        }
+    }
+
+    /// Dibuja tiles en vista isométrica
+    fn draw_isometric_tiles(&self, camera: &Camera) {
         for tile in &self.visible_tiles {
             let sprite = self.sprite_manager.get_sprite("environment", &tile.tile_type);
             if let Some(s) = sprite {
+                // Proyección isométrica
                 let iso_x = (tile.x - tile.y) * 20.0;
                 let iso_y = (tile.x + tile.y) * 10.0;
                 s.draw(&mut self.sprite_manager, iso_x, iso_y, 0.0);
+            }
+        }
+    }
+
+    /// Dibuja tiles en vista 2D (top-down, side-scroller, free-2d)
+    fn draw_2d_tiles(&self, camera: &Camera) {
+        for tile in &self.visible_tiles {
+            let sprite = self.sprite_manager.get_sprite("environment", &tile.tile_type);
+            if let Some(s) = sprite {
+                // Posición 2D simple
+                let x = tile.x * 32.0 + camera.position.x;
+                let y = tile.y * 32.0 + camera.position.y;
+                s.draw(&mut self.sprite_manager, x, y, 0.0);
             }
         }
     }
