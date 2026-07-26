@@ -5,7 +5,7 @@ use crate::physics::physics::{PhysicsConfig, PhysicsBody};
 use crate::player_controller::PlayerController;
 use crate::level_manager::Level;
 use crate::tile_system::TileSystem;
-use crate::camera::isometric_camera::IsometricCamera;
+use forge_runtime::camera::{Camera, CameraType};
 use crate::dialogue_system::DialogueSystem;
 use crate::dialogue_ui::dialogue_panel::DialogueUI;
 use crate::dialogue_manager::DialogueManager;
@@ -19,7 +19,7 @@ pub struct GameEngine {
     player_controller: PlayerController,
     level: Level,
     tile_system: TileSystem,
-    camera: IsometricCamera,
+    camera: Camera,
     dialogue_system: DialogueSystem,
     dialogue_ui: DialogueUI,
     dialogue_manager: DialogueManager,
@@ -34,7 +34,8 @@ impl GameEngine {
         let physics_system = IsometricCollisionSystem::new();
         let level = Level::new("level1".to_string(), &LevelData::load("assets/levels/level1.json").unwrap());
         let tile_system = TileSystem::new(level.clone(), sprite_manager.clone());
-        let camera = IsometricCamera::new(75.0, 1.0);
+        let camera = Camera::new();
+        camera.set_camera_type(CameraType::Isometric);
         let dialogue_system = DialogueSystem::new();
         let dialogue_ui = DialogueUI::new(dialogue_system.clone());
         let dialogue_manager = DialogueManager::new();
