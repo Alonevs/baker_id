@@ -264,7 +264,7 @@ impl App for ForgeEditorApp {
             ui.separator();
             
             // Viewport de renderizado
-            ui.label("Viewport - Renderizado en tiempo real");
+            ui.label("Viewport - Forge SDK Integration");
             ui.label(format!("Entidades: {}", self.get_entities().map(|e| e.len()).unwrap_or(0)));
             ui.label(format!("Estado: {}", if self.is_playing { "▶ Playing" } else { "⏹ Stopped" }));
             

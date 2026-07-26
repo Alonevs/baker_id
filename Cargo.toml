@@ -26,7 +26,8 @@ members = [
       "forge-sprite-baker",
       "forge-render",
       "forge-app",
-]
+      "forge-editor",
+ ]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
