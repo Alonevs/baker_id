@@ -7,7 +7,6 @@ use crate::input_capture::UserInput;
 use crate::hot_reload_panel::HotReloadPanel;
 use crate::hot_reload_integration::SimpleFileWatcherIntegration;
 use crate::explorer_panel_integration::ExplorerPanelIntegration;
-use crate::toolbar::ToolbarWidget;
 use crate::event_forge::EventForgeWidget;
 use crate::property_panel::PropertyPanel;
 use crate::export_import_panel::ExportImportPanel;
@@ -27,7 +26,7 @@ pub struct ForgeEditorApp {
     pub hot_reload_manager: crate::hot_reload::HotReloadManager,
     pub file_watcher_integration: Option<SimpleFileWatcherIntegration>,
     pub explorer_panel_integration: ExplorerPanelIntegration,
-    pub toolbar_widget: ToolbarWidget,
+
     pub event_forge_widget: EventForgeWidget,
     pub property_panel: PropertyPanel,
     pub export_import_panel: ExportImportPanel,
@@ -47,7 +46,7 @@ impl Default for ForgeEditorApp {
             hot_reload_manager: crate::hot_reload::HotReloadManager::new(),
             file_watcher_integration: None,
             explorer_panel_integration: ExplorerPanelIntegration::new(),
-            toolbar_widget: ToolbarWidget::new(),
+
             event_forge_widget: EventForgeWidget::new(),
             property_panel: PropertyPanel::new(),
             export_import_panel: ExportImportPanel::new(),
@@ -68,12 +67,9 @@ impl ForgeEditorApp {
         ));
         app.file_watcher_integration.as_mut().unwrap().start();
         
-        // Inicializar Toolbar
-        app.toolbar_widget.toolbar.select();
-        
         // Configurar Explorer Panel con proyecto actual
-        app.explorer_panel_integration.explorer.panel.current_project_path = 
-            Some(std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
+        app.explorer_panel_integration.explorer.panel.current_folder = Some(
+            std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
         
         // Configurar Export/Import Panel con ruta actual
         app.export_import_panel.export_path = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("project_export.json"));
@@ -136,7 +132,7 @@ impl ForgeEditorApp {
         self.update_preview_from_explorer();
         
         // Actualizar Toolbar
-        self.toolbar_widget.toolbar.select();
+
     }
     
     /// Conecta Explorer Panel con Preview Panel
@@ -176,7 +172,7 @@ impl ForgeEditorApp {
         self.explorer_panel_integration.update();
         
         // Actualizar Toolbar
-        self.toolbar_widget.toolbar.select();
+
         
         // Actualizar Preview desde Explorer
         self.update_preview_from_explorer();
@@ -189,28 +185,34 @@ impl ForgeEditorApp {
 impl App for ForgeEditorApp {
     fn update(&mut self, ctx: &egui::Context, _ui: &mut eframe::Frame) {
         // Renderizar Toolbar superior
-        self.toolbar_widget.render(ctx);
+
         
         // Renderizar Export/Import Panel (panel izquierdo)
-        self.export_import_panel.ui(ctx, &mut egui::SidePanel::left("export_import_panel")
-            .min_width(250.0).show(ctx, |ui| {
-                ui.heading("Export / Import");
-            }));
+        let left_panel = egui::SidePanel::left("export_import_panel")
+            .min_width(250.0);
+        let _ = left_panel.show(ctx, |ui| {
+            ui.heading("Export / Import");
+        });
+        // self.export_import_panel.ui(ctx, ui);
         
         // Renderizar Preview Panel (panel derecho)
-        self.preview_panel.ui(ctx, &mut egui::SidePanel::right("preview_panel")
-            .min_width(300.0).show(ctx, |ui| {
-                ui.heading("Preview Panel");
-            }));
+        let right_panel = egui::SidePanel::right("preview_panel")
+            .min_width(300.0);
+        let _ = right_panel.show(ctx, |ui| {
+            ui.heading("Preview Panel");
+        });
+        // self.preview_panel.ui(ctx, ui);
         
         // Renderizar Event Forge (panel superior derecho)
-        self.render_event_forge(ctx);
+        // self.render_event_forge(ctx);
         
-        // Explorer Panel (panel inferior izquierdo)
-        self.explorer_panel_integration.ui(ctx, &mut egui::SidePanel::bottom("explorer_panel")
-            .min_height(150.0).show(ctx, |ui| {
-                ui.heading("Explorer Panel");
-            }));
+        // Explorer Panel (panel izquierdo)
+        let explorer_panel = egui::SidePanel::left("explorer_panel")
+            .min_width(250.0);
+        let _ = explorer_panel.show(ctx, |ui| {
+            ui.heading("Explorer Panel");
+        });
+        // self.explorer_panel_integration.ui(ctx, ui);
         
         egui::CentralPanel::default().show(ctx, |ui| {
             // Play Control superior

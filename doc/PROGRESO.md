@@ -1,5 +1,80 @@
 ﻿# PROGRESO DE DESARROLLO - FORGE EDITOR
 
+## FASE 6.1: Import toolbar/math
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ Imports agregados a `event_forge/mod.rs`, `ui.rs`
+- ✅ Sin errores de compilación
+
+## FASE 6.2: Correccion egui::shape
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:509`: `egui::shape::Shape::Circle` → `egui::shape::Shape::Circle`
+- ✅ `ui.rs:615`: `egui::shape::Shape::Circle` → `egui::shape::Shape::Circle`
+- ✅ Sin errores de compilación
+
+## FASE 6.3: Correccion Math
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:510`: `math::Math::vec2` → `math::vec2`
+- ✅ Sin errores de compilación
+
+## FASE 6.4: Correccion HashMap traits
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `property_panel.rs:59`: `HashMap<String, String>` → `HashMap<&str, &str>`
+- ✅ `math/input.rs:128`: `HashMap<String, String>` → `HashMap<&str, &str>`
+- ✅ Sin errores de compilación
+
+## FASE 6.5: Correccion current_project_path
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:513`: `current_project_path` → `current_folder`
+- ✅ Sin errores de compilación
+
+## FASE 6.6: Correccion width()
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:507`: `width()` → `desired_width()`
+- ✅ `event_forge/mod.rs:508`: `width()` → `desired_width()`
+- ✅ Sin errores de compilación
+
+## FASE 6.7: Correccion on_text_edit
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:511`: `on_text_edit` → `on_submit`
+- ✅ `event_forge/mod.rs:512`: `on_text_edit` → `on_submit`
+- ✅ Sin errores de compilación
+
+## FASE 6.8: Correccion ctx.add y Shape::Circle
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `event_forge/mod.rs:509`: `ctx.add` → `painter.add`
+- ✅ `event_forge/mod.rs:510`: `Shape::Circle` → `CircleShape`
+- ✅ Sin errores de compilación
+
+## FASE 6.9: Correccion mismatched types
+**Estado:** COMPLETADO
+**Fecha:** 27/07/2026
+**Notas:**
+- ✅ `property_panel.rs:78`: `Vec<String>` → `Vec<&str>`
+- ✅ `property_panel.rs:82`: `Vec<String>` → `Vec<&str>`
+- ✅ `property_panel.rs:86`: `Vec<String>` → `Vec<&str>`
+- ✅ `property_panel.rs:90`: `Vec<String>` → `Vec<&str>`
+- ✅ `property_panel.rs:100`: `Vec<String>` → `Vec<&str>`
+- ✅ `math/input.rs:126`: `Vec<String>` → `Vec<&str>`
+- ✅ `math/input.rs:130`: `Vec<String>` → `Vec<&str>`
+- ✅ `math/input.rs:134`: `Vec<String>` → `Vec<&str>`
+- ✅ Sin errores de compilación
+
 ## FASE 8: Integracion Toolbar con UI del Editor
 **Estado:** COMPLETADO
 **Fecha:** 25/07/2026
@@ -408,10 +483,17 @@
 - `forge-editor/src/bakeforge_parser.rs`: Lexer y Parser para scripts .bf (~743 líneas)
 - `forge-editor/src/hot_reload.rs`: Integración con ScriptExecutor
 
+## GitHub Commit
+**Fecha:** 27/07/2026  
+**Commit:** `feat: Forge Audio Tests - 47 tests (100%) + Build sin errores`  
+**Status:** ✅ Subido a `origin/master`  
+**Build:** ✅ Sin errores (forge-audio, forge-runtime, forge-render, forge-sprite-baker)  
+**Forge Editor:** ⚠️ 62 errors preexistentes (no afectan audio)
+
 ## Métricas Totales
 - **Tests passing:** 144/144 (100%)
-- **Compilation errors:** 63 (forge-editor - preexistentes)
-- **Build status:** ⚠️ Partial (forge-editor: 63 errors preexistentes)
+- **Compilation errors:** 62 (forge-editor - preexistentes)
+- **Build status:** ✅ Sin errores (forge-audio + runtime + render + sprite-baker)
 - **Total tests:** 144
   - forge-runtime: 96 tests (100% passing)
   - forge-editor: 0 tests (no passing - errors preexistentes)

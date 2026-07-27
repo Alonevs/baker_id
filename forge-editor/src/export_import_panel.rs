@@ -114,11 +114,10 @@ impl ExportImportPanel {
             ui.label("Export Project:");
             ui.horizontal(|ui| {
                 ui.label("Path:");
-                ui.add(egui::TextEdit::singleline(&mut self.export_path.to_string_lossy()))
-                    .desired_width(200.0);
+                ui.add(egui::TextEdit::singleline(&mut self.export_path.to_string_lossy()));
                 if ui.button("Browse").clicked() {
                     // Placeholder para browse dialog
-                    ui.log("📁 Browse dialog placeholder");
+                    ui.add(egui::Label::new("📁 Browse dialog placeholder"));
                 }
             });
             
@@ -136,11 +135,10 @@ impl ExportImportPanel {
             ui.label("Import Project:");
             ui.horizontal(|ui| {
                 ui.label("Path:");
-                ui.add(egui::TextEdit::singleline(&mut self.import_path.to_string_lossy()))
-                    .desired_width(200.0);
+                ui.add(egui::TextEdit::singleline(&mut self.import_path.to_string_lossy()));
                 if ui.button("Browse").clicked() {
                     // Placeholder para browse dialog
-                    ui.log("📁 Browse dialog placeholder");
+                    ui.add(egui::Label::new("📁 Browse dialog placeholder"));
                 }
             });
             

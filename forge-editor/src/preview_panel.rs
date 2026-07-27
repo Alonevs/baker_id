@@ -134,10 +134,10 @@ impl PreviewPanel {
         // Placeholder para renderizado de imagen con egui_extras
         ui.horizontal(|ui| {
             if ui.button("📸 Full Screen").clicked() {
-                ui.log("🖼️ Full screen preview placeholder");
+                ui.add(egui::Label::new("🖼️ Full screen preview placeholder"));
             }
             if ui.button("🔄 Refresh").clicked() {
-                ui.log("🔄 Refresh placeholder");
+                ui.add(egui::Label::new("🔄 Refresh placeholder"));
             }
         });
     }
@@ -153,11 +153,11 @@ impl PreviewPanel {
             }
             
             if ui.button("▶ Play").clicked() {
-                ui.log(format!("▶ Playing: {}", asset.name));
+                ui.add(egui::Label::new(format!("▶ Playing: {}", asset.name)));
             }
             
             if ui.button("⏸️ Pause").clicked() {
-                ui.log("⏸️ Pause placeholder");
+                ui.add(egui::Label::new("⏸️ Pause placeholder"));
             }
             
             if ui.button("⏭️ Next").clicked() {
@@ -179,10 +179,10 @@ impl PreviewPanel {
         // Controles de script
         ui.horizontal(|ui| {
             if ui.button("🔍 Minimap").clicked() {
-                ui.log("🔍 Minimap placeholder");
+                ui.add(egui::Label::new("🔍 Minimap placeholder"));
             }
             if ui.button("⚙️ Settings").clicked() {
-                ui.log("⚙️ Settings placeholder");
+                ui.add(egui::Label::new("⚙️ Settings placeholder"));
             }
         });
         
@@ -199,10 +199,10 @@ impl PreviewPanel {
         
         ui.horizontal(|ui| {
             if ui.button("🔍 Validate").clicked() {
-                ui.log("✅ Validated placeholder");
+                ui.add(egui::Label::new("✅ Validated placeholder"));
             }
             if ui.button("📊 Format").clicked() {
-                ui.log("📊 Formatted placeholder");
+                ui.add(egui::Label::new("📊 Formatted placeholder"));
             }
         });
         
@@ -218,10 +218,10 @@ impl PreviewPanel {
         
         ui.horizontal(|ui| {
             if ui.button("🔍 Search").clicked() {
-                ui.log("🔍 Search placeholder");
+                ui.add(egui::Label::new("🔍 Search placeholder"));
             }
             if ui.button("📊 Word Count").clicked() {
-                ui.log("📊 Word count placeholder");
+                ui.add(egui::Label::new("📊 Word count placeholder"));
             }
         });
         
@@ -282,14 +282,14 @@ impl PreviewPanel {
                 ui.label("Controls:");
                 ui.horizontal(|ui| {
                     if ui.button("🔄 Refresh All").clicked() {
-                        ui.log("🔄 Refresh all assets placeholder");
+                        ui.add(egui::Label::new("🔄 Refresh all assets placeholder"));
                     }
                     if ui.button("📁 Import Assets").clicked() {
-                        ui.log("📁 Import assets dialog placeholder");
+                        ui.add(egui::Label::new("📁 Import assets dialog placeholder"));
                     }
                     if ui.button("🗑️ Clear Selection").clicked() {
                         self.selected_asset = None;
-                        ui.log("🗑️ Cleared selection");
+                        ui.add(egui::Label::new("🗑️ Cleared selection"));
                     }
                 });
                 

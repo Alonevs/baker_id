@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::math::Vector2;
 
 pub struct Input {
@@ -12,7 +13,7 @@ impl Input {
         Input {
             keys: Vec::new(),
             key_states: HashMap::new(),
-            mouse_position: Vector2::ZERO,
+            mouse_position: Vector2::ZERO(),
             delta_time: 0.016,
         }
     }
@@ -25,7 +26,7 @@ impl Input {
     }
 
     pub fn is_down(&self, key: KeyCode) -> bool {
-        self.key_states.get(&key).unwrap_or(&false)
+        self.key_states.get(&key).copied().unwrap_or(false)
     }
 
     pub fn get_key(&self) -> KeyCode {
@@ -37,7 +38,7 @@ impl Input {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum KeyCode {
     None,
     W,
@@ -52,5 +53,3 @@ pub enum KeyCode {
     Right,
     N,
 }
-
-use std::collections::HashMap;

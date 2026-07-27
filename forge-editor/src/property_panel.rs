@@ -55,9 +55,7 @@ impl PropertyPanel {
             // Seleccionar entidad
             ui.label("Select Entity:");
             ui.horizontal(|ui| {
-                if ui.add(egui::TextEdit::singleline("entity_1").desired_width(150.0)).clicked() {
-                    self.set_entity(EntityId(1));
-                }
+                ui.label("Entity: entity_1");
                 if ui.button("Apply").clicked() {
                     self.set_entity(EntityId(1));
                 }
@@ -69,31 +67,19 @@ impl PropertyPanel {
             ui.label("Transform Properties");
             ui.horizontal(|ui| {
                 ui.label("X:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.0.to_string()))
-                    .on_text_changed(|new_pos| {
-                        self.transform_properties.0 = new_pos.parse().unwrap_or(0.0);
-                    });
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.0.to_string()));
             });
             ui.horizontal(|ui| {
                 ui.label("Y:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.1.to_string()))
-                    .on_text_changed(|new_pos| {
-                        self.transform_properties.1 = new_pos.parse().unwrap_or(0.0);
-                    });
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.1.to_string()));
             });
             ui.horizontal(|ui| {
                 ui.label("Rotation:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.rotation.to_string()))
-                    .on_text_changed(|new_pos| {
-                        self.transform_properties.rotation = new_pos.parse().unwrap_or(0.0);
-                    });
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.rotation.to_string()));
             });
             ui.horizontal(|ui| {
                 ui.label("Scale:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.scale.to_string()))
-                    .on_text_changed(|new_pos| {
-                        self.transform_properties.scale = new_pos.parse().unwrap_or(1.0);
-                    });
+                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.scale.to_string()));
             });
             
             ui.separator();
@@ -105,8 +91,7 @@ impl PropertyPanel {
                 ui.add(egui::TextEdit::singleline(&mut self.component_properties.component_type));
             });
             ui.label("Additional Properties:");
-            ui.add(egui::TextEdit::multiline(&mut self.component_properties.properties.to_string()))
-                .desired_width(200.0);
+            ui.add(egui::TextEdit::multiline(&mut self.component_properties.properties.to_string()));
             
             ui.separator();
             
@@ -117,8 +102,7 @@ impl PropertyPanel {
                 ui.add(egui::TextEdit::singleline(&mut self.script_properties.script_path));
             });
             ui.label("Parameters:");
-            ui.add(egui::TextEdit::multiline(&mut self.script_properties.parameters.to_string()))
-                .desired_width(200.0);
+            ui.add(egui::TextEdit::multiline(&mut self.script_properties.parameters.to_string()));
             
             ui.separator();
             

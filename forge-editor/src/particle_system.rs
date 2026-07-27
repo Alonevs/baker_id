@@ -3,6 +3,7 @@ use std::sync::RwLock;
 use serde::{Serialize, Deserialize};
 use crate::math::Math;
 
+
 /// Animación de un sprite (secuencia de frames)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteAnimation {

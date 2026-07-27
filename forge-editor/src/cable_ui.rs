@@ -157,7 +157,7 @@ impl CableSystemUI {
         ui.label(&node.id);
         
         // Dibujar salida de cable desde el nodo
-        let output_port = egui::vec2(pos.x + size.x - 10.0, pos.y + size.y / 2.0);
+        let output_port = egui::Vec2::new(pos.x + size.x - 10.0, pos.y + size.y / 2.0);
         
         // Obtener conexiones salientes de este nodo
         let outgoing_edges: Vec<&Edge> = self.manager.edges.iter()
@@ -167,7 +167,7 @@ impl CableSystemUI {
         // Dibujar líneas de salida
         for edge in &outgoing_edges {
             if let Some(target_pos) = self.get_node_position(bounds, &edge.to) {
-                self.draw_cable_segment(ui, output_port, target_pos, &edge.condition);
+                self.draw_cable_segment(ui, egui::pos2(output_port.x, output_port.y), target_pos, &edge.condition);
             }
         }
         

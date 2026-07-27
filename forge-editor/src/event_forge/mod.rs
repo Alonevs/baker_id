@@ -405,7 +405,7 @@ impl EventForgeWidget {
                     let rect = response.rect;
                     
                     // Dibujar conexiones primero (debajo de los nodos)
-                    self.draw_connections(ctx, rect);
+                    self.draw_connections(ui, rect);
                     
                     // Dibujar nodos
                     self.draw_nodes(ctx, rect, ui);
@@ -418,8 +418,8 @@ impl EventForgeWidget {
                         let mut clicked_node = false;
                         for (_, node) in &self.manager.graph.nodes {
                             let node_rect = egui::Rect::from_min_size(
-                                egui::vec2(node.position.0 - 50.0, node.position.1 - 50.0),
-                                egui::vec2(100.0, 100.0)
+                                egui::Pos2::new(node.position.0 - 50.0, node.position.1 - 50.0),
+                                egui::Vec2::new(100.0, 100.0)
                             );
                             
                             if node_rect.contains(pos) {
@@ -440,7 +440,7 @@ impl EventForgeWidget {
     }
     
     /// Dibuja las conexiones entre nodos
-    fn draw_connections(&self, ctx: &egui::Context, rect: egui::Rect) {
+    fn draw_connections(&self, ui: &mut egui::Ui, rect: egui::Rect) {
         let scale = 0.8;
         
         for conn in &self.manager.graph.connections {
@@ -448,10 +448,10 @@ impl EventForgeWidget {
             let end = self.get_socket_position(&conn.to, scale);
             
             // Dibujar línea de conexión con egui
-            let line = Shape::line_segment([
+            let line = egui::Shape::line_segment([
                 egui::Pos2::new(start.x, start.y),
                 egui::Pos2::new(end.x, end.y)
-            ]);
+            ], egui::Stroke::new(2.0_f32, egui::Color32::WHITE));
             
             // Dibujar nodos de conexión
             let start_node = self.manager.graph.nodes.get(&conn.from.node_id);
@@ -460,27 +460,23 @@ impl EventForgeWidget {
             if let (Some(start_node), Some(end_node)) = (start_node, end_node) {
                 // Nodo de salida
                 let start_pos = egui::Pos2::new(start_node.position.0, start_node.position.1);
-                let start_circle = Shape::Circle {
-                    center: egui::Pos2::new(start_node.position.0 + 100.0, start_node.position.1 + 50.0),
-                    radius: 6.0
-                };
+                // let start_circle = egui::Shape::Circle(...);
                 
                 // Nodo de entrada
                 let end_pos = egui::Pos2::new(end_node.position.0, end_node.position.1);
-                let end_circle = Shape::Circle {
-                    center: egui::Pos2::new(end_node.position.0 - 100.0, end_node.position.1 + 50.0),
-                    radius: 6.0
-                };
+                // let end_circle = egui::Shape::Circle(...);
             }
             
-            ctx.add(Shape::Circle {
-                center: egui::Pos2::new(start.x, start.y),
-                radius: 3.0
-            });
-            ctx.add(Shape::Circle {
-                center: egui::Pos2::new(end.x, end.y),
-                radius: 3.0
-            });
+            let painter = ui.painter();
+            // Placeholder para círculos de conexión
+            painter.add(egui::Shape::line_segment([
+                egui::Pos2::new(start.x - 1.0, start.y),
+                egui::Pos2::new(start.x + 1.0, start.y)
+            ], egui::Stroke::new(1.0, egui::Color32::WHITE)));
+            painter.add(egui::Shape::line_segment([
+                egui::Pos2::new(end.x - 1.0, end.y),
+                egui::Pos2::new(end.x + 1.0, end.y)
+            ], egui::Stroke::new(1.0, egui::Color32::WHITE)));
         }
     }
 
@@ -499,18 +495,18 @@ impl EventForgeWidget {
                 NodeType::Action => "⚡ Action",
             };
             
-            let mut node_ui = egui::Frame::none()
+            let mut node_ui = egui::Frame::NONE
                 .fill(egui::Color32::from_rgb(50, 50, 80))
-                .stroke(egui::Stroke::new(2.0, egui::Color32::DARK_BLUE));
+                .stroke(egui::Stroke::new(2.0_f32, egui::Color32::DARK_BLUE));
             
             if Some(node.id) == self.selected_node {
                 node_ui = node_ui.fill(egui::Color32::from_rgb(80, 100, 150));
             }
             
-            egui::Area::new(format!("node_{}", node.id))
-                .fixed_pos(egui::pos2(x - 60.0, y - 30.0))
-                .anchor(egui::Align2::CENTER_CENTER)
-                .show(ui, |ui| {
+            egui::Area::new(format!("node_{}", node.id).into())
+                .fixed_pos(egui::Pos2::new(x - 60.0, y - 30.0))
+                .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
+                .show(ctx, |ui| {
                     node_ui.show(ui, |ui| {
                         ui.add_space(5.0);
                         ui.label(node_label);
@@ -523,19 +519,19 @@ impl EventForgeWidget {
     }
     
     /// Obtiene la posición del socket
-    fn get_socket_position(&self, socket: &SocketId, scale: f32) -> egui::pos2 {
+    fn get_socket_position(&self, socket: &SocketId, scale: f32) -> egui::Pos2 {
         let node = self.manager.graph.nodes.get(&socket.node_id);
         if let Some(node) = node {
             let x = node.position.0;
             let y = node.position.1;
             
             if socket.is_output {
-                egui::pos2(x + 50.0 * scale, y + 25.0 * scale)
+                egui::Pos2::new(x + 50.0 * scale, y + 25.0 * scale)
             } else {
-                egui::pos2(x - 50.0 * scale, y + 25.0 * scale)
+                egui::Pos2::new(x - 50.0 * scale, y + 25.0 * scale)
             }
         } else {
-            egui::pos2(0.0, 0.0)
+            egui::Pos2::new(0.0, 0.0)
         }
     }
 
