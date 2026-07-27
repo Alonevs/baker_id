@@ -185,6 +185,15 @@ impl ForgeEditorApp {
 impl App for ForgeEditorApp {
     fn update(&mut self, ctx: &egui::Context, _ui: &mut eframe::Frame) {
         // Renderizar Toolbar superior
+        let top_panel = egui::TopBottomPanel::top("toolbar")
+            .min_height(40.0);
+        let _ = top_panel.show(ctx, |ui| {
+            ui.heading("Toolbar");
+            
+            // Crear ToolbarWidget
+            let mut toolbar = crate::toolbar::ToolbarWidget::new();
+            toolbar.render(ctx);
+        });
 
         
         // Renderizar Export/Import Panel (panel izquierdo)

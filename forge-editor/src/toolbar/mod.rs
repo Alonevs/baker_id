@@ -76,7 +76,13 @@ impl Toolbar {
 
     /// Remover herramienta por índice
     pub fn remove_tool(&mut self, index: usize) -> bool {
-        self.tools.write().unwrap().remove(index).is_some()
+        let mut tools = self.tools.write().unwrap();
+        if index < tools.len() {
+            tools.remove(index);
+            true
+        } else {
+            false
+        }
     }
 
     /// Obtener índice de herramienta
@@ -141,12 +147,17 @@ impl Toolbar {
         let tools = self.tools.read().unwrap();
         let current = self.current_tool;
         
+        let tools_json = tools.iter()
+            .map(|t| format!("\"{:?}\"", t))
+            .collect::<Vec<_>>()
+            .join(", ");
+        
         format!(
             r#"{{
   "current_tool": "{:?}",
-  "tools": [$(tools.iter().map(|t| format!("\"{:?}\"", t)).collect::<Vec<_>>().join(", "))$]
+  "tools": ["{}"]
 }}"#,
-            current,
+            current, tools_json
         )
     }
 
@@ -181,15 +192,17 @@ impl ToolbarWidget {
     }
 
     /// Renderizar Toolbar con egui
-    pub fn render(&self, ctx: &egui::Context) {
+    pub fn render(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("toolbar_panel").show(ctx, |ui| {
             ui.heading("Toolbar");
+            
+            // Obtener herramienta actual antes del closure
+            let current = self.toolbar.get_current_tool();
             
             // Renderizar herramientas
             ui.horizontal(|ui| {
                 // Botones de herramientas
                 let tools = self.toolbar.get_tools();
-                let current = self.toolbar.get_current_tool();
                 
                 for tool in tools {
                     let button_text = match tool {
