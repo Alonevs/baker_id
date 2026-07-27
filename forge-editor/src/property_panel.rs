@@ -44,7 +44,7 @@ impl PropertyPanel {
     
     /// Obtiene entidad seleccionada
     pub fn get_selected_entity(&self) -> Option<EntityId> {
-        self.selected_entity_id
+        self.selected_entity_id.clone()
     }
     
     /// UI completa del Property Panel
@@ -142,14 +142,24 @@ impl Default for TransformProperties {
 #[derive(Debug, Clone)]
 pub struct ComponentProperties {
     pub component_type: String,
-    pub properties: HashMap<String, String>,
+    pub properties: crate::VecStringDisplay,
+}
+
+impl std::fmt::Display for ComponentProperties {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Component Properties:")?;
+        for item in &self.properties {
+            writeln!(f, "  {}", item)?;
+        }
+        Ok(())
+    }
 }
 
 impl Default for ComponentProperties {
     fn default() -> Self {
         Self {
             component_type: String::new(),
-            properties: HashMap::new(),
+            properties: crate::VecStringDisplay::new(),
         }
     }
 }
@@ -157,14 +167,27 @@ impl Default for ComponentProperties {
 #[derive(Debug, Clone)]
 pub struct ScriptProperties {
     pub script_path: String,
-    pub parameters: HashMap<String, String>,
+    pub parameters: crate::VecStringDisplay,
 }
+
+impl std::fmt::Display for ScriptProperties {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Script Properties:")?;
+        writeln!(f, "  Path: {}", self.script_path)?;
+        for item in &self.parameters {
+            writeln!(f, "  {}", item)?;
+        }
+        Ok(())
+    }
+}
+
+
 
 impl Default for ScriptProperties {
     fn default() -> Self {
         Self {
             script_path: String::new(),
-            parameters: HashMap::new(),
+            parameters: crate::VecStringDisplay::new(),
         }
     }
 }

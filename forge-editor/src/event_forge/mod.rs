@@ -548,7 +548,7 @@ impl EventForgeWidget {
             None => NodeType::TriggerZone,
         };
         
-        let node = Node::new(
+        let mut node = Node::new(
             self.manager.graph.nodes.len() as u32 + 1,
             node_type,
         );

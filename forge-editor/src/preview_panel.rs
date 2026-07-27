@@ -43,12 +43,13 @@ pub struct AssetInfo {
 
 impl AssetInfo {
     pub fn new(name: String, path: PathBuf, asset_type: AssetType) -> Self {
-        let metadata = std::fs::metadata(&path).unwrap_or_else(|_| std::fs::Metadata::from_bytes(&[]));
+        let metadata = std::fs::metadata(&path).ok();
+        let size = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
         Self {
             name,
             path,
             asset_type,
-            size: metadata.len(),
+            size,
             preview_data: None,
         }
     }
@@ -143,7 +144,7 @@ impl PreviewPanel {
     }
     
     /// Preview de audio
-    fn render_audio_preview(&self, ui: &mut egui::Ui, asset: &AssetInfo) {
+    fn render_audio_preview(&mut self, ui: &mut egui::Ui, asset: &AssetInfo) {
         ui.label(format!("🎵 Audio Preview: {}", asset.name));
         ui.label(format!("Size: {} bytes", asset.size));
         
@@ -243,7 +244,7 @@ impl PreviewPanel {
                 egui::ScrollArea::vertical()
                     .max_height(ui.available_height() - 200.0)
                     .show(ui, |ui| {
-                        for (index, asset) in self.available_assets.iter().enumerate() {
+                        for (index, asset) in self.available_assets.clone().iter().enumerate() {
                             ui.horizontal(|ui| {
                                 if ui.selectable_label(
                                     self.selected_asset.as_ref().map(|a| a.path == asset.path).unwrap_or(false),
@@ -260,16 +261,16 @@ impl PreviewPanel {
                 ui.separator();
                 
                 // Preview actual
-                if let Some(asset) = &self.selected_asset {
+                if let Some(asset) = self.selected_asset.clone() {
                     ui.label(format!("Preview: {}", asset.name));
                     ui.separator();
                     
                     match asset.asset_type {
-                        AssetType::Image => self.render_image_preview(ui, asset),
-                        AssetType::Audio => self.render_audio_preview(ui, asset),
-                        AssetType::Script => self.render_script_preview(ui, asset),
-                        AssetType::Json => self.render_json_preview(ui, asset),
-                        AssetType::Text => self.render_text_preview(ui, asset),
+                        AssetType::Image => self.render_image_preview(ui, &asset),
+                        AssetType::Audio => self.render_audio_preview(ui, &asset),
+                        AssetType::Script => self.render_script_preview(ui, &asset),
+                        AssetType::Json => self.render_json_preview(ui, &asset),
+                        AssetType::Text => self.render_text_preview(ui, &asset),
                     }
                 } else {
                     ui.label("No asset selected");

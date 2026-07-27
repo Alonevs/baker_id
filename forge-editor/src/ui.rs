@@ -142,7 +142,7 @@ impl ForgeEditorApp {
             let asset_type = crate::preview_panel::AssetInfo::detect_type(&path);
             let asset = crate::preview_panel::AssetInfo::new(
                 path.file_name().and_then(|n| n.to_str()).unwrap_or("Unknown").to_string(),
-                path,
+                path.clone(),
                 asset_type
             );
             self.preview_panel.add_asset(asset);
@@ -153,7 +153,7 @@ impl ForgeEditorApp {
                 self.preview_panel.select_asset(index);
             }
             
-            self.log(format!("📁 Preview set: {}", path.display()));
+            self.log(format!("📁 Preview set: {}", path.clone().display()));
         }
     }
     

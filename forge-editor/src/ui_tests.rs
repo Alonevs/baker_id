@@ -16,6 +16,11 @@ pub fn test_editor_log() {
         hot_reload_panel: HotReloadPanel::new(),
         hot_reload_manager: HotReloadManager::new(),
         file_watcher_integration: None,
+        explorer_panel_integration: crate::explorer_panel_integration::ExplorerPanelIntegration::new(),
+        event_forge_widget: crate::event_forge::EventForgeWidget::new(),
+        property_panel: crate::property_panel::PropertyPanel::new(),
+        export_import_panel: crate::export_import_panel::ExportImportPanel::new(),
+        preview_panel: crate::preview_panel::PreviewPanel::new(),
     };
     app.log("Test log message".to_string());
     assert_eq!(app.logs.len(), 1);

@@ -90,4 +90,57 @@ pub use property_panel::{PropertyPanel, EntityId};
 pub use live_sync_manager::SyncEvent;
 pub use delta_sync::DeltaEncoder;
 
+pub struct VecStringDisplay(pub Vec<String>);
+
+impl std::fmt::Display for VecStringDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[")?;
+        for (i, item) in self.0.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", item)?;
+        }
+        write!(f, "]")
+    }
+}
+
+impl std::fmt::Debug for VecStringDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "VecStringDisplay([")?;
+        for (i, item) in self.0.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", item)?;
+        }
+        write!(f, "])")
+    }
+}
+
+impl Clone for VecStringDisplay {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl Default for VecStringDisplay {
+    fn default() -> Self {
+        Self(Vec::new())
+    }
+}
+
+impl VecStringDisplay {
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
+}
+
+impl<'a> Iterator for &'a VecStringDisplay {
+    type Item = &'a String;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.iter().next()
+    }
+}
+
 
