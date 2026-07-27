@@ -115,21 +115,4 @@ impl BitacoraManager {
             });
         });
     }
-    
-    /// Obtiene lista de entradas filtradas para la UI
-    pub fn get_entries_for_ui(&self) -> Vec<&BitacoraEntry> {
-        let mut entries: Vec<&BitacoraEntry> = self.entries.values().collect();
-        entries.sort_by_key(|e| e.id.clone());
-        entries
-    }
-    
-    /// Obtiene entrada por ID para la UI
-    pub fn get_entry_for_ui(&self, id: &str) -> Option<&BitacoraEntry> {
-        self.entries.get(id)
-    }
-    
-    /// Obtiene número total de entradas
-    pub fn entry_count(&self) -> usize {
-        self.entries.len()
-    }
 }

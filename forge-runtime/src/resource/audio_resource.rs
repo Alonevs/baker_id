@@ -1,7 +1,6 @@
 //! Audio Resource - Gestión de audio y música
 
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 
 // Importar trait Resource del módulo padre
 use super::resource_manager::{Resource, ResourceType};

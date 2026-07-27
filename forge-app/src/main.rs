@@ -9,7 +9,6 @@
 
 use eframe::egui;
 use eframe::NativeOptions;
-use std::collections::HashMap;
 use std::time::Instant;
 use forge_runtime::resource::ResourceManager;
 use forge_runtime::resource::ResourceType;
@@ -18,7 +17,6 @@ use forge_runtime::entities::Position2D;
 use forge_runtime::entities::Velocity2D;
 use forge_runtime::entities::Size2D;
 use forge_runtime::entities::Color2D;
-use forge_types::Vec2;
 
 /// Configuración de la aplicación
 #[derive(Debug, Clone)]

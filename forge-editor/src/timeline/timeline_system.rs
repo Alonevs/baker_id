@@ -1,7 +1,5 @@
 //! Timeline System Editor - Adaptador para conectar con runtime
 
-use crate::timeline::timeline_editor::TimelineEditor;
-
 // Stub para TimelineSystem en editor
 // Se usa TimelineEditor para la UI
 #[derive(Debug, Clone)]

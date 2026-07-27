@@ -1,6 +1,5 @@
 //! Timeline System - Sistema central de línea de tiempo
 
-use crate::timeline::timeline::Timeline;
 use crate::timeline::timeline_manager::TimelineManager;
 use std::collections::HashMap;
 

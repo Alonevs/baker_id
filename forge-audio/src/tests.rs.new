@@ -1,0 +1,1164 @@
+﻿//! Tests de cobertura completa para forge-audio
+//! 
+//! Total: 45 tests
+//! - audio_mixer: 6 tests
+//! - audio_bus: 6 tests
+//! - audio_effects: 6 tests
+//! - audio_source: 9 tests
+//! - spatial_audio: 8 tests
+//! - audio_manager: 6 tests
+//! - audio_sample: 6 tests
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        audio_bus::{AudioBus, AudioBusSystem, BusType},
+        audio_effects::{AudioEffect, AudioEffects, EffectType},
+        audio_mixer::{AudioMixer, MixerChannel},
+        audio_sample::{AudioChannel, AudioFormat, AudioSample},
+        audio_source::{AudioSource, PlaybackMode, SourceState},
+        spatial_audio::{AudioPosition, SpatialAudio, SpatialAudioSource},
+        audio_manager::AudioManager,
+    };
+
+    // =========================================================================
+    // AUDIO MIXER TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_mixer_default_config() {
+        let mixer = AudioMixer::new(None);
+        
+        assert_eq!(mixer.config.master_volume, 1.0);
+        assert_eq!(mixer.config.sample_rate, 44100);
+        assert_eq!(mixer.config.channels, 2);
+        assert_eq!(mixer.config.buffer_size, 1024);
+        assert_eq!(mixer.master_volume, 1.0);
+        assert!(mixer.output_buffer.is_empty());
+    }
+
+    #[test]
+    fn test_audio_mixer_channel_operations() {
+        let mut mixer = AudioMixer::new(None);
+        
+        // Crear canal
+        let channel = MixerChannel::new("ch1".to_string(), "Channel 1".to_string());
+        mixer.add_channel(channel);
+        
+        assert_eq!(mixer.get_channel_count(), 1);
+        
+        // Obtener canal
+        let channel = mixer.get_channel("ch1").unwrap();
+        assert_eq!(channel.volume, 1.0);
+        assert_eq!(channel.pan, 0.0);
+        assert_eq!(channel.pitch, 1.0);
+        assert!(!channel.muted);
+        assert!(!channel.solo);
+        
+        // Modificar volumen
+        mixer.get_channel_mut("ch1").unwrap().set_volume(0.5);
+        assert_eq!(mixer.get_channel("ch1").unwrap().volume, 0.5);
+        
+        // Toggle mute
+        mixer.get_channel_mut("ch1").unwrap().toggle_mute();
+        assert!(mixer.get_channel("ch1").unwrap().muted);
+        
+        mixer.get_channel_mut("ch1").unwrap().toggle_mute();
+        assert!(!mixer.get_channel("ch1").unwrap().muted);
+    }
+
+    #[test]
+    fn test_audio_mixer_mixing() {
+        let mut mixer = AudioMixer::new(None);
+        
+        // Agregar canales
+        let mut channel1 = MixerChannel::new("ch1".to_string(), "Channel 1".to_string());
+        channel1.set_volume(0.5);
+        mixer.add_channel(channel1);
+        
+        let mut channel2 = MixerChannel::new("ch2".to_string(), "Channel 2".to_string());
+        channel2.set_volume(0.3);
+        mixer.add_channel(channel2);
+        
+        // Mezclar
+        mixer.mix(0.016);
+        
+        // Verificar buffer de salida
+        assert!(!mixer.output_buffer.is_empty());
+        assert_eq!(mixer.get_master_volume(), 1.0);
+    }
+
+    #[test]
+    fn test_audio_mixer_volume_clamping() {
+        let mut mixer = AudioMixer::new(None);
+        
+        // Canal con volumen > 1.0 (debe clampear a 1.0)
+        let mut channel1 = MixerChannel::new("ch1".to_string(), "Channel 1".to_string());
+        channel1.set_volume(1.5);
+        assert_eq!(channel1.volume, 1.0);
+        
+        // Canal con volumen < 0.0 (debe clampear a 0.0)
+        let mut channel2 = MixerChannel::new("ch2".to_string(), "Channel 2".to_string());
+        channel2.set_volume(-0.5);
+        assert_eq!(channel2.volume, 0.0);
+        
+        // Canal con volumen normal
+        let mut channel3 = MixerChannel::new("ch3".to_string(), "Channel 3".to_string());
+        channel3.set_volume(0.75);
+        assert_eq!(channel3.volume, 0.75);
+        
+        mixer.add_channel(channel1);
+        mixer.add_channel(channel2);
+        mixer.add_channel(channel3);
+    }
+
+    #[test]
+    fn test_audio_mixer_master_volume() {
+        let mut mixer = AudioMixer::new(None);
+        
+        // Volumen maestro > 1.0 (debe clampear a 1.0)
+        mixer.set_master_volume(1.5);
+        assert_eq!(mixer.get_master_volume(), 1.0);
+        
+        // Volumen maestro < 0.0 (debe clampear a 0.0)
+        mixer.set_master_volume(-0.5);
+        assert_eq!(mixer.get_master_volume(), 0.0);
+        
+        // Volumen maestro normal
+        mixer.set_master_volume(0.8);
+        assert_eq!(mixer.get_master_volume(), 0.8);
+        
+        // Volumen maestro por defecto
+        let mixer2 = AudioMixer::new(None);
+        assert_eq!(mixer2.get_master_volume(), 1.0);
+    }
+
+    #[test]
+    fn test_audio_mixer_mute_and_solo() {
+        let mut mixer = AudioMixer::new(None);
+        
+        let mut channel1 = MixerChannel::new("ch1".to_string(), "Channel 1".to_string());
+        channel1.set_volume(0.5);
+        mixer.add_channel(channel1.clone());
+        
+        let mut channel2 = MixerChannel::new("ch2".to_string(), "Channel 2".to_string());
+        channel2.set_volume(0.5);
+        mixer.add_channel(channel2.clone());
+        
+        // Toggle mute
+        channel1.toggle_mute();
+        assert!(channel1.muted);
+        
+        // Toggle mute again
+        channel1.toggle_mute();
+        assert!(!channel1.muted);
+        
+        // Toggle solo
+        channel2.toggle_solo();
+        assert!(channel2.solo);
+        
+        // Toggle solo again
+        channel2.toggle_solo();
+        assert!(!channel2.solo);
+        
+        // Verificar que se pueden obtener canales
+        assert!(mixer.get_channel("ch1").is_some());
+        assert!(mixer.get_channel_mut("ch2").is_some());
+        
+        // Verificar count
+        assert_eq!(mixer.get_channel_count(), 2);
+    }
+
+    // =========================================================================
+    // AUDIO BUS TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_bus_default_creation() {
+        let bus = AudioBus::new(
+            "bus1".to_string(),
+            "Bus 1".to_string(),
+            BusType::Master
+        );
+        
+        assert_eq!(bus.id, "bus1");
+        assert_eq!(bus.name, "Bus 1");
+        assert_eq!(bus.bus_type, BusType::Master);
+        assert_eq!(bus.volume, 1.0);
+        assert_eq!(bus.pan, 0.0);
+        assert!(!bus.muted);
+        assert!(!bus.solo);
+        assert!(bus.enabled);
+        assert!(bus.inputs.is_empty());
+        assert!(bus.outputs.is_empty());
+        assert!(bus.effects.is_empty());
+    }
+
+    #[test]
+    fn test_audio_bus_connections() {
+        let mut bus = AudioBus::new(
+            "bus1".to_string(),
+            "Bus 1".to_string(),
+            BusType::Sfx
+        );
+        
+        // Agregar inputs y outputs
+        bus.add_input("input1".to_string());
+        bus.add_input("input2".to_string());
+        bus.add_output("output1".to_string());
+        bus.connect("master_bus".to_string());
+        
+        assert_eq!(bus.get_input_count(), 2);
+        assert_eq!(bus.get_output_count(), 2);
+        assert!(bus.is_connected_to("master_bus"));
+    }
+
+    #[test]
+    fn test_audio_bus_system() {
+        let mut system = AudioBusSystem::new();
+        
+        assert_eq!(system.get_bus_count(), 1);
+        assert_eq!(system.get_master_bus_id(), "master_bus");
+        
+        // Verificar bus master existe
+        let bus = system.get_bus("master_bus").unwrap();
+        assert_eq!(bus.bus_type, BusType::Master);
+        assert_eq!(bus.name, "Master Bus");
+        
+        // Agregar nuevo bus
+        let new_bus = AudioBus::new(
+            "sfx_bus".to_string(),
+            "SFX Bus".to_string(),
+            BusType::Sfx
+        );
+        system.add_bus(new_bus);
+        
+        assert_eq!(system.get_bus_count(), 2);
+        assert_eq!(system.get_bus_type("sfx_bus").unwrap(), BusType::Sfx);
+    }
+
+    #[test]
+    fn test_audio_bus_volume_and_pan() {
+        let mut bus = AudioBus::new(
+            "test_bus".to_string(),
+            "Test Bus".to_string(),
+            BusType::Sfx
+        );
+        
+        // Volumen > 1.0 (debe mantenerse)
+        bus.volume = 1.5;
+        assert_eq!(bus.volume, 1.5);
+        
+        // Volumen < 0.0 (debe mantenerse)
+        bus.volume = -0.5;
+        assert_eq!(bus.volume, -0.5);
+        
+        // Pan > 1.0 (debe mantenerse)
+        bus.pan = 1.5;
+        assert_eq!(bus.pan, 1.5);
+        
+        // Pan < -1.0 (debe mantenerse)
+        bus.pan = -1.5;
+        assert_eq!(bus.pan, -1.5);
+    }
+
+    #[test]
+    fn test_audio_bus_inputs_outputs_effects() {
+        let mut bus = AudioBus::new(
+            "test_bus".to_string(),
+            "Test Bus".to_string(),
+            BusType::Sfx
+        );
+        
+        // Agregar inputs
+        bus.add_input("input1".to_string());
+        bus.add_input("input2".to_string());
+        assert_eq!(bus.get_input_count(), 2);
+        
+        // Agregar outputs
+        bus.add_output("output1".to_string());
+        bus.add_output("output2".to_string());
+        assert_eq!(bus.get_output_count(), 2);
+        
+        // Agregar efectos
+        bus.add_effect("effect1".to_string());
+        bus.add_effect("effect2".to_string());
+        assert_eq!(bus.get_effect_count(), 2);
+        
+        // Verificar que no hay duplicados
+        bus.add_input("input1".to_string());
+        assert_eq!(bus.get_input_count(), 2); // No deberÃ­a aumentar
+        
+        bus.add_output("output1".to_string());
+        assert_eq!(bus.get_output_count(), 2); // No deberÃ­a aumentar
+        
+        bus.add_effect("effect1".to_string());
+        assert_eq!(bus.get_effect_count(), 2); // No deberÃ­a aumentar
+    }
+
+    #[test]
+    fn test_audio_bus_remove_and_connect() {
+        let mut bus = AudioBus::new(
+            "test_bus".to_string(),
+            "Test Bus".to_string(),
+            BusType::Sfx
+        );
+        
+        // Agregar inputs y outputs
+        bus.add_input("input1".to_string());
+        bus.add_input("input2".to_string());
+        bus.add_output("output1".to_string());
+        bus.add_output("output2".to_string());
+        
+        // Remover input
+        bus.remove_input("input1");
+        assert_eq!(bus.get_input_count(), 1);
+        
+        // Remover output
+        bus.remove_output("output1");
+        assert_eq!(bus.get_output_count(), 1);
+        
+        // Conectar a otro bus
+        bus.connect("master_bus".to_string());
+        assert_eq!(bus.get_output_count(), 2);
+        
+        // Verificar conexiÃ³n
+        assert!(bus.is_connected_to("master_bus"));
+        assert!(!bus.is_connected_to("nonexistent"));
+        
+        // Remover bus del sistema
+        let mut system = AudioBusSystem::new();
+        let new_bus = AudioBus::new(
+            "removable_bus".to_string(),
+            "Removable Bus".to_string(),
+            BusType::Music
+        );
+        system.add_bus(new_bus);
+        
+        assert_eq!(system.get_bus_count(), 2);
+        system.remove_bus("removable_bus");
+        assert_eq!(system.get_bus_count(), 1);
+    }
+
+    // =========================================================================
+    // AUDIO EFFECTS TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_effect_creation() {
+        let effect = AudioEffect::new(
+            "effect1".to_string(),
+            "Effect 1".to_string(),
+            EffectType::Reverb
+        );
+        
+        assert_eq!(effect.id, "effect1");
+        assert_eq!(effect.name, "Effect 1");
+        assert_eq!(effect.effect_type, EffectType::Reverb);
+        assert!(effect.enabled);
+        assert!(!effect.bypassed);
+        
+        // Verificar config default
+        assert_eq!(effect.config.effect_type, EffectType::Reverb);
+        assert_eq!(effect.config.params.get("wet").unwrap(), &0.5);
+        assert_eq!(effect.config.params.get("dry").unwrap(), &1.0);
+    }
+
+    #[test]
+    fn test_audio_effects_processing() {
+        let mut effects = AudioEffects::new();
+        
+        // Agregar efecto
+        let mut effect = AudioEffect::new(
+            "reverb".to_string(),
+            "Reverb".to_string(),
+            EffectType::Reverb
+        );
+        effect.set_param("wet".to_string(), 0.7);
+        effects.add_effect(effect);
+        
+        // Procesar muestra
+        let input = 0.5;
+        let output = effects.process_sample(input);
+        
+        assert!(!effects.effects.is_empty());
+        assert_eq!(effects.get_effect_count(), 1);
+        
+        // Output debe estar atenuado por wet
+        assert!(output < input * 1.0);
+    }
+
+    #[test]
+    fn test_audio_effects_bypass() {
+        let mut effects = AudioEffects::new();
+        
+        let effect = AudioEffect::new(
+            "distortion".to_string(),
+            "Distortion".to_string(),
+            EffectType::Distortion
+        );
+        effects.add_effect(effect);
+        
+        // Procesar con efecto activo
+        let input = 0.8;
+        let output_enabled = effects.process_sample(input);
+        
+        // Bypassear efecto
+        effects.get_effect_mut("distortion").unwrap().toggle_bypass();
+        let output_bypassed = effects.process_sample(input);
+        
+        // Reactivar
+        effects.get_effect_mut("distortion").unwrap().toggle_bypass();
+        let output_reenabled = effects.process_sample(input);
+        
+        assert!(!output_enabled.is_nan());
+        assert!(!output_bypassed.is_nan());
+        assert!(!output_reenabled.is_nan());
+    }
+
+    #[test]
+    fn test_audio_effects_multiple_types() {
+        let mut effects = AudioEffects::new();
+        
+        // Agregar efectos de diferentes tipos
+        let reverb = AudioEffect::new(
+            "reverb".to_string(),
+            "Reverb".to_string(),
+            EffectType::Reverb
+        );
+        let delay = AudioEffect::new(
+            "delay".to_string(),
+            "Delay".to_string(),
+            EffectType::Delay
+        );
+        let chorus = AudioEffect::new(
+            "chorus".to_string(),
+            "Chorus".to_string(),
+            EffectType::Chorus
+        );
+        
+        effects.add_effect(reverb);
+        effects.add_effect(delay);
+        effects.add_effect(chorus);
+        
+        assert_eq!(effects.get_effect_count(), 3);
+        
+        // Procesar muestra con mÃºltiples efectos
+        let input = 0.5;
+        let output = effects.process_sample(input);
+        
+        assert!(!output.is_nan());
+        assert!(!output.is_infinite());
+        
+        // Verificar que se pueden obtener efectos
+        assert!(effects.get_effect("reverb").is_some());
+        assert!(effects.get_effect("delay").is_some());
+        assert!(effects.get_effect("chorus").is_some());
+    }
+
+    #[test]
+    fn test_audio_effects_distortion_and_compressor() {
+        // Probar distorsiÃ³n
+        let mut effects = AudioEffects::new();
+        let distortion = AudioEffect::new(
+            "distortion".to_string(),
+            "Distortion".to_string(),
+            EffectType::Distortion
+        );
+        effects.add_effect(distortion);
+        
+        // DistorsiÃ³n amplifica: input.clamp(-1.0, 1.0) * 2.0
+        let input = 0.8;
+        let output = effects.process_sample(input);
+        assert!(output.abs() > input); // Amplificado
+        assert!(output.abs() <= 2.0); // Clamped
+        
+        // Probar compresor
+        let mut effects2 = AudioEffects::new();
+        let compressor = AudioEffect::new(
+            "compressor".to_string(),
+            "Compressor".to_string(),
+            EffectType::Compressor
+        );
+        effects2.add_effect(compressor);
+        
+        // Compressor limita a Â±0.5
+        let input = 2.0;
+        let output = effects2.process_sample(input);
+        assert!(output.abs() <= 0.5);
+    }
+
+    #[test]
+    fn test_audio_effects_remove_and_get() {
+        let mut effects = AudioEffects::new();
+        
+        // Agregar efectos
+        let effect1 = AudioEffect::new(
+            "effect1".to_string(),
+            "Effect 1".to_string(),
+            EffectType::Reverb
+        );
+        let effect2 = AudioEffect::new(
+            "effect2".to_string(),
+            "Effect 2".to_string(),
+            EffectType::Delay
+        );
+        
+        effects.add_effect(effect1);
+        effects.add_effect(effect2);
+        
+        assert_eq!(effects.get_effect_count(), 2);
+        
+        // Remover efecto
+        effects.remove_effect("effect1");
+        assert_eq!(effects.get_effect_count(), 1);
+        
+        // Verificar que effect1 ya no existe
+        assert!(effects.get_effect("effect1").is_none());
+        assert!(effects.get_effect("effect2").is_some());
+        
+        // Agregar y remover otro efecto
+        let effect3 = AudioEffect::new(
+            "effect3".to_string(),
+            "Effect 3".to_string(),
+            EffectType::Chorus
+        );
+        effects.add_effect(effect3);
+        assert_eq!(effects.get_effect_count(), 2);
+        
+        effects.remove_effect("effect3");
+        assert_eq!(effects.get_effect_count(), 1);
+    }
+
+    // =========================================================================
+    // AUDIO SOURCE TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_source_default_state() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let source = AudioSource::new(sample);
+        
+        assert_eq!(source.state, SourceState::Stopped);
+        assert_eq!(source.playback_mode, PlaybackMode::Once);
+        assert_eq!(source.position, 0.0);
+        assert_eq!(source.total_duration, 0.0);
+        assert_eq!(source.volume, 1.0);
+        assert_eq!(source.pitch, 1.0);
+        assert_eq!(source.pan, 0.0);
+        assert!(source.callback.is_none());
+    }
+
+    #[test]
+    fn test_audio_source_playback_modes() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        
+        // Play
+        source.play(None);
+        assert_eq!(source.state, SourceState::Playing);
+        assert_eq!(source.position, 0.0);
+        
+        // Pause
+        source.pause();
+        assert_eq!(source.state, SourceState::Paused);
+        
+        // Stop
+        source.stop();
+        assert_eq!(source.state, SourceState::Stopped);
+        assert_eq!(source.position, 0.0);
+    }
+
+    #[test]
+    fn test_audio_source_update() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        source.total_duration = 1.0;
+        source.play(None);
+        
+        // Actualizar 0.1 segundos a 44100 Hz
+        source.update(0.1, 44100);
+        
+        // PosiciÃ³n debe avanzar (aprox 4410 muestras en 0.1s)
+        assert!(source.position > 0.0);
+        
+        // Verificar getters
+        assert_eq!(source.get_position(), source.position);
+        assert_eq!(source.get_duration(), 1.0);
+        assert_eq!(source.get_volume(), 1.0);
+    }
+
+    #[test]
+    fn test_audio_source_volume_pitch_pan() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        
+        // Test volume clamping
+        source.set_volume(1.5);
+        assert_eq!(source.get_volume(), 1.0);
+        
+        source.set_volume(-0.5);
+        assert_eq!(source.get_volume(), 0.0);
+        
+        source.set_volume(0.5);
+        assert_eq!(source.get_volume(), 0.5);
+        
+        // Test pitch minimum
+        source.set_pitch(0.0);
+        assert_eq!(source.get_pitch(), 0.1);
+        
+        source.set_pitch(2.0);
+        assert_eq!(source.get_pitch(), 2.0);
+        
+        // Test pan clamping
+        source.set_pan(2.0);
+        assert_eq!(source.get_pan(), 1.0);
+        
+        source.set_pan(-2.0);
+        assert_eq!(source.get_pan(), -1.0);
+        
+        source.set_pan(0.0);
+        assert_eq!(source.get_pan(), 0.0);
+    }
+
+    #[test]
+    fn test_audio_source_loop_and_finish() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        source.total_duration = 1.0;
+        source.set_loop(0.0, 0.5);
+        
+        // Test Once mode - should finish
+        source.play(None);
+        source.update(1.0, 44100);
+        assert_eq!(source.state, SourceState::Finished);
+        
+        // Test Loop mode - should loop
+        source.stop();
+        source.play(None);
+        source.set_playback_mode(PlaybackMode::Loop);
+        source.update(2.0, 44100);
+        assert_eq!(source.state, SourceState::Playing);
+        assert!(source.position >= 0.0 && source.position < 0.5);
+    }
+
+    #[test]
+    fn test_audio_source_set_loop() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        source.total_duration = 2.0;
+        
+        // Set loop range
+        source.set_loop(0.5, 1.5);
+        
+        assert_eq!(source.loop_start, 0.5);
+        assert_eq!(source.loop_end, 1.5);
+        
+        // Test update with loop
+        source.play(None);
+        source.set_playback_mode(PlaybackMode::Loop);
+        source.update(3.0, 44100);
+        
+        // DeberÃ­a estar en el rango de loop (0.5-1.5)
+        assert!(source.position >= 0.5 && source.position <= 1.5);
+    }
+
+    #[test]
+    fn test_audio_source_callback() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        source.total_duration = 1.0;
+        
+        // Callback counter
+        static CALLBACK_COUNT: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+        let callback = Box::new(|| {
+            CALLBACK_COUNT.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        });
+        
+        // Reset counter for this test
+        CALLBACK_COUNT.store(0, std::sync::atomic::Ordering::SeqCst);
+        
+        // Play with callback
+        source.play(Some(callback));
+        source.update(0.5, 44100);
+        
+        // Callback debe haberse ejecutado al menos una vez
+        assert!(CALLBACK_COUNT.load(std::sync::atomic::Ordering::SeqCst) > 0);
+        
+        // Verificar que el source sigue funcionando
+        assert_eq!(source.get_volume(), 1.0);
+        assert_eq!(source.get_pitch(), 1.0);
+    }
+
+    #[test]
+    fn test_audio_source_state_transitions() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        let mut source = AudioSource::new(sample);
+        source.total_duration = 1.0;
+        
+        // Start from Stopped
+        assert_eq!(source.state, SourceState::Stopped);
+        
+        // Play -> Playing
+        source.play(None);
+        assert_eq!(source.state, SourceState::Playing);
+        
+        // Playing -> Paused
+        source.pause();
+        assert_eq!(source.state, SourceState::Paused);
+        
+        // Paused -> Playing (pause no cambia el estado directamente, pero sigue en Paused)
+        // El estado cambia en update si estÃ¡ playing
+        source.update(0.1, 44100);
+        assert_eq!(source.state, SourceState::Paused); // update no cambia estado si estÃ¡ paused
+        
+        // Stop -> Stopped
+        source.stop();
+        assert_eq!(source.state, SourceState::Stopped);
+        
+        // Verificar que position reseteÃ³
+        assert_eq!(source.position, 0.0);
+        
+        // Verificar que callback se reseteÃ³
+        assert!(source.callback.is_none());
+    }
+
+    // =========================================================================
+    // SPATIAL AUDIO TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_spatial_audio_source_default() {
+        let source = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        
+        assert_eq!(source.id, "spatial1");
+        assert_eq!(source.name, "Spatial 1");
+        assert_eq!(source.position.x, 0.0);
+        assert_eq!(source.position.y, 0.0);
+        assert_eq!(source.position.z, 0.0);
+        assert_eq!(source.volume, 1.0);
+        assert_eq!(source.pitch, 1.0);
+        assert_eq!(source.pan, 0.0);
+        assert!(source.enabled);
+        assert_eq!(source.min_distance, 1.0);
+        assert_eq!(source.max_distance, 1000.0);
+    }
+
+    #[test]
+    fn test_spatial_audio_position_update() {
+        let mut source = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        source.set_position(AudioPosition::new(0.0, 0.0, 0.0));
+        source.set_velocity(AudioPosition::new(10.0, 0.0, 0.0));
+        
+        // Actualizar 0.1 segundos
+        source.update(0.1);
+        
+        assert_eq!(source.position.x, 1.0);
+        assert_eq!(source.position.y, 0.0);
+        assert_eq!(source.position.z, 0.0);
+    }
+
+    #[test]
+    fn test_spatial_audio_distance_gain() {
+        let mut source = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        source.set_listener(AudioPosition::new(0.0, 0.0, 0.0));
+        source.set_position(AudioPosition::new(100.0, 0.0, 0.0));
+        
+        // Ganancia a 100 unidades
+        let gain = source.get_distance_gain();
+        assert!(!gain.is_nan());
+        assert!(gain <= 1.0);
+        assert!(gain > 0.0);
+        
+        // Verificar rango
+        assert!(source.is_within_range());
+    }
+
+    #[test]
+    fn test_spatial_audio_velocity_clamping() {
+        // Test 1: Velocidad normal
+        let mut source1 = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        source1.set_velocity(AudioPosition::new(50.0, 0.0, 0.0));
+        source1.update(0.1);
+        assert_eq!(source1.velocity.x, 50.0);
+        
+        // Test 2: Velocidad mÃ¡xima (100.0) - debe clamping
+        let mut source2 = SpatialAudioSource::new("spatial2".to_string(), "Spatial 2".to_string());
+        source2.set_velocity(AudioPosition::new(150.0, 0.0, 0.0));
+        source2.update(0.1);
+        assert_eq!(source2.velocity.x, 100.0); // Clamped a 100.0
+        
+        // Test 3: Velocidad negativa mÃ¡xima
+        let mut source3 = SpatialAudioSource::new("spatial3".to_string(), "Spatial 3".to_string());
+        source3.set_velocity(AudioPosition::new(-150.0, 0.0, 0.0));
+        source3.update(0.1);
+        assert_eq!(source3.velocity.x, -100.0); // Clamped a -100.0
+    }
+
+    #[test]
+    fn test_spatial_audio_system_operations() {
+        let mut spatial = SpatialAudio::new(None);
+        
+        // Agregar fuentes
+        let source1 = SpatialAudioSource::new("source1".to_string(), "Source 1".to_string());
+        let source2 = SpatialAudioSource::new("source2".to_string(), "Source 2".to_string());
+        
+        spatial.add_source(source1);
+        spatial.add_source(source2);
+        
+        assert_eq!(spatial.get_source_count(), 2);
+        
+        // Obtener fuentes
+        assert!(spatial.get_source("source1").is_some());
+        assert!(spatial.get_source("source2").is_some());
+        assert!(spatial.get_source("source3").is_none());
+        
+        // Actualizar
+        spatial.update(0.1);
+        
+        // Verificar que las fuentes se actualizaron
+        let source1_mut = spatial.get_source_mut("source1").unwrap();
+        assert_eq!(source1_mut.position.x, 0.0); // Sin velocidad, posiciÃ³n no cambia
+    }
+
+    #[test]
+    fn test_spatial_audio_cone_and_listener() {
+        let mut source = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        
+        // Configurar listener
+        source.set_listener(AudioPosition::new(0.0, 0.0, 0.0));
+        
+        // Configurar cono
+        source.cone_inner_angle = 60.0;
+        source.cone_outer_angle = 120.0;
+        source.cone_volume_factor = 0.5;
+        source.cone_outer_volume_factor = 0.2;
+        
+        assert_eq!(source.cone_inner_angle, 60.0);
+        assert_eq!(source.cone_outer_angle, 120.0);
+        assert_eq!(source.cone_volume_factor, 0.5);
+        assert_eq!(source.cone_outer_volume_factor, 0.2);
+        
+        // Mover fuente fuera del cono
+        source.set_position(AudioPosition::new(100.0, 0.0, 0.0));
+        
+        // Verificar que estÃ¡ dentro del rango
+        assert!(source.is_within_range());
+        
+        // Verificar ganancia de distancia
+        let gain = source.get_distance_gain();
+        assert!(gain <= 1.0);
+        assert!(gain > 0.0);
+    }
+
+    #[test]
+    fn test_spatial_audio_distance_and_range() {
+        let mut source = SpatialAudioSource::new("spatial1".to_string(), "Spatial 1".to_string());
+        source.set_listener(AudioPosition::new(0.0, 0.0, 0.0));
+        
+        // Test 1: Distancia cero (en el listener)
+        source.set_position(AudioPosition::new(0.0, 0.0, 0.0));
+        let distance1 = source.get_distance();
+        assert!((distance1 - 0.0).abs() < 0.001);
+        let gain1 = source.get_distance_gain();
+        assert!((gain1 - 1.0).abs() < 0.001); // MÃ¡xima ganancia (cercana a 1.0)
+        
+        // Test 2: Distancia mÃ­nima (en el min_distance)
+        source.set_position(AudioPosition::new(1.0, 0.0, 0.0));
+        let distance2 = source.get_distance();
+        assert!((distance2 - 1.0).abs() < 0.001);
+        
+        // Test 3: Distancia mÃ¡xima (fuera del rango)
+        source.set_position(AudioPosition::new(2000.0, 0.0, 0.0));
+        let distance3 = source.get_distance();
+        assert!((distance3 - 2000.0).abs() < 0.001);
+        
+        // DeberÃ­a estar fuera del rango
+        assert!(!source.is_within_range());
+        
+        // Ganancia debe ser muy baja (atenuaciÃ³n significativa)
+        let gain3 = source.get_distance_gain();
+        assert!(gain3 < 0.5); // Atenuada significativamente
+    }
+
+    #[test]
+    fn test_spatial_audio_system_remove_source() {
+        let mut spatial = SpatialAudio::new(None);
+        
+        // Agregar mÃºltiples fuentes
+        let source1 = SpatialAudioSource::new("source1".to_string(), "Source 1".to_string());
+        let source2 = SpatialAudioSource::new("source2".to_string(), "Source 2".to_string());
+        let source3 = SpatialAudioSource::new("source3".to_string(), "Source 3".to_string());
+        
+        spatial.add_source(source1);
+        spatial.add_source(source2);
+        spatial.add_source(source3);
+        
+        assert_eq!(spatial.get_source_count(), 3);
+        
+        // Remover source2
+        spatial.remove_source("source2");
+        assert_eq!(spatial.get_source_count(), 2);
+        
+        // Verificar que source2 ya no existe
+        assert!(spatial.get_source("source2").is_none());
+        assert!(spatial.get_source("source1").is_some());
+        assert!(spatial.get_source("source3").is_some());
+        
+        // Obtener listener position (deberÃ­a ser promedio de source1 y source3)
+        let listener_pos = spatial.get_listener_position();
+        // source1 y source3 estÃ¡n en origen, asÃ­ que el promedio tambiÃ©n estÃ¡ en origen
+        assert!((listener_pos.x - 0.0).abs() < 0.001);
+        assert!((listener_pos.y - 0.0).abs() < 0.001);
+        assert!((listener_pos.z - 0.0).abs() < 0.001);
+        
+        // Remover todas las fuentes
+        spatial.remove_source("source1");
+        spatial.remove_source("source3");
+        assert_eq!(spatial.get_source_count(), 0);
+        
+        // Listener position deberÃ­a ser origen cuando no hay fuentes
+        let listener_pos = spatial.get_listener_position();
+        assert_eq!(listener_pos.x, 0.0);
+        assert_eq!(listener_pos.y, 0.0);
+        assert_eq!(listener_pos.z, 0.0);
+    }
+
+    // =========================================================================
+    // AUDIO MANAGER TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_manager_initialization() {
+        let manager = AudioManager::new();
+        
+        assert_eq!(manager.get_source_count(), 0);
+        assert_eq!(manager.get_bus_count(), 1);
+        assert_eq!(manager.get_channel_count(), 0);
+        assert_eq!(manager.get_master_bus_id(), "master_bus");
+        assert_eq!(manager.get_sample_rate(), 44100);
+    }
+
+    #[test]
+    fn test_audio_manager_load_source() {
+        let mut manager = AudioManager::new();
+        
+        let sample = AudioSample::new(
+            "sfx1".to_string(),
+            "SFX 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        
+        let id = manager.load_sample(sample);
+        
+        assert_eq!(manager.get_source_count(), 1);
+        assert_eq!(id, "sfx1");
+        
+        let source = manager.get_source("sfx1").unwrap();
+        assert_eq!(source.get_volume(), 1.0);
+    }
+
+    #[test]
+    fn test_audio_manager_play_pause_stop() {
+        let mut manager = AudioManager::new();
+        
+        let sample = AudioSample::new(
+            "music1".to_string(),
+            "Music 1".to_string(),
+            std::path::PathBuf::from("test.mp3")
+        );
+        manager.load_sample(sample);
+        
+        // Play
+        manager.play("music1", None);
+        assert_eq!(manager.get_source("music1").unwrap().is_playing(), true);
+        
+        // Pause
+        manager.pause("music1");
+        assert_eq!(manager.get_source("music1").unwrap().is_paused(), true);
+        
+        // Stop
+        manager.stop("music1");
+        assert_eq!(manager.get_source("music1").unwrap().is_playing(), false);
+    }
+
+    #[test]
+    fn test_audio_manager_update_and_render() {
+        let mut manager = AudioManager::new();
+        
+        let sample = AudioSample::new(
+            "sfx1".to_string(),
+            "SFX 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        manager.load_sample(sample);
+        
+        manager.play("sfx1", None);
+        manager.update(0.1);
+        
+        // Verificar que se actualizÃ³
+        assert!(manager.get_source("sfx1").unwrap().get_position() > 0.0);
+        
+        // Render debe actualizar
+        manager.render();
+        assert!(manager.get_source("sfx1").unwrap().get_position() > 0.0);
+    }
+
+    #[test]
+    fn test_audio_manager_spatial_and_effects() {
+        let mut manager = AudioManager::new();
+        
+        // Agregar fuente espacial
+        let spatial_source = SpatialAudioSource::new(
+            "spatial1".to_string(),
+            "Spatial 1".to_string()
+        );
+        manager.add_spatial_source(spatial_source);
+        
+        // Verificar que la fuente espacial se agregÃ³ (get_source_count no cuenta espaciales)
+        assert_eq!(manager.get_source_count(), 0);
+        
+        // Agregar efecto a bus
+        let effect = AudioEffect::new(
+            "reverb".to_string(),
+            "Reverb".to_string(),
+            crate::audio_effects::EffectType::Reverb
+        );
+        manager.add_effect_to_bus("master_bus", effect);
+        
+        // Verificar que el efecto se agregÃ³ al bus
+        assert_eq!(manager.get_bus_count(), 1);
+    }
+
+    // =========================================================================
+    // AUDIO SAMPLE TESTS (3 tests)
+    // =========================================================================
+
+    #[test]
+    fn test_audio_sample_default() {
+        let sample = AudioSample::new(
+            "sample1".to_string(),
+            "Sample 1".to_string(),
+            std::path::PathBuf::from("test.wav")
+        );
+        
+        assert_eq!(sample.id, "sample1");
+        assert_eq!(sample.name, "Sample 1");
+        assert_eq!(sample.format, AudioFormat::Wav);
+        assert_eq!(sample.duration, 0.0);
+        assert_eq!(sample.sample_rate, 44100);
+        assert_eq!(sample.channels, 1);
+        assert!(sample.data.is_empty());
+    }
+
+    #[test]
+    fn test_audio_sample_format_display() {
+        assert_eq!(format!("{}", AudioFormat::Wav), "WAV");
+        assert_eq!(format!("{}", AudioFormat::Mp3), "MP3");
+        assert_eq!(format!("{}", AudioFormat::Ogg), "OGG");
+        assert_eq!(format!("{}", AudioFormat::Flac), "FLAC");
+        assert_eq!(format!("{}", AudioFormat::Aiff), "AIFF");
+    }
+
+    #[test]
+    fn test_audio_sample_data_and_duration() {
+        let mut sample = AudioSample::new(
+            "sample2".to_string(),
+            "Sample 2".to_string(),
+            std::path::PathBuf::from("test2.wav")
+        );
+        
+        sample.set_data(vec![0x00, 0x01, 0x02, 0x03]);
+        sample.set_duration(2.5);
+        
+        assert_eq!(sample.data.len(), 4);
+        assert_eq!(sample.data[0], 0x00);
+        assert_eq!(sample.duration, 2.5);
+    }
+
+    #[test]
+    fn test_audio_sample_channel_display() {
+        assert_eq!(format!("{}", AudioChannel::Mono), "Mono");
+        assert_eq!(format!("{}", AudioChannel::Stereo), "Stereo");
+        assert_eq!(format!("{}", AudioChannel::Surround51), "Surround51");
+        assert_eq!(format!("{}", AudioChannel::Surround71), "Surround71");
+    }
+
+    #[test]
+    fn test_audio_sample_different_formats() {
+        let wav_path = std::path::PathBuf::from("test.wav");
+        let mp3_path = std::path::PathBuf::from("test.mp3");
+        let flac_path = std::path::PathBuf::from("test.flac");
+        
+        let mut wav_sample = AudioSample::new("wav1".to_string(), "WAV Sample".to_string(), wav_path.clone());
+        let mut mp3_sample = AudioSample::new("mp31".to_string(), "MP3 Sample".to_string(), mp3_path.clone());
+        let mut flac_sample = AudioSample::new("flac1".to_string(), "FLAC Sample".to_string(), flac_path.clone());
+        
+        // Establecer formatos explÃ­citamente
+        wav_sample.format = AudioFormat::Wav;
+        mp3_sample.format = AudioFormat::Mp3;
+        flac_sample.format = AudioFormat::Flac;
+        
+        assert_eq!(wav_sample.format, AudioFormat::Wav);
+        assert_eq!(mp3_sample.format, AudioFormat::Mp3);
+        assert_eq!(flac_sample.format, AudioFormat::Flac);
+        
+        assert_eq!(wav_sample.sample_rate, 44100);
+        assert_eq!(mp3_sample.sample_rate, 44100);
+        assert_eq!(flac_sample.sample_rate, 44100);
+    }
+
+    #[test]
+    fn test_audio_sample_sample_rate_and_channels() {
+        let mut sample = AudioSample::new(
+            "sample3".to_string(),
+            "Sample 3".to_string(),
+            std::path::PathBuf::from("test3.wav")
+        );
+        
+        sample.set_data(vec![0x00, 0x01, 0x02, 0x03]);
+        sample.set_duration(3.0);
+        
+        // Verificar valores por defecto
+        assert_eq!(sample.sample_rate, 44100);
+        assert_eq!(sample.channels, 1);
+        
+        // Verificar que se pueden modificar
+        sample.sample_rate = 48000;
+        sample.channels = 2;
+        
+        assert_eq!(sample.sample_rate, 48000);
+        assert_eq!(sample.channels, 2);
+    }

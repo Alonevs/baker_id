@@ -23,3 +23,6 @@ pub use audio_effects::{AudioEffects, AudioEffect, EffectType};
 pub use spatial_audio::{SpatialAudio, SpatialAudioSource, AudioPosition};
 pub use audio_manager::AudioManager;
 pub use audio_sample::{AudioSample, AudioFormat};
+
+#[cfg(test)]
+mod tests;

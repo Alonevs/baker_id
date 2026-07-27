@@ -3,10 +3,9 @@
 //! Sistema de renderizado 2D para el SDK.
 
 use egui::Color32;
-use egui::{Context, Rect, Ui, Vec2};
-use std::path::Path;
+use egui::{Rect, Ui};
 use forge_runtime::resource::sprite_resource::SpriteResource;
-use forge_types::Vec2 as ForgeVec2;
+use forge_types::Vec2;
 
 
 /// Configuración del render backend

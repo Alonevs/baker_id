@@ -85,7 +85,7 @@ impl TransitionEffect {
                         eframe::egui::Vec2::new(1000.0, 1000.0),
                     ),
                     eframe::egui::Rounding::ZERO,
-                    eframe::egui::Shape::Stroke(eframe::egui::Stroke::new(
+                    eframe::egui::Shape::stroke(eframe::egui::Stroke::new(
                         2.0,
                         eframe::egui::Color32::from_rgb(255, 255, 255),
                     )),
@@ -102,7 +102,7 @@ pub struct SceneData {
     pub id: String,
     pub name: String,
     pub entities: Vec<crate::Entity>,
-    pub components: HashMap<String, Vec<crate::Component>>,
+    pub components: HashMap<String, Vec<String>>,
     pub scripts: HashMap<String, String>,
     pub scene_settings: SceneSettings,
 }
@@ -150,7 +150,7 @@ pub struct Scene {
     pub id: String,
     pub name: String,
     pub entities: Vec<crate::Entity>,
-    pub components: HashMap<String, Vec<crate::Component>>,
+    pub components: HashMap<String, Vec<String>>,
     pub scripts: HashMap<String, String>,
     pub scene_settings: SceneSettings,
     pub is_active: bool,

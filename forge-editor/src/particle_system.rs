@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::sync::RwLock;
 use serde::{Serialize, Deserialize};
+use crate::math::Math;
 
 /// Animación de un sprite (secuencia de frames)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -307,12 +308,16 @@ pub struct ParticleEmitterConfig {
     pub count: usize,
 }
 
-
+/// Utilidades matemáticas
+pub mod math {
+    pub fn random() -> f32 {
+        std::time::Instant::now().elapsed().as_nanos() as f32 / 1_000_000_000.0
+    }
+}
 
 impl ParticleSystem {
     pub fn random() -> f32 {
-        let now = std::time::Instant::now().elapsed().as_nanos() as f32;
-        now / 1_000_000_000.0
+        math::random()
     }
 }
 

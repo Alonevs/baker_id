@@ -1,7 +1,6 @@
 //! Script Resource - Gestión de scripts de usuario
 
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 
 // Importar trait Resource del módulo padre
 use super::resource_manager::{Resource, ResourceType};

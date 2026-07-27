@@ -1,6 +1,6 @@
 use crate::excel_integration::{
     Workbook, ExcelSheet, Cell, Row, CellValue, CellType, CellStyle,
-    CellAlignHorizontal, CellAlignVertical, DataType, Column,
+    CellAlignHorizontal, CellAlignVertical, DataType, Column, SheetName,
 };
 
 /// Escritor de Excel para crear y modificar libros

@@ -1,6 +1,6 @@
 //! Entidades del juego 2D
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
 /// Componente de posición 2D
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -56,7 +56,6 @@ impl<'de> Deserialize<'de> for Color2D {
     where
         D: Deserializer<'de>,
     {
-        use serde::de::Error;
         use serde::de::MapAccess;
         use serde::de::Visitor;
         

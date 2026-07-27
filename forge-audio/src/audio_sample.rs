@@ -84,3 +84,14 @@ impl Default for AudioChannel {
         Self::Stereo
     }
 }
+
+impl std::fmt::Display for AudioChannel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Mono => write!(f, "Mono"),
+            Self::Stereo => write!(f, "Stereo"),
+            Self::Surround51 => write!(f, "Surround51"),
+            Self::Surround71 => write!(f, "Surround71"),
+        }
+    }
+}

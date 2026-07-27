@@ -405,8 +405,8 @@ pub struct AudioManager {
     sfx_manager: SfxManager,
     music_manager: MusicManager,
     mixer: AudioMixer,
-    scene_audio_states: HashMap<SceneId, AudioState>,
-    current_scene: Option<SceneId>,
+    scene_audio_states: HashMap<String, AudioState>,
+    current_scene: Option<String>,
 }
 
 impl AudioManager {
@@ -450,7 +450,7 @@ impl AudioManager {
     }
     
     /// Cargar música para escena actual
-    pub fn load_scene_music(&mut self, scene_id: SceneId, music_id: MusicTrackId, loop_: bool) {
+    pub fn load_scene_music(&mut self, scene_id: String, music_id: MusicTrackId, loop_: bool) {
         if let Err(_) = self.music_manager.load_music_track(music_id, "background", loop_) {
             // Música no cargada, ignorar
         }
@@ -463,7 +463,7 @@ impl AudioManager {
     }
     
     /// Aplicar estado de audio de escena
-    pub fn apply_scene_audio(&mut self, scene_id: SceneId) {
+    pub fn apply_scene_audio(&mut self, scene_id: String) {
         if let Some(state) = self.scene_audio_states.get(&scene_id) {
             if let Some(track_id) = state.music_track {
                 let _ = self.music_manager.play_music(track_id);

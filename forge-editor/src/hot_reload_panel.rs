@@ -6,7 +6,7 @@
 //! - Preview de resultados
 
 use eframe::egui;
-use crate::hot_reload::{HotReloadManager, ChangeType};
+use crate::hot_reload::HotReloadManager;
 
 /// Hot Reload Panel - panel para hot reload
 pub struct HotReloadPanel {

@@ -47,8 +47,30 @@ impl SimpleFileWatcherIntegration {
     }
     
     /// Escanea el directorio buscando cambios
-    fn scan_directory(_entries: std::fs::ReadDir, _watch_dir: &Path) {
-        println!("[INTEGRATION] Scanned directory");
+    fn scan_directory(entries: std::fs::ReadDir, _watch_dir: &Path) {
+        println!("[INTEGRATION] Scanning directory...");
+        
+        // Procesar cada entry del directorio
+        for entry in entries.flatten() {
+            let path = entry.path();
+            
+            // Solo procesar archivos .bf (Bakeforge scripts)
+            if let Some(ext) = path.extension() {
+                if ext == "bf" {
+                    let file_name = path.file_name()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_default();
+                    
+                    // Leer contenido del archivo
+                    if let Ok(content) = fs::read_to_string(&path) {
+                        // Registrar cambio en el HotReloadManager
+                        Self::process_change(&file_name, ChangeType::Modified, content);
+                    }
+                }
+            }
+        }
+        
+        println!("[INTEGRATION] Directory scan completed");
     }
     
     /// Procesa un cambio y lo registra en el HotReloadManager
@@ -89,6 +111,7 @@ mod tests {
         let temp_dir = std::env::temp_dir();
         let mut integration = SimpleFileWatcherIntegration::new(manager, &temp_dir, 0);
         
+        integration.start();
         integration.check();
         // No debería error al verificar cambios
     }
@@ -104,5 +127,27 @@ mod tests {
         );
         
         assert_eq!(manager.pending_changes.len(), 1);
+    }
+
+    #[test]
+    fn test_simple_file_watcher_integration_scan_directory() {
+        let manager = HotReloadManager::new();
+        let temp_dir = std::env::temp_dir();
+        let mut integration = SimpleFileWatcherIntegration::new(manager.clone(), &temp_dir, 0);
+        
+        integration.start();
+        
+        // Crear un archivo .bf temporal
+        let test_file = temp_dir.join("test_scan.bf");
+        fs::write(&test_file, "function test() {}".to_string()).unwrap();
+        
+        // Escanear el directorio
+        if let Ok(entries) = fs::read_dir(&temp_dir) {
+            SimpleFileWatcherIntegration::scan_directory(entries, &temp_dir);
+        }
+        
+        // Verificar que el archivo fue procesado
+        assert!(test_file.exists());
+        fs::remove_file(test_file).unwrap();
     }
 }

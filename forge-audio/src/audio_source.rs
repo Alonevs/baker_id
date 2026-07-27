@@ -168,6 +168,10 @@ impl AudioSource {
     pub fn get_pan(&self) -> f32 {
         self.pan
     }
+
+    pub fn set_playback_mode(&mut self, mode: PlaybackMode) {
+        self.playback_mode = mode;
+    }
 }
 
 impl Default for AudioSource {

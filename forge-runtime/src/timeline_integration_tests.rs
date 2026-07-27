@@ -3,7 +3,6 @@
 
 use crate::timeline::timeline_system::TimelineSystem;
 use crate::timeline::timeline_manager::TimelineManager;
-use crate::timeline::timeline::Timeline;
 use crate::timeline::timeline_manager::AnimationComponent;
 use crate::play_mode::PlayMode;
 

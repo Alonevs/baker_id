@@ -1,4 +1,4 @@
-use forge_editor::{ForgeEditorApp, SDKIntegration};
+use forge_editor::ForgeEditorApp;
 use egui;
 
 fn main() -> eframe::Result<()> {
@@ -6,7 +6,7 @@ fn main() -> eframe::Result<()> {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 720.0])
             .with_min_inner_size([800.0, 600.0])
-            .with_title("Forge Editor - Forge SDK"),
+            .with_title("Forge Editor"),
         ..Default::default()
     };
     
@@ -16,7 +16,6 @@ fn main() -> eframe::Result<()> {
         Box::new(|cc| {
             // Registrar cargadores de imágenes nativos para egui 0.33.3
             egui_extras::install_image_loaders(&cc.egui_ctx);
-            
             Ok(Box::new(ForgeEditorApp::new(cc)))
         }),
     )

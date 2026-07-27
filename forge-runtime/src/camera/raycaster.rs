@@ -2,9 +2,6 @@
 //! 
 //! Vista en primera persona estilo Doom, Wolfenstein 3D
 
-use crate::camera::Camera;
-use crate::math::Vec2;
-
 /// Casta un rayo DDA para detectar obstáculos
 pub fn cast_ray_dda(
     start_x: f32,
