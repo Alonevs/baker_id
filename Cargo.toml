@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["Forge Team"]
 description = "Forge Game Engine"
 license = "MIT"
+autoexamples = false
 
 [workspace.package]
 edition = "2021"

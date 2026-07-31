@@ -1,7 +1,8 @@
-﻿//! Integration Validation Tests
+//! Integration Validation Tests
 
 pub mod integration_tests {
-    
+    use std::process::Command;
+
 
     #[test]
     #[ignore]

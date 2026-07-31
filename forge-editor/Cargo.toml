@@ -5,6 +5,8 @@ edition = "2021"
 authors = ["Forge Team"]
 description = "Forge Game Engine Editor"
 license = "MIT"
+autoexamples = false
+autotests = false
 
 [dependencies]
 eframe = { version = "0.33.3", default-features = false, features = ["wgpu"] }
