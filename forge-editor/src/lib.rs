@@ -1,4 +1,4 @@
-﻿//! # Forge Editor
+//! # Forge Editor
 //! 
 //! Editor de juego 2D con sistema de nodos, viewport, asset browser y preview de assets.
 
@@ -90,6 +90,11 @@ pub use preview_panel::AssetType;
 pub use property_panel::{PropertyPanel, EntityId};
 pub use live_sync_manager::SyncEvent;
 pub use delta_sync::DeltaEncoder;
+
+pub mod sprite_slicer;
+pub mod tile_palette_panel;
+pub use sprite_slicer::{SpriteSlicer, TilesetConfig, SlicedTile};
+pub use tile_palette_panel::TilePalettePanel;
 
 pub struct VecStringDisplay(pub Vec<String>);
 

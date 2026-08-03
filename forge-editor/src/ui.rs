@@ -26,6 +26,7 @@ pub enum LeftTab {
 pub enum RightTab {
     Properties,
     Preview,
+    TilePalette,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -54,6 +55,7 @@ pub struct ForgeEditorApp {
     pub property_panel: PropertyPanel,
     pub export_import_panel: ExportImportPanel,
     pub preview_panel: PreviewPanel,
+    pub tile_palette_panel: crate::tile_palette_panel::TilePalettePanel,
     pub toolbar_widget: ToolbarWidget,
     pub timeline_editor: TimelineEditor,
 
@@ -88,6 +90,7 @@ impl Default for ForgeEditorApp {
             property_panel,
             export_import_panel: ExportImportPanel::new(),
             preview_panel: PreviewPanel::new(),
+            tile_palette_panel: crate::tile_palette_panel::TilePalettePanel::new(),
             toolbar_widget: ToolbarWidget::new(),
             timeline_editor,
 
@@ -172,7 +175,9 @@ impl ForgeEditorApp {
         self.play_session = Some(PlaySession::new(&self.entities));
         self.is_playing = true;
         self.is_paused = false;
+        self.event_forge_widget.manager.runtime_context.clear();
         self.log("▶ Play Mode iniciado".to_string());
+        self.log("⚡ Event Forge activado para la simulación.".to_string());
     }
     
     /// Pausa/Reanuda Play Mode
@@ -200,6 +205,12 @@ impl ForgeEditorApp {
         if self.is_playing && !self.is_paused {
             if let Some(ref mut session) = self.play_session {
                 session.update(delta, &self.user_input);
+
+                // Ejecutar el grafo de eventos Event Forge durante el Play Mode
+                let event_logs = self.event_forge_widget.manager.execute_graph(&mut self.entities, delta);
+                for event_log in event_logs {
+                    self.log(event_log);
+                }
             }
         }
         
@@ -246,7 +257,7 @@ impl App for ForgeEditorApp {
                 }
             });
 
-        // 3. Panel Derecho (Pestañas: Properties | Preview)
+        // 3. Panel Derecho (Pestañas: Properties | Preview | Tile Palette)
         egui::SidePanel::right("right_dock")
             .resizable(true)
             .default_width(280.0)
@@ -254,6 +265,7 @@ impl App for ForgeEditorApp {
                 ui.horizontal(|ui| {
                     ui.selectable_value(&mut self.right_tab, RightTab::Properties, "📋 Properties");
                     ui.selectable_value(&mut self.right_tab, RightTab::Preview, "🖼️ Preview");
+                    ui.selectable_value(&mut self.right_tab, RightTab::TilePalette, "🎨 Tile Palette");
                 });
                 ui.separator();
 
@@ -264,6 +276,9 @@ impl App for ForgeEditorApp {
                     }
                     RightTab::Preview => {
                         self.preview_panel.ui(ctx, ui);
+                    }
+                    RightTab::TilePalette => {
+                        self.tile_palette_panel.ui(ctx, ui);
                     }
                 }
             });
@@ -444,11 +459,14 @@ impl App for ForgeEditorApp {
 
                     match current_tool {
                         ToolType::Paint | ToolType::TileMap => {
-                            let new_id = format!("Tile_{}", self.entities.len() + 1);
+                            let tile_name = self.tile_palette_panel.get_selected_tile()
+                                .map(|t| t.name.clone())
+                                .unwrap_or_else(|| "Tile_0".to_string());
+                            let new_id = format!("{}_{}", tile_name, self.entities.len() + 1);
                             self.entities.push(Entity::new(new_id.clone(), (local_x, local_y)));
                             self.selected_entity_index = Some(self.entities.len() - 1);
                             self.sync_property_panel_from_entity(self.entities.len() - 1);
-                            self.log(format!("🎨 Tile pintado en ({:.0}, {:.0})", local_x, local_y));
+                            self.log(format!("🎨 {} pintado en ({:.0}, {:.0})", tile_name, local_x, local_y));
                         }
                         ToolType::PhysicsBrush => {
                             let new_id = format!("PhysicsBox_{}", self.entities.len() + 1);

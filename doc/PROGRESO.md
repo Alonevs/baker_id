@@ -774,14 +774,33 @@
   - Pintado de Tiles y generación de objetos con física al hacer clic según la herramienta activa.
 - **Verificación:** `cargo check` y `cargo test --workspace` (146 tests unitarios 100% passing).
 
+## ⚡ Integración de Event Forge con Play Mode (03/08/2026)
+**Responsable:** Antigravity AI
+- **Ejecución en Vivo:** Implementación de `EventNodeManager::execute_graph` conectando el grafo visual de eventos directamente con las entidades vivas de la escena durante `Play Mode` (`is_playing == true`).
+- **Soporte de Nodos Dinámicos:**
+  - `Action`: Desplaza entidades en tiempo real en la escena según velocidad (X, Y).
+  - `Dialogue`: Emite diálogos interactivos a la consola de la Bitácora de Salida (`💬 [EventForge] Guardián: "..."`).
+  - `Conditional`: Evalúa flags del contexto de runtime.
+  - `TriggerZone` & `Cinematic`: Ejecutan secuencias temporizadas o por zona.
+- **Auto-conectividad:** `add_node` ahora asigna tipos variados y conecta automáticamente nuevos nodos en flujo.
+- **Verificación:** Pruebas unitarias añadidas en `ui_tests.rs` (`test_event_forge_execution_in_play_mode`), `cargo check` limpio y `cargo test --workspace` 100% pasando (147 tests unitarios en verde).
+
+## 🎨 Implementación de Paleta de Tiles & Cortador de Sprites (03/08/2026)
+**Responsable:** Antigravity AI
+- **Cortador de Sprites (`SpriteSlicer`):** Creado `forge-editor/src/sprite_slicer.rs` para trocear atlas/spritesheets en cuadrícula (ancho/alto de celda en px, filas, columnas, márgenes), extrayendo metadatos de animación e índices de coordenadas UV.
+- **Paleta de Tiles Visual (`TilePalettePanel`):** Creado `forge-editor/src/tile_palette_panel.rs` permitiendo seleccionar visualmente el tile activo mediante miniaturas cuadradas con `egui`.
+- **Integración con Canvas 2D:** Añadida pestaña `🎨 Tile Palette` en el panel derecho (`RightTab::TilePalette` en `ui.rs`). Al pintar con la herramienta `ToolType::TileMap` o `ToolType::Paint`, las entidades colocadas adquieren automáticamente el ID y la textura del tile seleccionado en la paleta.
+- **Documentación & Tests:** Actualizados manuales `doc/tools/31_SPRITE_SLICER.md` y `doc/tools/32_TILEMAP_PAINTER.md` a estado COMPLETADO. Pruebas unitarias en `ui_tests.rs` (`test_sprite_slicer_and_tile_palette`) y `cargo test --workspace` 100% pasando (148 tests unitarios en verde).
+
 ## 🎯 PRÓXIMOS OBJETIVOS
-1. **Desarrollar nuevas funcionalidades del Editor (Toolbar, Event Forge, Scripting).**
-2. **Re-activar y migrar tests e2e / ejemplos de `forge-editor` al alcanzar el 90% de avance del proyecto.**
+1. **Implementar Inspector de Física Avanzado con Gizmos visuales de colisión.**
+2. **Crear Empaquetador / Exportador a Ejecutable Juego (.exe).**
+3. **Re-activar y migrar tests e2e / ejemplos de `forge-editor` al alcanzar el 90% de avance del proyecto.**
 
 ## Estado Final
 - **Build Workspace:** ✅ `cargo build` exitoso
-- **Tests Workspace:** ✅ `cargo test --workspace` 100% passing (146/146)
-- **UI Responsiva e Interactiva:** ✅ Solucionado (Lienzo 2D, DragValue, Pestañas, Toolbar)
+- **Tests Workspace:** ✅ `cargo test --workspace` 100% passing (148/148)
+- **UI Responsiva e Interactiva:** ✅ Tile Palette + Sprite Slicer + Event Forge + Play Mode integrados
 - **Archivos de Lanzamiento:** ✅ `abrir_editor.bat` y `run.bat` listos
 - **Fecha de actualización:** 03/08/2026
 

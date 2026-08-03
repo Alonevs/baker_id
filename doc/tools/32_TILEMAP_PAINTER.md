@@ -1,8 +1,8 @@
 # 🖌️ TileMap Painter 32
 
-**Estado:** ⏳ Pendiente | **Prioridad:** 🟡 Media  
-**Versión:** 1.0.0 (planned) | **Última actualización:** 2026-07-23  
-**AI Responsable:** [AI: opencode]
+**Estado:** ✅ COMPLETADO | **Prioridad:** 🟢 ALTA  
+**Versión:** 1.0.0 | **Última actualización:** 2026-08-03  
+**AI Responsable:** Antigravity AI
 
 ---
 

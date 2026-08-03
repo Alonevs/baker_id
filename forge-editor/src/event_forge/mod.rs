@@ -241,6 +241,51 @@ impl EventNodeManager {
         results
     }
 
+    /// Ejecuta el grafo de eventos en tiempo real durante la simulación de Play Mode
+    pub fn execute_graph(&mut self, entities: &mut [crate::play_session::Entity], delta: f32) -> Vec<String> {
+        let mut logs = Vec::new();
+
+        if self.graph.nodes.is_empty() {
+            return logs;
+        }
+
+        // Iterar y procesar nodos del grafo de eventos
+        for (id, node) in self.graph.nodes.iter_mut() {
+            node.execution_count = node.execution_count.saturating_add(1);
+
+            match node.node_type {
+                NodeType::TriggerZone => {
+                    logs.push(format!("⚡ [EventForge #{}] TriggerZone activado en la escena.", id));
+                }
+                NodeType::Action => {
+                    if !entities.is_empty() {
+                        let speed_x = node.properties.get("speed_x").and_then(|v| v.parse::<f32>().ok()).unwrap_or(25.0);
+                        let speed_y = node.properties.get("speed_y").and_then(|v| v.parse::<f32>().ok()).unwrap_or(0.0);
+                        let target = &mut entities[0];
+                        target.position.0 += speed_x * delta;
+                        target.position.1 += speed_y * delta;
+                        logs.push(format!("⚡ [EventForge #{}] Action: Entidad '{}' desplazada a ({:.1}, {:.1})", id, target.id, target.position.0, target.position.1));
+                    }
+                }
+                NodeType::Dialogue => {
+                    let speaker = node.properties.get("speaker").cloned().unwrap_or_else(|| "Guardián".to_string());
+                    let text = node.properties.get("text").cloned().unwrap_or_else(|| "¡Bienvenido a Forge Engine 2D!".to_string());
+                    logs.push(format!("💬 [EventForge #{}] {}: \"{}\"", id, speaker, text));
+                }
+                NodeType::Conditional => {
+                    let flag_name = node.properties.get("flag").cloned().unwrap_or_else(|| "has_key".to_string());
+                    let val = self.runtime_context.get_flag(&flag_name).unwrap_or(true);
+                    logs.push(format!("🔀 [EventForge #{}] Condición '{}' -> {}", id, flag_name, if val { "VERDADERO" } else { "FALSO" }));
+                }
+                NodeType::Cinematic => {
+                    logs.push(format!("🎬 [EventForge #{}] Secuencia cinemática activa.", id));
+                }
+            }
+        }
+
+        logs
+    }
+
     pub fn get_connections_for_node(&self, node_id: u32) -> Vec<&Connection> {
         self.graph.connections.iter().filter(|conn| {
             conn.from.node_id == node_id || conn.to.node_id == node_id
@@ -536,28 +581,49 @@ impl EventForgeWidget {
     }
 
     pub fn add_node(&mut self) {
-        let node_type = match self.selected_node {
-            Some(_) => {
-                // Si hay nodo seleccionado, crear del mismo tipo
-                if let Some(node) = self.manager.get_node(self.selected_node.unwrap()) {
-                    node.node_type
-                } else {
-                    NodeType::TriggerZone
-                }
+        let node_types = [
+            NodeType::TriggerZone,
+            NodeType::Action,
+            NodeType::Dialogue,
+            NodeType::Conditional,
+            NodeType::Cinematic,
+        ];
+        let idx = self.manager.graph.nodes.len() % node_types.len();
+        let node_type = node_types[idx];
+
+        let id = self.manager.graph.nodes.len() as u32 + 1;
+        let mut node = Node::new(id, node_type);
+
+        match node_type {
+            NodeType::Action => {
+                node.properties.insert("speed_x".to_string(), "30.0".to_string());
+                node.properties.insert("speed_y".to_string(), "0.0".to_string());
             }
-            None => NodeType::TriggerZone,
-        };
-        
-        let mut node = Node::new(
-            self.manager.graph.nodes.len() as u32 + 1,
-            node_type,
-        );
-        // Posición aleatoria en el canvas
+            NodeType::Dialogue => {
+                node.properties.insert("speaker".to_string(), "Guardián".to_string());
+                node.properties.insert("text".to_string(), "¡Aventurero, bienvenido a Forge 2D!".to_string());
+            }
+            NodeType::Conditional => {
+                node.properties.insert("flag".to_string(), "has_key".to_string());
+            }
+            _ => {}
+        }
+
+        let step = self.manager.graph.nodes.len() as f32;
         node.position = (
-            (self.width / 2.0 - 50.0) + ((self.manager.graph.nodes.len() as f32 * 100.0) % 200.0),
-            (self.height / 2.0 - 50.0) + ((self.manager.graph.nodes.len() as f32 * 100.0) % 200.0)
+            150.0 + (step * 140.0) % 500.0,
+            120.0 + (step * 60.0) % 300.0,
         );
+
         self.manager.add_node(node);
+
+        if id > 1 {
+            self.manager.create_connection(
+                SocketId::output(id - 1, 0),
+                SocketId::input(id, 0),
+            );
+        }
+
         self.selected_node = None;
     }
 }
