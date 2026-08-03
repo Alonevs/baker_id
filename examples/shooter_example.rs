@@ -47,15 +47,6 @@ impl Enemy {
         }
     }
 }
-    
-    pub fn take_damage(&mut self, damage: i32) {
-        self.health -= damage;
-        if self.health <= 0 {
-            self.health = 0;
-            println!("🎯 Enemy destroyed! Score: +{}", self.score_value);
-        }
-    }
-}
 
 /// Proyectil
 pub struct Bullet {

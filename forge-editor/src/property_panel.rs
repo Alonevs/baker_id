@@ -1,4 +1,4 @@
-﻿//! Property Panel - Panel de propiedades para entidades
+//! Property Panel - Panel de propiedades para entidades
 
 use eframe::egui;
 use std::collections::HashMap;
@@ -47,16 +47,21 @@ impl PropertyPanel {
         self.selected_entity_id.clone()
     }
     
-    /// UI completa del Property Panel
-    pub fn ui(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    /// Renderiza el Property Panel en egui
+    pub fn render(&mut self, ctx: &egui::Context) {
         egui::SidePanel::right("property_panel").show(ctx, |ui| {
-            ui.heading("Property Panel");
+            ui.heading("📋 Property Panel");
+            ui.separator();
             
             // Seleccionar entidad
-            ui.label("Select Entity:");
+            ui.label("Entity Selection:");
             ui.horizontal(|ui| {
-                ui.label("Entity: entity_1");
-                if ui.button("Apply").clicked() {
+                let id_text = match &self.selected_entity_id {
+                    Some(id) => format!("Entity #{}", id.0),
+                    None => "None Selected".to_string(),
+                };
+                ui.label(id_text);
+                if ui.button("Select Entity 1").clicked() {
                     self.set_entity(EntityId(1));
                 }
             });
@@ -64,55 +69,46 @@ impl PropertyPanel {
             ui.separator();
             
             // Transform Properties
-            ui.label("Transform Properties");
+            ui.heading("📐 Transform");
             ui.horizontal(|ui| {
                 ui.label("X:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.0.to_string()));
-            });
-            ui.horizontal(|ui| {
+                ui.add(egui::DragValue::new(&mut self.transform_properties.position.0).speed(0.5));
                 ui.label("Y:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.position.1.to_string()));
+                ui.add(egui::DragValue::new(&mut self.transform_properties.position.1).speed(0.5));
             });
             ui.horizontal(|ui| {
                 ui.label("Rotation:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.rotation.to_string()));
+                ui.add(egui::DragValue::new(&mut self.transform_properties.rotation).speed(1.0).suffix("°"));
             });
             ui.horizontal(|ui| {
                 ui.label("Scale:");
-                ui.add(egui::TextEdit::singleline(&mut self.transform_properties.scale.to_string()));
+                ui.add(egui::DragValue::new(&mut self.transform_properties.scale).speed(0.05));
             });
             
             ui.separator();
             
             // Component Properties
-            ui.label("Component Properties");
+            ui.heading("🧱 Components");
             ui.horizontal(|ui| {
                 ui.label("Type:");
                 ui.add(egui::TextEdit::singleline(&mut self.component_properties.component_type));
             });
-            ui.label("Additional Properties:");
-            ui.add(egui::TextEdit::multiline(&mut self.component_properties.properties.to_string()));
             
             ui.separator();
             
             // Script Properties
-            ui.label("Script Properties");
+            ui.heading("💻 Script");
             ui.horizontal(|ui| {
                 ui.label("Path:");
                 ui.add(egui::TextEdit::singleline(&mut self.script_properties.script_path));
             });
-            ui.label("Parameters:");
-            ui.add(egui::TextEdit::multiline(&mut self.script_properties.parameters.to_string()));
             
             ui.separator();
             
             // Botones de acción
             ui.horizontal(|ui| {
-                if ui.button("🔄 Reset Transform").clicked() {
+                if ui.button("🔄 Reset").clicked() {
                     self.transform_properties = TransformProperties::default();
-                }
-                if ui.button("💾 Save Properties").clicked() {
-                    ui.label("✅ Saved");
                 }
                 if ui.button("🗑️ Clear").clicked() {
                     self.selected_entity_id = None;

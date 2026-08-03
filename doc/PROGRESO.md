@@ -758,13 +758,47 @@
   - Configurado `autoexamples = false` y `autotests = false` en `forge-editor` y la raíz para omitir tests e2e e integración obsoletos hasta alcanzar el 90% de progreso del proyecto.
   - `cargo test --workspace` se ejecuta al 100% pasando sin errores.
 
+## Refactorización de Interactivación Completa de UI (Forge Editor 2D)
+**Fecha:** 02/08/2026
+**Responsable:** Antigravity AI
+- **Sincronización de Estado Persistente:** Se solucionó el problema de re-instanciación de widgets por frame que reseteaba selecciones. `ToolbarWidget` ahora conserva de forma persistente la herramienta activa (`Select`, `Move`, `Scale`, `Rotate`, `Paint`, `PhysicsBrush`, `TileMap`, `Audio`, `Script`).
+- **Property Panel Interactivo:** Integración de `DragValue` en los campos numéricos de Transform (Posición $X, Y$, Rotación, Escala) permitiendo arrastrar o escribir valores y ver la entidad en tiempo real en el lienzo 2D.
+- **Sistema de Pestañas Organizado:**
+  - Panel Izquierdo: Pestañas `📁 Explorer` (árbol de directorios navegable con selección) y `🔥 Hot Reload` (ejecución y diff view de scripts).
+  - Panel Derecho: Pestañas `📋 Properties` e `🖼️ Preview`.
+  - Panel Inferior: Pestañas `🎬 Timeline`, `⚡ Event Graph`, `📝 Bitácora` y `📦 Export/Import`.
+- **Viewport 2D Interactivo:**
+  - Lienzo 2D con rejilla visual.
+  - Selección de entidades haciendo clic en el canvas.
+  - Arrastre interactivo de entidades con el ratón.
+  - Pintado de Tiles y generación de objetos con física al hacer clic según la herramienta activa.
+- **Verificación:** `cargo check` y `cargo test --workspace` (146 tests unitarios 100% passing).
+
 ## 🎯 PRÓXIMOS OBJETIVOS
 1. **Desarrollar nuevas funcionalidades del Editor (Toolbar, Event Forge, Scripting).**
 2. **Re-activar y migrar tests e2e / ejemplos de `forge-editor` al alcanzar el 90% de avance del proyecto.**
 
 ## Estado Final
 - **Build Workspace:** ✅ `cargo build` exitoso
-- **Tests Workspace:** ✅ `cargo test --workspace` 100% passing
-- **Errores de compilación del Editor:** ✅ 0/68 arreglados
-- **Fecha de actualización:** 31/07/2026
+- **Tests Workspace:** ✅ `cargo test --workspace` 100% passing (146/146)
+- **UI Responsiva e Interactiva:** ✅ Solucionado (Lienzo 2D, DragValue, Pestañas, Toolbar)
+- **Archivos de Lanzamiento:** ✅ `abrir_editor.bat` y `run.bat` listos
+- **Fecha de actualización:** 03/08/2026
+
+---
+
+## 📜 HISTORIAL DE AUDITORÍAS Y RECTIFICACIONES CONSOLIDADAS
+
+### Auditoría y Consolidación de Documentación (03/08/2026)
+- **Consolidación de Archivos `.md`:** Se reorganizó la estructura de documentación a 3 Niveles como exige `AGENTS.md`. Se integraron los archivos redundantes (`PROGRESO2.md`, `CORRECCION_INCONSISTENCIAS.md`, `REVISION_EXHAUSTIVA.md`, `ESTADO_ACTUAL.md`, `control_calidad.md`, `DOCUMENTATION_GUIDE.md`, `REQUIREMENTS.md`, `UX_MANUAL.md`) dentro de `PROGRESO.md`, `AI_GUIDELINES.md` y `VISION.md`.
+- **Estado de Tests:** 146/146 tests unitarios pasando en todo el workspace (100% ok).
+
+### Historial Sesiones 1-7 (24/07/2026 - 25/07/2026)
+- **Physics 2D Deadlock Fix:** Eliminados locks anidados en `physics_2d_world.rs` solucionando 4 timeouts (6/6 tests passing).
+- **Audio System (FASE 11):** 18/18 tests passing en `forge-audio`.
+- **Play Mode & Snapshots (FASE 36):** Implementación de `PlaySession`, `SnapshotManager` e `InputCapture` en `forge-editor`.
+- **Script Executor con Parser (FASE 39):** Integración de Lexer y Parser real `.bf` en `bakeforge_parser.rs` (50/50 tests passing).
+- **Toolbar & Event Forge Initial Build (FASE 8.5 & FASE 7):** Creación de `toolbar/mod.rs` y `event_node_editor.rs`.
+
+
 

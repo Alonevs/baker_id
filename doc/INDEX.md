@@ -10,17 +10,15 @@
 
 ```
 doc/
-├── VISION.md                              ← Punto de verdad (único)
+├── VISION.md                              ← Punto de verdad (único, incluye requisitos y UX)
 ├── ARCHITECTURE.md                        ← Arquitectura técnica
-├── TOOLS.md                               ← Lista de herramientas
+├── TOOLS.md                               ← NIVEL 1: Índice maestro y lista de herramientas
 ├── ROADMAP.md                             ← Qué falta por hacer
-├── REQUIREMENTS.md                        ← Requisitos
 ├── README.md                              ← Entrada principal
-├── PROGRESO.md                            ← Registro de Progreso y Handoff
-├── AI_GUIDELINES.md                       ← Directrices para IA
-├── UX_MANUAL.md                           ← Manual de diseño UX/UI
+├── PROGRESO.md                            ← NIVEL 3: Registro de Progreso, métricas e historial
+├── AI_GUIDELINES.md                       ← Directrices y normas de IA
 │
-├── tools/                                 ← Documentación de herramientas
+├── tools/                                 ← NIVEL 2: Documentación de herramientas (10 secciones)
 │   ├── 01_SCENE_EDITOR.md                 ← Editor de escena
 │   ├── 01_LIVE_SYNC.md                    ← Sincronización
 │   ├── Uis.md                             ← UIs (Transform, Component, Property, Plugin)
